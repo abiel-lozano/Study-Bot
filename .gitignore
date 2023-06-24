@@ -1,0 +1,11 @@
+# Enviroment variables
+.env
+
+# IDE files
+.vscode
+
+# Source material
+sources.txt
+
+# Misc
+image_recognition.py
