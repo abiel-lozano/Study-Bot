@@ -3,7 +3,6 @@ import wave
 import ffmpeg
 import whisper
 import openai
-from gtts import gTTS
 from pathlib import Path
 from elevenlabs import generate, play, set_api_key
 
