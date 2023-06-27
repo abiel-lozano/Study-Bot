@@ -1,7 +1,10 @@
 # Study-Bot
 
-Study-Bot is an open-source project developed by Edumakers from Tecnológico de Monterrey. It is designed to assist visually impaired students review their academic course material. It is an AI-powered study companion that incorporates various technologies, including [Whisper](https://openai.com/research/whisper), [GPT-3.5](https://platform.openai.com/docs/models/gpt-3-5), [Elevenlabs](https://beta.elevenlabs.io/), and [OpenCV](https://opencv.org/). For testing purposes, sample course material was sourced from [Langman's Medical Embryology](https://www.amazon.com/Langmans-Medical-Embryology-T-W-Sadler/dp/1496383907), a book by Thomas W. Sadler, PhD.
+Study-Bot is an open-source project developed by Edumakers from Tecnológico de Monterrey. It is designed to help visually impaired students review their academic course material. It is an AI-powered study companion that incorporates various technologies, including [Whisper](https://openai.com/research/whisper), [GPT-3.5](https://platform.openai.com/docs/models/gpt-3-5), [Elevenlabs](https://beta.elevenlabs.io/), and [OpenCV](https://opencv.org/). For testing purposes, sample course material was sourced from [Langman's Medical Embryology](https://www.amazon.com/Langmans-Medical-Embryology-T-W-Sadler/dp/1496383907), a book by Thomas W. Sadler, PhD.
 
+This project is currently under development. So far, it can listen to the user's question, analyze the source material of the topic they want to study, generate an answer, and read it out loud to the user. 
+
+The next step is to incorporate object recognition, so that the user can hold up a physical model related to the topic and ask a question about it. The object recognition will then be used to provide context to the GPT-3.5 model.
 
 ## Contributors
 
