@@ -23,7 +23,7 @@ The next step is to incorporate object recognition, so that the user can hold up
 
 It is recomended to use [Python 3.9.9](https://www.python.org/downloads/release/python-399/) so that the ```whisper``` library can be used without issues. To avoid having to remove your current Python installation, you may want to use a virtual enviroment to use this specific version of Python. To install the required dependencies, run the following command:
 
-```powershell
+```bash
 pip install -r requirements.txt
 ```
 
