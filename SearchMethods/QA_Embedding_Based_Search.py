@@ -1,6 +1,7 @@
 # Study-Bot: Question Answering (Embedding-based Search) v0.2
 # Uses OpenAI's Cookbook guide code to use embedding-based search
 # https://github.com/openai/openai-cookbook/blob/main/examples/Question_answering_using_embeddings.ipynb
+# Do not run, this is for future reference only
 
 # import ast
 import tiktoken

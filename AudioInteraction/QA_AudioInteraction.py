@@ -22,7 +22,7 @@ def record():
 	audio = pyaudio.PyAudio()
 
 	# Open audio stream for recording
-	stream = audio.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK)
+	stream = audio.open(format = FORMAT, channels = CHANNELS, rate = RATE, input = True, frames_per_buffer = CHUNK)
 	print('Recording question...')
 
 	# Initalize audio buffer
@@ -57,9 +57,9 @@ def record():
 
 record()
 
-model = whisper.load_model("base")
-result = model.transcribe("output.wav", fp16=False, language="English")
-print(result["text"])
+model = whisper.load_model('base')
+result = model.transcribe('output.wav', fp16=False, language='English')
+print(result['text'])
 
 # If there is a file with the name "output.mp3" in the directory, delete it.
 if Path('output.mp3').is_file():

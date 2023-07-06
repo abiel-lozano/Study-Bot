@@ -1,5 +1,6 @@
 # Uses OpenAI's Cookbook guide code to embed text
 # https://github.com/openai/openai-cookbook/blob/main/examples/Embedding_long_inputs.ipynb
+# Do not run, this is only for future reference.
 
 import openai
 from tenacity import retry, wait_random_exponential, stop_after_attempt, retry_if_not_exception_type
