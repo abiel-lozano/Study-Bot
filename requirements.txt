@@ -1,0 +1,10 @@
+openai
+whisper
+pyaudio
+wave
+ffmpeg
+pathlib
+elevenlabs
+cv2
+numpy
+time
