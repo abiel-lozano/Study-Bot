@@ -7,6 +7,14 @@ import cv2
 # Capture video
 cam = cv2.VideoCapture(0)
 
+# Color ranges
+colonLower = np.array([9, 255 * 0.55, 255 * 0.35], np.uint8)
+colonUpper = np.array([28, 255, 255], np.uint8)
+liverLower = np.array([38, 225 * 0.22, 255 * 0.38], np.uint8)
+liverUpper = np.array([41, 255, 255], np.uint8)
+stomachLower = np.array([90, 80, 1], np.uint8)
+stomachUpper = np.array([120, 255, 255], np.uint8)
+
 while True:
     # Reading the video from the webcam in image frames
     _, imageFrame = cam.read()
@@ -16,19 +24,9 @@ while True:
 
     # Set color ranges of the objects and define masks
 
-    # Colon
-    colonLower = np.array([9, 255 * 0.55, 255 * 0.35], np.uint8)
-    colonUpper = np.array([28, 255, 255], np.uint8)
+    # Masks
     colonMask = cv2.inRange(hsvFrame, colonLower, colonUpper)
-
-    # liver
-    liverLower = np.array([38, 225 * 0.22, 255 * 0.38], np.uint8)
-    liverUpper = np.array([41, 255, 255], np.uint8)
     liverMask = cv2.inRange(hsvFrame, liverLower, liverUpper)
-
-    # Stomach
-    stomachLower = np.array([90, 80, 1], np.uint8)
-    stomachUpper = np.array([120, 255, 255], np.uint8)
     stomachMask = cv2.inRange(hsvFrame, stomachLower, stomachUpper)
 
     # Create a 5x5 square-shaped filter called kernel

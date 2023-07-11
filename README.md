@@ -1,7 +1,7 @@
 # Study-Bot
 
 Study-Bot is an open-source project developed by Edumakers from Tecnológico de Monterrey. It is designed to help visually impaired students review their academic course material. It is an AI-powered study companion that incorporates various technologies, including [Whisper](https://openai.com/research/whisper), [GPT-3.5](https://platform.openai.com/docs/models/gpt-3-5), [Elevenlabs](https://beta.elevenlabs.io/), and [OpenCV](https://opencv.org/). For testing purposes, sample course material was generated using [ChatGPT](https://openai.com/blog/chatgpt).
-
+<!-- Note: The topic used for testing was recently changed from Embryology to Human Body -->
 This project is currently under development. So far, it can listen to the user's question, analyze the source material of the topic they want to study, detect the physical educational material that they are holding by color, generate an answer, and read it out loud to the user. 
 
 The next step is to create a user interface in the form of a desktop application, and to create a computer vision model that can detect the physical educational material without depending on color, as well as some performance improvements.

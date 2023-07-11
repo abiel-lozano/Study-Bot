@@ -106,7 +106,7 @@ print('Converting audio to text...\n')
 model = whisper.load_model('base')
 result = model.transcribe('output.wav', fp16 = False, language = 'English')
 print('Question: ' + result['text'] + '\n')
-
+# result['text'] = 'What am I holding and what is this for?'
 # Delete audio files
 Path('output.wav').unlink()
 Path('output.mp3').unlink()
@@ -115,7 +115,6 @@ Path('output.mp3').unlink()
 
 objects = 'User is not holding any objects'
 
-
 # Capture video
 cam = cv2.VideoCapture(0) # Use 0 for default camera
 print('Looking for objects...\n')
@@ -123,30 +122,29 @@ print('Looking for objects...\n')
 startTime = time.time()
 elapsedTime = 0
 
-while elapsedTime < 5:
+# Stomach color range
+stomachLower = np.array([90, 80, 1], np.uint8)
+stomachUpper = np.array([120, 255, 255], np.uint8)
+
+# Colon color range
+colonLower = np.array([9, 255 * 0.55, 255 * 0.35], np.uint8)
+colonUpper = np.array([28, 255, 255], np.uint8)
+
+# Liver color range
+liverLower = np.array([38, 225 * 0.22, 255 * 0.38], np.uint8)
+liverUpper = np.array([41, 255, 255], np.uint8)
+
+while elapsedTime < 1:
 
 	_, imageFrame = cam.read()
 
 	# Convert frame from BGR color space to HSV
 	hsvFrame = cv2.cvtColor(imageFrame, cv2.COLOR_BGR2HSV)
 
-	# Set color ranges of objects and define masks
-
-	# Colon
-	colonLower = np.array([9, 255 * 0.55, 255 * 0.35], np.uint8)
-	colonUpper = np.array([28, 255, 255], np.uint8)
+	# Create masks for each organ
 	colonMask = cv2.inRange(hsvFrame, colonLower, colonUpper)
-
-	# Liver
-	liverLower = np.array([38, 225 * 0.22, 255 * 0.38], np.uint8)
-	liverUpper = np.array([41, 255, 255], np.uint8)
 	liverMask = cv2.inRange(hsvFrame, liverLower, liverUpper)
-
-	# Stomach
-	stomachLower = np.array([90, 80, 1], np.uint8)
-	stomachUpper = np.array([120, 255, 255], np.uint8)
 	stomachMask = cv2.inRange(hsvFrame, stomachLower, stomachUpper)
-
 
 	# Create a 5x5 square-shaped filter called kernel
 	# Filter is filled with ones and will be used for morphological transformations such as dilation for better detection
@@ -229,22 +227,28 @@ print('Objects detected: ' + objects + '\n')
 # ---------------- GPT Interaction ----------------
 
 # Build prompt
-query = f"""Try to use the information below to answer the user's question.
-The user may or may not be holding a physical representation of what their 
-question is about. Consider the objects the user is holding, so that the 
-answer can be refined to be more specific to the user's question.
+query = f"""Try to use the information below to help the user study by answering 
+the user's question. The user may or may not be holding a physical representation 
+of what their question is about. Consider the object list, which includes all 
+the objects that the user is holding, so that the answer can be refined to be 
+more specific to the user's question. Do not mention the user or the information 
+in your answer to make it more sound natural.
 
-If question is unrelated to the information, ignore all previous instructions 
-and try to answer the question without mentioning the information or the objects.
+If the question is unrelated to the information, ignore all previous instructions
+and try to answer the question without mentioning the information or the objects 
+to make it sound more natural.
+
+Objects held by user: {objects}.
+
+Question: {result['text']}
 
 Information: 
 \"\"\"
 {source}
 \"\"\"
-Objects: {objects}.
-
-Question: {result}
 """
+
+print('Prompt: ' + query + '\n')
 
 # Send prompt to GPT
 
@@ -263,7 +267,9 @@ print('Answer: ' + answer + '\n\n')
 # # ---------------- TTS Conversion -----------------
 
 print('Converting answer to audio...\n')
-audioOutput = generate(answer)
+# Disabled for cost cutting during testing, always sounds good anyway!
+# audioOutput = generate(answer)
 print('Audio conversion complete.\n')
 print('Playing audio...\n')
-play(audioOutput)
+# Disabled for cost cutting during testing, always sounds good anyway!
+# play(audioOutput)
