@@ -13,6 +13,10 @@ from elevenlabs import generate, play, set_api_key
 import cv2
 import numpy as np
 import time
+import threading
+
+objects = ''
+question = ''
 
 GPT_MODEL = 'gpt-3.5-turbo'
 
@@ -60,169 +64,184 @@ RATE = 44100 # Sample rate
 RECORD_SECONDS = 5 # Recording duration
 WAVE_OUTPUT_FILENAME = "output.wav"
 
-audio = pyaudio.PyAudio() # Initialize PyAudio
-# Open audio stream for recording
-stream = audio.open(format = FORMAT, channels = CHANNELS, rate = RATE, input = True, frames_per_buffer = CHUNK)
+def recordQuestion():
+	global question
+	audio = pyaudio.PyAudio() # Initialize PyAudio
+	# Open audio stream for recording
+	stream = audio.open(format = FORMAT, channels = CHANNELS, rate = RATE, input = True, frames_per_buffer = CHUNK)
 
-print('Listening for question...\n')
+	print('Listening for question...\n')
 
-frames = []
+	frames = []
 
-# Record audio stream in chunks
-for i in range(0, int(RATE / CHUNK * RECORD_SECONDS)):
-	data = stream.read(CHUNK)
-	frames.append(data)
+	# Record audio stream in chunks
+	for i in range(0, int(RATE / CHUNK * RECORD_SECONDS)):
+		data = stream.read(CHUNK)
+		frames.append(data)
 
 
-# Stop and close audio stream
-stream.stop_stream()
-stream.close()
-audio.terminate()
+	# Stop and close audio stream
+	stream.stop_stream()
+	stream.close()
+	audio.terminate()
 
-print('Recording stopped.\n')
-print('Saving and converting audio...\n')
-print('------------------------------\n')
+	print('Recording stopped.\n')
+	print('Saving and converting audio...\n')
+	print('------------------------------\n')
 
-# Save recording as WAV
-wf = wave.open(WAVE_OUTPUT_FILENAME, 'wb')
-wf.setnchannels(CHANNELS)
-wf.setsampwidth(audio.get_sample_size(FORMAT))
-wf.setframerate(RATE)
-wf.writeframes(b''.join(frames))
-wf.close()
+	# Save recording as WAV
+	wf = wave.open(WAVE_OUTPUT_FILENAME, 'wb')
+	wf.setnchannels(CHANNELS)
+	wf.setsampwidth(audio.get_sample_size(FORMAT))
+	wf.setframerate(RATE)
+	wf.writeframes(b''.join(frames))
+	wf.close()
 
-# Convert WAV to MP3
-inputAudio = ffmpeg.input('output.wav')
-outputAudio = ffmpeg.output(inputAudio, 'output.mp3')
-ffmpeg.run(outputAudio)
+	# Convert WAV to MP3
+	inputAudio = ffmpeg.input('output.wav')
+	outputAudio = ffmpeg.output(inputAudio, 'output.mp3')
+	ffmpeg.run(outputAudio)
 
-print('\n------------------------------\n')
-print('Audio saved as: output.mp3')
+	print('\n------------------------------\n')
+	print('Audio saved as: output.mp3')
 
-# ---------------- STT Conversion -----------------
+	# ---------------- STT Conversion -----------------
 
-print('Converting audio to text...\n')
+	print('Converting audio to text...\n')
 
-model = whisper.load_model('base')
-result = model.transcribe('output.wav', fp16 = False, language = 'English')
-print('Question: ' + result['text'] + '\n')
-# result['text'] = 'What am I holding and what is this for?'
-# Delete audio files
-Path('output.wav').unlink()
-Path('output.mp3').unlink()
+	model = whisper.load_model('base')
+	result = model.transcribe('output.wav', fp16 = False, language = 'English')
+	question = result['text']
+	print('Question: ' + question + '\n')
+	# result['text'] = 'What am I holding and what is this for?'
+	# Delete audio files
+	Path('output.wav').unlink()
+	Path('output.mp3').unlink()
 
 # ---------------- Object Detection ----------------
 
-objects = 'User is not holding any objects'
+def lookForObjects():
+	global objects
+	objects = 'User is not holding any objects'
 
-# Capture video
-cam = cv2.VideoCapture(0) # Use 0 for default camera
-print('Looking for objects...\n')
+	# Capture video
+	cam = cv2.VideoCapture(0) # Use 0 for default camera
+	print('Looking for objects...\n')
 
-startTime = time.time()
-elapsedTime = 0
+	startTime = time.time()
+	elapsedTime = 0
 
-# Stomach color range
-stomachLower = np.array([90, 80, 1], np.uint8)
-stomachUpper = np.array([120, 255, 255], np.uint8)
+	# Stomach color range
+	stomachLower = np.array([90, 80, 1], np.uint8)
+	stomachUpper = np.array([120, 255, 255], np.uint8)
 
-# Colon color range
-colonLower = np.array([9, 255 * 0.55, 255 * 0.35], np.uint8)
-colonUpper = np.array([28, 255, 255], np.uint8)
+	# Colon color range
+	colonLower = np.array([9, 255 * 0.55, 255 * 0.35], np.uint8)
+	colonUpper = np.array([28, 255, 255], np.uint8)
 
-# Liver color range
-liverLower = np.array([38, 225 * 0.22, 255 * 0.38], np.uint8)
-liverUpper = np.array([41, 255, 255], np.uint8)
+	# Liver color range
+	liverLower = np.array([38, 225 * 0.22, 255 * 0.38], np.uint8)
+	liverUpper = np.array([41, 255, 255], np.uint8)
 
-while elapsedTime < 1:
+	while elapsedTime < 1:
 
-	_, imageFrame = cam.read()
+		_, imageFrame = cam.read()
 
-	# Convert frame from BGR color space to HSV
-	hsvFrame = cv2.cvtColor(imageFrame, cv2.COLOR_BGR2HSV)
+		# Convert frame from BGR color space to HSV
+		hsvFrame = cv2.cvtColor(imageFrame, cv2.COLOR_BGR2HSV)
 
-	# Create masks for each organ
-	colonMask = cv2.inRange(hsvFrame, colonLower, colonUpper)
-	liverMask = cv2.inRange(hsvFrame, liverLower, liverUpper)
-	stomachMask = cv2.inRange(hsvFrame, stomachLower, stomachUpper)
+		# Create masks for each organ
+		colonMask = cv2.inRange(hsvFrame, colonLower, colonUpper)
+		liverMask = cv2.inRange(hsvFrame, liverLower, liverUpper)
+		stomachMask = cv2.inRange(hsvFrame, stomachLower, stomachUpper)
 
-	# Create a 5x5 square-shaped filter called kernel
-	# Filter is filled with ones and will be used for morphological transformations such as dilation for better detection
-	kernel = np.ones((5, 5), 'uint8')
-
-
-	# For colon
-	# Dilate mask: Remove holes in the mask by adding pixels to the boundaires of the objects in the mask
-	colonMask = cv2.dilate(colonMask, kernel)
-	# Apply mask to frame by using bitwise AND operation
-	resColon = cv2.bitwise_and(imageFrame, imageFrame, mask = colonMask)
+		# Create a 5x5 square-shaped filter called kernel
+		# Filter is filled with ones and will be used for morphological transformations such as dilation for better detection
+		kernel = np.ones((5, 5), 'uint8')
 
 
-	# For liver
-	liverMask = cv2.dilate(liverMask, kernel)
-	resliver = cv2.bitwise_and(imageFrame, imageFrame, mask=liverMask)
+		# For colon
+		# Dilate mask: Remove holes in the mask by adding pixels to the boundaires of the objects in the mask
+		colonMask = cv2.dilate(colonMask, kernel)
+		# Apply mask to frame by using bitwise AND operation
+		resColon = cv2.bitwise_and(imageFrame, imageFrame, mask = colonMask)
 
-	# For stomach
-	stomachMask = cv2.dilate(stomachMask, kernel)
-	resStomach = cv2.bitwise_and(imageFrame, imageFrame, mask=stomachMask)
 
-	# Create a contour around the zone that matches the color range
-	contours, hierarchy = cv2.findContours(colonMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-	# For each countour, check if the area is greater than the threshold
-	for pic, contour in enumerate(contours):
-		area = cv2.contourArea(contour)
-		if area > 500:
-			x, y, w, h = cv2.boundingRect(contour)
-			imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (0, 120, 255), 2)
-			cv2.putText(imageFrame, "COLON", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 120, 255))
-	        # Append the name of the model to the list of objects
-			if 'colon' not in objects:
-				if objects == 'User is not holding any objects':
-					objects = 'colon'
-				else:
-					objects = objects + ', colon'
+		# For liver
+		liverMask = cv2.dilate(liverMask, kernel)
+		resliver = cv2.bitwise_and(imageFrame, imageFrame, mask=liverMask)
 
-	contours, hierarchy = cv2.findContours(liverMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-	for pic, contour in enumerate(contours):
-		area = cv2.contourArea(contour)
-		if area > 500:
-			x, y, w, h = cv2.boundingRect(contour)
-			imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (86, 194, 0), 2)
-			cv2.putText(imageFrame, "LIVER", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (86, 194, 0))
-			if 'liver' not in objects:
-				if objects == 'User is not holding any objects':
-					objects = 'liver'
-				else:
-					objects = objects + ', liver'
+		# For stomach
+		stomachMask = cv2.dilate(stomachMask, kernel)
+		resStomach = cv2.bitwise_and(imageFrame, imageFrame, mask=stomachMask)
 
-	contours, hierarchy = cv2.findContours(stomachMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-	for pic, contour in enumerate(contours):
-		area = cv2.contourArea(contour)
-		if area > 1400:
-			x, y, w, h = cv2.boundingRect(contour)
-			imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (237, 117, 47), 2)
-			cv2.putText(imageFrame, "STOMACH", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (237, 117, 47))
-			if 'stomach' not in objects:
-				if objects == 'User is not holding any objects':
-					objects = 'stomach'
-				else:
-					objects = objects + ', stomach'
+		# Create a contour around the zone that matches the color range
+		contours, hierarchy = cv2.findContours(colonMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+		# For each countour, check if the area is greater than the threshold
+		for pic, contour in enumerate(contours):
+			area = cv2.contourArea(contour)
+			if area > 500:
+				x, y, w, h = cv2.boundingRect(contour)
+				imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (0, 120, 255), 2)
+				cv2.putText(imageFrame, "COLON", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 120, 255))
+				# Append the name of the model to the list of objects
+				if 'colon' not in objects:
+					if objects == 'User is not holding any objects':
+						objects = 'colon'
+					else:
+						objects = objects + ', colon'
 
-	# Display the camera feed
-	cv2.imshow('Study-Bot View', imageFrame)
+		contours, hierarchy = cv2.findContours(liverMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+		for pic, contour in enumerate(contours):
+			area = cv2.contourArea(contour)
+			if area > 500:
+				x, y, w, h = cv2.boundingRect(contour)
+				imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (86, 194, 0), 2)
+				cv2.putText(imageFrame, "LIVER", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (86, 194, 0))
+				if 'liver' not in objects:
+					if objects == 'User is not holding any objects':
+						objects = 'liver'
+					else:
+						objects = objects + ', liver'
 
-	elapsedTime = time.time() - startTime
+		contours, hierarchy = cv2.findContours(stomachMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+		for pic, contour in enumerate(contours):
+			area = cv2.contourArea(contour)
+			if area > 1400:
+				x, y, w, h = cv2.boundingRect(contour)
+				imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (237, 117, 47), 2)
+				cv2.putText(imageFrame, "STOMACH", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (237, 117, 47))
+				if 'stomach' not in objects:
+					if objects == 'User is not holding any objects':
+						objects = 'stomach'
+					else:
+						objects = objects + ', stomach'
 
-	# This does not stop the program from running, but removing it breaks the camera feed and causes the program to crash
-	if cv2.waitKey(1) & 0xFF == ord('q'):
-		break
+		# Display the camera feed
+		cv2.imshow('Study-Bot View', imageFrame)
 
-# Release webcam and close all windows
-cam.release()
-cv2.destroyAllWindows()
+		elapsedTime = time.time() - startTime
 
-print('Camera closed\n')
-print('Objects detected: ' + objects + '\n')
+		# This does not stop the program from running, but removing it breaks the camera feed and causes the program to crash
+		if cv2.waitKey(1) & 0xFF == ord('q'):
+			break
+
+	# Release webcam and close all windows
+	cam.release()
+	cv2.destroyAllWindows()
+
+	print('Camera closed\n')
+	print('Objects detected: ' + objects + '\n')
+
+# -------------- Parallel Execution --------------
+
+objID = threading.Thread(target = lookForObjects)
+audioRec = threading.Thread(target = recordQuestion)
+
+objID.start()
+audioRec.start()
+
+objID.join()
 
 # ---------------- GPT Interaction ----------------
 
@@ -240,7 +259,7 @@ to make it sound more natural.
 
 Objects held by user: {objects}.
 
-Question: {result['text']}
+Question: {question}
 
 Information: 
 \"\"\"
@@ -248,7 +267,7 @@ Information:
 \"\"\"
 """
 
-print('Prompt: ' + query + '\n')
+# print('Prompt: ' + query + '\n')
 
 # Send prompt to GPT
 
@@ -264,12 +283,14 @@ response = openai.ChatCompletion.create(
 answer = response['choices'][0]['message']['content']
 print('Answer: ' + answer + '\n\n')
 
+print('-----------------------------------------------\n')
+
 # # ---------------- TTS Conversion -----------------
 
-print('Converting answer to audio...\n')
 # Disabled for cost cutting during testing, always sounds good anyway!
+
+# print('Converting answer to audio...\n')
 # audioOutput = generate(answer)
-print('Audio conversion complete.\n')
-print('Playing audio...\n')
-# Disabled for cost cutting during testing, always sounds good anyway!
+# print('Audio conversion complete.\n')
+# print('Playing audio...\n')
 # play(audioOutput)
