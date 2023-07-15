@@ -1,19 +1,16 @@
 # Study-Bot: Question answering using audio interaction and object detection
 
-# TODO: Add concurrent audio recording and object detection
-# TODO: Add language selector and spanish voice
-
 import openai
 import whisper
 import pyaudio
 import wave
-import ffmpeg
 from pathlib import Path
-from elevenlabs import generate, play, set_api_key
+from elevenlabs import generate, play, set_api_key, stream
 import cv2
 import numpy as np
 import time
 import threading
+import keyboard
 
 objects = ''
 question = ''
@@ -79,15 +76,13 @@ def recordQuestion():
 		data = stream.read(CHUNK)
 		frames.append(data)
 
-
 	# Stop and close audio stream
 	stream.stop_stream()
 	stream.close()
 	audio.terminate()
 
 	print('Recording stopped.\n')
-	print('Saving and converting audio...\n')
-	print('------------------------------\n')
+	print('Saving audio file...\n')
 
 	# Save recording as WAV
 	wf = wave.open(WAVE_OUTPUT_FILENAME, 'wb')
@@ -97,12 +92,7 @@ def recordQuestion():
 	wf.writeframes(b''.join(frames))
 	wf.close()
 
-	# Convert WAV to MP3
-	inputAudio = ffmpeg.input('output.wav')
-	outputAudio = ffmpeg.output(inputAudio, 'output.mp3')
-	ffmpeg.run(outputAudio)
-
-	print('\n------------------------------\n')
+	# print('\n------------------------------\n')
 	print('Audio saved as: output.mp3')
 
 	# ---------------- STT Conversion -----------------
@@ -116,7 +106,7 @@ def recordQuestion():
 	# result['text'] = 'What am I holding and what is this for?'
 	# Delete audio files
 	Path('output.wav').unlink()
-	Path('output.mp3').unlink()
+	# Path('output.mp3').unlink()
 
 # ---------------- Object Detection ----------------
 
@@ -233,7 +223,7 @@ def lookForObjects():
 	print('Camera closed\n')
 	print('Objects detected: ' + objects + '\n')
 
-# -------------- Parallel Execution --------------
+# ----------------- Mutithreading -----------------
 
 objID = threading.Thread(target = lookForObjects)
 audioRec = threading.Thread(target = recordQuestion)
@@ -242,6 +232,7 @@ objID.start()
 audioRec.start()
 
 objID.join()
+audioRec.join()
 
 # ---------------- GPT Interaction ----------------
 
@@ -271,21 +262,23 @@ Information:
 
 # Send prompt to GPT
 
+messageHistory = [
+	{'role': 'system', 'content': 'You answer questions in the same language as the question.'},
+	{'role': 'user', 'content': query},
+]
+
 print('Sending prompt to GPT...\n')
 response = openai.ChatCompletion.create(
-	messages = [
-		{'role': 'system', 'content': 'You answer questions in the same language as the question.'},
-		{'role': 'user', 'content': query},
-	],
-	model = GPT_MODEL, temperature = 0
+	messages = messageHistory,
+	model = GPT_MODEL, 
+	temperature = 0.2
 )
 
 answer = response['choices'][0]['message']['content']
 print('Answer: ' + answer + '\n\n')
 
-print('-----------------------------------------------\n')
 
-# # ---------------- TTS Conversion -----------------
+# ---------------- TTS Conversion -----------------
 
 # Disabled for cost cutting during testing, always sounds good anyway!
 
@@ -294,3 +287,93 @@ print('-----------------------------------------------\n')
 # print('Audio conversion complete.\n')
 # print('Playing audio...\n')
 # play(audioOutput)
+print('Audio playback complete.\n')
+print('---------------------------------------------\n')
+
+# Audio stream and multilingual voice model tests
+
+# print('Running streaming test...\n')
+# audioOutput = generate(text = answer, stream = True)
+# stream(audioOutput)
+# print('Streaming test complete.\n')
+
+# print('Running multilingual voice test...\n')
+# audioOutput = generate(text = answer, model = 'eleven_multilingual_v1')
+# play(audioOutput)
+# print('Multilingual voice test complete.\n')
+
+# -------------- Conversation Handling --------------
+
+while True:
+	# Wait for the user to press space to ask another question
+	print('Press space to ask another question, or press q to quit.\n')
+
+	while True:
+		if keyboard.is_pressed(' '):
+			print('Preparing for next question, please hold...\n')
+			break
+		if keyboard.is_pressed('q'):
+			print('Exiting program...\n')
+			exit()
+	
+	# Reset variables
+	objects = 'User is not holding any objects'
+	question = ''
+	
+	# Restart threads
+	
+	objID = threading.Thread(target = lookForObjects)
+	audioRec = threading.Thread(target = recordQuestion)
+
+	objID.start()
+	audioRec.start()
+	
+	objID.join()
+	audioRec.join()
+
+	# Build prompt with chat history
+	# Add last response from GPT to message history
+	messageHistory.append({'role': 'assistant', 'content': answer})
+
+	# Build new prompt and add to chat history
+
+	# NOTE: Add this to the query if the model's response has any deviations from previous instructions
+	"""
+	Remember to consider the object list when answering the user's 
+	question. Do not mention the user or the information in your answer to make 
+	it more sound natural.
+
+	If the question is unrelated to the information, ignore all previous instructions
+	and try to answer the question without mentioning the information or the objects
+	to make it sound more natural.
+	"""
+	query = f"""Objects held by user: {objects}.
+Question: {question}
+"""
+
+	messageHistory.append({'role': 'user', 'content': query})
+
+	# Send prompt to GPT
+       
+	print('Prompt: ' + query + '\n')
+
+	print('Sending prompt to GPT...\n')
+
+	response = openai.ChatCompletion.create(
+		messages = messageHistory,
+		model = GPT_MODEL,
+		temperature = 0.2
+	)
+
+	answer = response['choices'][0]['message']['content']
+	print('Answer: ' + answer + '\n\n')
+
+	# Convert answer to audio
+
+	# print('Converting answer to audio...\n')
+	# audioOutput = generate(text = answer)
+	# print('Audio conversion complete.\n')
+	# print('Playing audio...\n')
+	# play(audioOutput)
+	# print('Audio playback complete.\n')
+	print('---------------------------------------------\n')
