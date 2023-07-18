@@ -2,10 +2,14 @@
 
 import openai
 import whisper
+from pydub import AudioSegment
+from pydub.playback import play as pydubPlay
+import io
+from typing import Iterator
 import pyaudio
 import wave
 from pathlib import Path
-from elevenlabs import generate, play, set_api_key, stream
+from elevenlabs import generate, play, set_api_key#, stream
 import cv2
 import numpy as np
 import time
@@ -59,7 +63,7 @@ FORMAT = pyaudio.paInt16 # Audio codec format
 CHANNELS = 2
 RATE = 44100 # Sample rate
 RECORD_SECONDS = 5 # Recording duration
-WAVE_OUTPUT_FILENAME = "output.wav"
+WAVE_OUTPUT_FILENAME = "question.wav"
 
 def recordQuestion():
 	global question
@@ -93,20 +97,20 @@ def recordQuestion():
 	wf.close()
 
 	# print('\n------------------------------\n')
-	print('Audio saved as: output.mp3')
+	print('Audio saved as: question.wav\n')
 
 	# ---------------- STT Conversion -----------------
 
 	print('Converting audio to text...\n')
 
 	model = whisper.load_model('base')
-	result = model.transcribe('output.wav', fp16 = False, language = 'English')
+	result = model.transcribe('question.wav', fp16 = False, language = 'English')
 	question = result['text']
 	print('Question: ' + question + '\n')
-	# result['text'] = 'What am I holding and what is this for?'
-	# Delete audio files
-	Path('output.wav').unlink()
-	# Path('output.mp3').unlink()
+	
+	# Delete audio file
+	Path('question.wav').unlink()
+	print('Question audio file deleted.\n')
 
 # ---------------- Object Detection ----------------
 
@@ -223,6 +227,17 @@ def lookForObjects():
 	print('Camera closed\n')
 	print('Objects detected: ' + objects + '\n')
 
+# NOTE: Add reasoning about mpv for why this function is needed in docs later
+
+def stream(audioStream: Iterator[bytes]) -> bytes:
+    audioOutput = b""
+    for chunk in audioStream:
+        if chunk is not None:
+            audio += chunk
+
+    audioSegment = AudioSegment.from_file(io.BytesIO(audioOutput), format="mp3")
+    pydubPlay(audioSegment)
+
 # ----------------- Mutithreading -----------------
 
 objID = threading.Thread(target = lookForObjects)
@@ -249,7 +264,6 @@ and try to answer the question without mentioning the information or the objects
 to make it sound more natural.
 
 Objects held by user: {objects}.
-
 Question: {question}
 
 Information: 
@@ -257,6 +271,9 @@ Information:
 {source}
 \"\"\"
 """
+# Objects held by user: Stomach.
+
+# Question: What am I holding, and what is it for?
 
 # print('Prompt: ' + query + '\n')
 
@@ -280,6 +297,9 @@ print('Answer: ' + answer + '\n\n')
 
 # ---------------- TTS Conversion -----------------
 
+# NOTE: Remember to create a function for this later, so it can be used here
+# and inside the conversation handling loop
+
 # Disabled for cost cutting during testing, always sounds good anyway!
 
 # print('Converting answer to audio...\n')
@@ -292,10 +312,10 @@ print('---------------------------------------------\n')
 
 # Audio stream and multilingual voice model tests
 
-# print('Running streaming test...\n')
-# audioOutput = generate(text = answer, stream = True)
-# stream(audioOutput)
-# print('Streaming test complete.\n')
+print('Running streaming test...\n')
+audioOutput = generate(text = answer, stream = True)
+stream(audioOutput)
+print('Streaming test complete.\n')
 
 # print('Running multilingual voice test...\n')
 # audioOutput = generate(text = answer, model = 'eleven_multilingual_v1')
@@ -339,14 +359,16 @@ while True:
 
 	# NOTE: Add this to the query if the model's response has any deviations from previous instructions
 	"""
-	Remember to consider the object list when answering the user's 
-	question. Do not mention the user or the information in your answer to make 
-	it more sound natural.
+	Remember to consider the object list and the information provided when answering 
+	the user's question. Do not mention the user or the information in your answer 
+	to make it more sound natural.
 
 	If the question is unrelated to the information, ignore all previous instructions
 	and try to answer the question without mentioning the information or the objects
 	to make it sound more natural.
 	"""
+
+	# NOTE: Indentation is not incorrect, it is intentional to make the prompt format correctly
 	query = f"""Objects held by user: {objects}.
 Question: {question}
 """
@@ -370,10 +392,24 @@ Question: {question}
 
 	# Convert answer to audio
 
+	# Disabled for cost cutting during testing, always sounds good anyway!
+
 	# print('Converting answer to audio...\n')
-	# audioOutput = generate(text = answer)
+	# audioOutput = generate(answer)
 	# print('Audio conversion complete.\n')
 	# print('Playing audio...\n')
 	# play(audioOutput)
-	# print('Audio playback complete.\n')
+	print('Audio playback complete.\n')
 	print('---------------------------------------------\n')
+
+	# Audio stream and multilingual voice model tests
+
+	print('Running streaming test...\n')
+	audioOutput = generate(text = answer, stream = True)
+	stream(audioOutput)
+	print('Streaming test complete.\n')
+
+	# print('Running multilingual voice test...\n')
+	# audioOutput = generate(text = answer, model = 'eleven_multilingual_v1')
+	# play(audioOutput)
+	# print('Multilingual voice test complete.\n')
