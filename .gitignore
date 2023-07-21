@@ -9,3 +9,5 @@ sources.txt
 
 # Misc
 image_recognition.py
+src/credentials.py
+src/__pycache__
