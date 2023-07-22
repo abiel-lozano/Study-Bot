@@ -11,3 +11,10 @@ sources.txt
 image_recognition.py
 src/credentials.py
 src/__pycache__
+
+# Compilation output
+*.exe
+*.pyc
+studyBot.spec
+dist
+build

@@ -278,7 +278,7 @@ def lookForObjects():
 		
 		contours, hierarchy = cv2.findContours(heartMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 		for pic, contour in enumerate(contours):
-			area = cv2
+			area = cv2.contourArea(contour)
 			if area > 500:
 				x, y, w, h = cv2.boundingRect(contour)
 				imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (255, 0, 0), 2)
@@ -291,7 +291,7 @@ def lookForObjects():
 
 		contours, hierarchy = cv2.findContours(kidneyMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 		for pic, contour in enumerate(contours):
-			area = cv2
+			area = cv2.contourArea(contour)
 			if area > 500:
 				x, y, w, h = cv2.boundingRect(contour)
 				imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (255, 0, 255), 2)
@@ -340,7 +340,7 @@ def streamAnswer(audioStream: Iterator[bytes]) -> bytes:
     audioOutput = b""
     for chunk in audioStream:
         if chunk is not None:
-            audio += chunk
+            audioOutput += chunk
 
     audioSegment = AudioSegment.from_file(io.BytesIO(audioOutput), format="mp3")
     pydubPlay(audioSegment)
@@ -419,8 +419,8 @@ if __name__ == '__main__':
 			print('GPT just replied! :) \n')
 
 	# Convert answer to audio
-	# print('Converting answer to audio...\n')
-	# convertTTS(answer)
+	print('Converting answer to audio...\n')
+	convertTTS(answer)
 
 	# -------------- Conversation Handling --------------
 
@@ -494,5 +494,5 @@ Question: {question}
 			print('GPT just replied! :) \n')
 
 		# Convert answer to audio
-		# print('Converting answer to audio...\n')
-		# convertTTS(answer)
+		print('Converting answer to audio...\n')
+		convertTTS(answer)
