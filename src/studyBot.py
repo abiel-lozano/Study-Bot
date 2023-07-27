@@ -17,10 +17,12 @@ import threading
 import keyboard
 import credentials # Ignored by git, contains API keys
 
-# TODO: Replace global variables with return values from functions!
-
+global objects
+global question
+global answer
 objects = ''
 question = ''
+answer = ''
 
 GPT_MODEL = 'gpt-3.5-turbo'
 
@@ -140,14 +142,14 @@ def recordQuestion():
 
 	# print('Converting audio to text...\n')
 
+	# Send audio file to API for transcription
 	model = whisper.load_model('base')
-	result = model.transcribe('question.wav', fp16 = False, language = 'English')
+	result = model.transcribe('question.wav', fp16 = False)
 	question = result['text']
 	# print('Question: ' + question + '\n')
 	
 	# Delete audio file
 	Path('question.wav').unlink()
-	# print('Question audio file deleted.\n')
 
 def lookForObjects():
 	global objects
@@ -303,7 +305,7 @@ def lookForObjects():
 						objects = objects + ', kidney'
 
 		# Display the camera feed
-		cv2.imshow('Study-Bot View', imageFrame)
+		# cv2.imshow('Study-Bot View', imageFrame)
 
 		elapsedTime = time.time() - startTime
 
@@ -312,28 +314,21 @@ def lookForObjects():
 			break
 
 	# Release webcam and close all windows
-	cam.release()
+	# cam.release()
 	cv2.destroyAllWindows()
 
-	# print('Camera closed\n')
-	# print('Objects detected: ' + objects + '\n')
-
 def sendMessage(messageList: any):
-	# Take in the message list, send it to GPT, and return the response and the updated message list
-
 	# Send prompt to GPT
 	response = openai.ChatCompletion.create(
 		messages = messageList,
 		model = GPT_MODEL, 
 		temperature = 0.2
 	)
-
-	answer = response['choices'][0]['message']['content']
+	print(response)
+	_answer = response['choices'][0]['message']['content']
 
 	# Add the response to the message list
-	messageList.append({'role': 'assistant', 'content': answer})
-
-	return messageList, answer
+	messageList.append({'role': 'assistant', 'content': _answer})
 
 # NOTE: Add reasoning about mpv for why this function is needed in docs later
 def streamAnswer(audioStream: Iterator[bytes]) -> bytes:
@@ -346,26 +341,8 @@ def streamAnswer(audioStream: Iterator[bytes]) -> bytes:
     pydubPlay(audioSegment)
 
 def convertTTS(text: str):
-	# Disabled for cost cutting during testing, always sounds good anyway!
-
-	# print('Converting answer to audio...\n')
-	# audioOutput = generate(answer)
-	# print('Audio conversion complete.\n')
-	# print('Playing audio...\n')
-	# play(audioOutput)
-
-	# Audio stream and multilingual voice model tests
-
-
-	# print('Running streaming test...\n')
-	audioOutput = generate(text = text, stream = True)
+	audioOutput = generate(text = text, model = 'eleven_multilingual_v1', stream = True)
 	streamAnswer(audioOutput)
-	# print('Streaming complete.\n')
-
-	# print('Running multilingual voice test...\n')
-	# audioOutput = generate(text = answer, model = 'eleven_multilingual_v1')
-	# play(audioOutput)
-	# print('Multilingual voice test complete.\n')
 
 # Only run if not imported as a module
 if __name__ == '__main__':
@@ -412,11 +389,12 @@ if __name__ == '__main__':
 	]
 
 	print('Sending prompt to GPT...\n')
-	messageHistory, answer = sendMessage(messageHistory)
+	sendMessage(messageHistory)
+	answer = next((msg for msg in reversed(messageHistory) if msg['role'] == 'assistant'), None)['content']
 	
 	if answer != '':
-			# print('Answer: ' + answer + '\n\n')
-			print('GPT just replied! :) \n')
+		# print('Answer: ' + answer + '\n\n')
+		print('Recieved reply from GPT. \n')
 
 	# Convert answer to audio
 	print('Converting answer to audio...\n')
@@ -439,7 +417,6 @@ if __name__ == '__main__':
 		# Reset variables
 		objects = 'User is not holding any objects'
 		question = ''
-		answer = ''
 
 		# Restart threads
 
@@ -461,6 +438,7 @@ if __name__ == '__main__':
 		# Build prompt with chat history
 		# Add last response from GPT to message history
 		messageHistory.append({'role': 'assistant', 'content': answer})
+		answer = ''
 
 		# Build new prompt and add to chat history
 
@@ -487,11 +465,12 @@ Question: {question}
 
 		print('Sending prompt to GPT...\n')
 
-		messageHistory, answer = sendMessage(messageHistory)
+		sendMessage(messageHistory)
+		answer = next((msg for msg in reversed(messageHistory) if msg['role'] == 'assistant'), None)['content']
 
 		if answer != '':
 			# print('Answer: ' + answer + '\n\n')
-			print('GPT just replied! :) \n')
+			print('Recieved reply from GPT. \n')
 
 		# Convert answer to audio
 		print('Converting answer to audio...\n')
