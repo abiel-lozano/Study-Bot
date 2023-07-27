@@ -1,27 +1,35 @@
 import studyBot
 import tkinter
-import json
+import sys
 
 # NOTE - There is chance this is not necessary
 global answer
 global messageHistory
 global query
 global firstQuestion
+global source
 answer = ''
 studyBot.question = ''
 studyBot.objects = ''
+source = ''
 firstQuestion = True
 
 # Build initial prompt
 
 def checkSelection():
-	# language = languageVar.get()
+	global source
 	topic = topicVar.get()
 	infoDisplay.set(f'Selected topic: {topic}')
+	
+	if topic == 'Human Body':
+		source = studyBot.humanBodySource
+	elif topic == 'Biochem':
+		source = studyBot.biochemSource
 
 def backgroundInit():
 	threadStart = studyBot.threading.Thread(target = startQuestionThreads)
 	threadStart.start()
+	# threadStart.join()
 
 
 def startQuestionThreads():
@@ -37,7 +45,6 @@ def startQuestionThreads():
 
 	# Display the recorded question and identified object
 	infoDisplay.set(f'Question taken: {studyBot.question} \nObject identified: {studyBot.objects}')
-	print(f'Question taken: {studyBot.question} \nObject identified: {studyBot.objects}')
 
 	if firstQuestion:
 		firstQuestion = False
@@ -48,7 +55,7 @@ def startQuestionThreads():
 
 		Information:
 		\"\"\"
-		{studyBot.source}
+		{source}
 		\"\"\"
 		"""
 
@@ -63,18 +70,16 @@ Question: {studyBot.question}
 		messageHistory.append({'role': 'user', 'content': query})
 
 	infoDisplay.set(f'Messaging GPT, please wait...')
-	print(f'Messaging GPT, please wait...')
 	threadSendMessage = studyBot.threading.Thread(target = studyBot.sendMessage, args = (messageHistory,))
 	threadSendMessage.start()
 	threadSendMessage.join()
 
 	answer = next((msg for msg in reversed(messageHistory) if msg['role'] == 'assistant'), None)['content']
 	infoDisplay.set(f'Answer: {answer}')
-	print(f'Answer: {answer}')
 
-	threadConvertTTS = studyBot.threading.Thread(target = studyBot.convertTTS, args = (answer,))
-	threadConvertTTS.start()
-	threadConvertTTS.join()
+	# threadConvertTTS = studyBot.threading.Thread(target = studyBot.convertTTS, args = (answer,))
+	# threadConvertTTS.start()
+	# threadConvertTTS.join()
 
 # Create the main window
 window = tkinter.Tk()
@@ -85,16 +90,24 @@ window.geometry('450x350')
 window.configure(bg = '#3C3836')
 
 # Create the title label
-titleLabel = tkinter.Label(window, text = 'Study-Bot', font = ('Leelawadee', 24, 'bold'), bg = '#3C3836', fg = '#FDF1C7')
+titleLabel = tkinter.Label(window, text = 'Study-Bot', font = ('Leelawadee', 24, 'bold'), bg = '#3C3836', fg = '#FBF1C7')
 titleLabel.pack(pady = 15)
 
 # Create the topic dropdown
-topicLabel = tkinter.Label(window, text = 'Select Topic:', bg = '#3C3836', fg = '#FDF1C7', font = ('Leelawadee', 12))
+topicLabel = tkinter.Label(window, text = 'Select Topic:', bg = '#3C3836', fg = '#FBF1C7', font = ('Leelawadee', 12))
 topicLabel.pack(pady = 15)
+
+# Create the topic frame
+topicFrame = tkinter.Frame(window, bg = '#3C3836')
+topicFrame.pack(pady = 15)
+
 topicVar = tkinter.StringVar(window)
-topicDropdown = tkinter.OptionMenu(window, topicVar, 'Human Body', 'Biochem')
+topicDropdown = tkinter.OptionMenu(topicFrame, topicVar, 'Human Body', 'Biochem')
 topicDropdown.config(width = 15)
-topicDropdown.pack()
+topicDropdown.pack(side = 'left', padx = 10)
+
+selectButton = tkinter.Button(topicFrame, text = 'Select', command = checkSelection, bg = '#FABD2F', font = ('Leelawadee', 12))
+selectButton.pack(side = 'left', padx = 10)
 
 # Create the buttons frame
 buttonsFrame = tkinter.Frame(window, bg = '#3C3836')
@@ -106,12 +119,13 @@ askButton = tkinter.Button(buttonsFrame, text = 'Ask a question', command = back
 askButton.pack(side = 'left', padx = 10)
 
 # Create the 'Exit' button
-exitButton = tkinter.Button(buttonsFrame, text = 'Exit', command = exit, bg = '#FB4934', font = ('Leelawadee', 12))
+exitButton = tkinter.Button(buttonsFrame, text = 'Exit', command = sys.exit, bg = '#FB4934', font = ('Leelawadee', 12))
 exitButton.pack(side = 'left', padx = 10)
 
 # Create the infoDisplay text label
 infoDisplay = tkinter.StringVar()
-infoLabel = tkinter.Label(window, textvariable=infoDisplay, bg = '#504945', fg = '#FDF1C7',font = ('Leelawadee', 12))
+infoDisplay.set('Welcome to Study-Bot! Please select a topic before asking a question.')
+infoLabel = tkinter.Label(window, textvariable=infoDisplay, bg = '#83A598', fg = '#282828',font = ('Leelawadee', 12), wraplength = 400)
 infoLabel.pack()
 
 window.mainloop()

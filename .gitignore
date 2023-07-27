@@ -15,6 +15,7 @@ src/__pycache__
 # Compilation output
 *.exe
 *.pyc
-studyBot.spec
+studyBotCLI.spec
+studyBotGUI.spec
 dist
 build
