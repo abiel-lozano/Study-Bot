@@ -1,0 +1,2 @@
+openAiKey = ''
+elevenLabsKey = ''

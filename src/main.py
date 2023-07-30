@@ -14,8 +14,6 @@ studyBot.objects = ''
 source = ''
 firstQuestion = True
 
-# Build initial prompt
-
 def checkSelection():
 	global source
 	topic = topicVar.get()
@@ -30,7 +28,6 @@ def backgroundInit():
 	threadStart = studyBot.threading.Thread(target = startQuestionThreads)
 	threadStart.start()
 	# threadStart.join()
-
 
 def startQuestionThreads():
 	global firstQuestion
@@ -77,9 +74,9 @@ Question: {studyBot.question}
 	answer = next((msg for msg in reversed(messageHistory) if msg['role'] == 'assistant'), None)['content']
 	infoDisplay.set(f'Answer: {answer}')
 
-	# threadConvertTTS = studyBot.threading.Thread(target = studyBot.convertTTS, args = (answer,))
-	# threadConvertTTS.start()
-	# threadConvertTTS.join()
+	threadConvertTTS = studyBot.threading.Thread(target = studyBot.convertTTS, args = (answer,))
+	threadConvertTTS.start()
+	threadConvertTTS.join()
 
 # Create the main window
 window = tkinter.Tk()

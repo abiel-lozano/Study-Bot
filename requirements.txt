@@ -11,4 +11,6 @@ threading
 keyboard
 pydub
 pyinstaller
-# gTTS # Still not sure about this one, so it's not officially a requirement for now
+sys
+# Still not sure about this one, so it's not officially a requirement for now
+# gTTS 
