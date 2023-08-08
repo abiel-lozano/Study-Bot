@@ -12,5 +12,4 @@ keyboard
 pydub
 pyinstaller
 sys
-# Still not sure about this one, so it's not officially a requirement for now
-# gTTS 
+opencv-contrib-python

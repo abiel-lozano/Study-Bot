@@ -14,6 +14,7 @@ studyBot.objects = ''
 source = ''
 firstQuestion = True
 
+# Select the source material to be sent to GPT and select object ID function (not implemented yet)
 def checkSelection():
 	global source
 	topic = topicVar.get()
@@ -24,6 +25,7 @@ def checkSelection():
 	elif topic == 'Biochem':
 		source = studyBot.biochemSource
 
+# TODO: Check if this is necessary or if it can be removed
 def backgroundInit():
 	threadStart = studyBot.threading.Thread(target = startQuestionThreads)
 	threadStart.start()
@@ -32,6 +34,7 @@ def backgroundInit():
 def startQuestionThreads():
 	global firstQuestion
 	global messageHistory
+	# Start threads for object identification and question recording
 	threadObjID = studyBot.threading.Thread(target = studyBot.lookForObjects)
 	threadQuestionRec = studyBot.threading.Thread(target = studyBot.recordQuestion)
 	threadObjID.start()
@@ -43,6 +46,7 @@ def startQuestionThreads():
 	# Display the recorded question and identified object
 	infoDisplay.set(f'Question taken: {studyBot.question} \nObject identified: {studyBot.objects}')
 
+	# Prepare messageHistory depending on whether this is the first question or not
 	if firstQuestion:
 		firstQuestion = False
 		query = f"""{studyBot.instructions}
@@ -66,14 +70,17 @@ Question: {studyBot.question}
 """		
 		messageHistory.append({'role': 'user', 'content': query})
 
+	# Message GPT
 	infoDisplay.set(f'Messaging GPT, please wait...')
 	threadSendMessage = studyBot.threading.Thread(target = studyBot.sendMessage, args = (messageHistory,))
 	threadSendMessage.start()
 	threadSendMessage.join()
 
+	# Get the answer of the last message of messageHistory
 	answer = next((msg for msg in reversed(messageHistory) if msg['role'] == 'assistant'), None)['content']
 	infoDisplay.set(f'Answer: {answer}')
 
+	# Convert TTS
 	threadConvertTTS = studyBot.threading.Thread(target = studyBot.convertTTS, args = (answer,))
 	threadConvertTTS.start()
 	threadConvertTTS.join()

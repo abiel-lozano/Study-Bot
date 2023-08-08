@@ -31,4 +31,5 @@ def convertTTS(text, lang):
     stream.close()
     p.terminate()
 
-convertTTS('Based on the information provided, it appears that you are holding your stomach. The stomach is an organ located in the upper abdomen that plays a vital role in the digestion of food. Its main function is to store and break down food into smaller particles through the process of mechanical and chemical digestion. It secretes gastric juices, including hydrochloric acid and enzymes, which help in the breakdown of proteins. It also mixes the partially digested food with these juices to form a semi-liquid mixture called chyme, which is then gradually released into the small intestine for further digestion and absorption.', 'en')
+# convertTTS('The stomach is an organ located in the upper abdomen that plays a vital role in the digestion of food. Its main function is to store and break down food into smaller particles through the process of mechanical and chemical digestion.', 'en')
+convertTTS('El estómago es un órgano ubicado en la parte superior del abdomen que juega un papel vital en la digestión de los alimentos. Su función principal es almacenar y descomponer los alimentos en partículas más pequeñas a través del proceso de digestión mecánica y química.', 'es')

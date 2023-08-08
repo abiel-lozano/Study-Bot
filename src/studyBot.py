@@ -9,7 +9,7 @@ from typing import Iterator
 import pyaudio
 import wave
 from pathlib import Path
-from elevenlabs import generate, play, set_api_key#, stream
+from elevenlabs import generate, play, set_api_key
 import cv2
 import numpy as np
 import time
@@ -99,7 +99,6 @@ and try to answer the question without mentioning the information or the objects
 to make it sound more natural.
 """
 
-# ---------------- Audio Recording ----------------
 
 # Recorder configuration
 CHUNK = 1024 # Chunk size
@@ -110,13 +109,11 @@ RECORD_SECONDS = 5 # Recording duration
 WAVE_OUTPUT_FILENAME = "question.wav"
 
 def recordQuestion():
+	# ---------------- Audio Recording ----------------
 	global question
 	audio = pyaudio.PyAudio() # Initialize PyAudio
 	# Open audio stream for recording
 	stream = audio.open(format = FORMAT, channels = CHANNELS, rate = RATE, input = True, frames_per_buffer = CHUNK)
-
-	# print('Listening for question...\n')
-
 	frames = []
 
 	# Record audio stream in chunks
@@ -129,9 +126,6 @@ def recordQuestion():
 	stream.close()
 	audio.terminate()
 
-	# print('Recording stopped.\n')
-	# print('Saving audio file...\n')
-
 	# Save recording as WAV
 	wf = wave.open(WAVE_OUTPUT_FILENAME, 'wb')
 	wf.setnchannels(CHANNELS)
@@ -140,17 +134,10 @@ def recordQuestion():
 	wf.writeframes(b''.join(frames))
 	wf.close()
 
-	# print('Audio saved as: question.wav\n')
-
 	# ---------------- STT Conversion -----------------
-
-	# print('Converting audio to text...\n')
-
-	# Send audio file to API for transcription
 	model = whisper.load_model('base')
 	result = model.transcribe('question.wav', fp16 = False)
 	question = result['text']
-	# print('Question: ' + question + '\n')
 	
 	# Delete audio file
 	Path('question.wav').unlink()
@@ -161,8 +148,8 @@ def lookForObjects():
 
 	# Capture video
 	cam = cv2.VideoCapture(0) # Use 0 for default camera
-	# print('Looking for objects...\n')
 
+	# Start timer
 	startTime = time.time()
 	elapsedTime = 0
 
@@ -199,13 +186,11 @@ def lookForObjects():
 		# Filter is filled with ones and will be used for morphological transformations such as dilation for better detection
 		kernel = np.ones((5, 5), 'uint8')
 
-
 		# For colon
 		# Dilate mask: Remove holes in the mask by adding pixels to the boundaires of the objects in the mask
 		colonMask = cv2.dilate(colonMask, kernel)
 		# Apply mask to frame by using bitwise AND operation
 		resColon = cv2.bitwise_and(imageFrame, imageFrame, mask = colonMask)
-
 
 		# For liver
 		liverMask = cv2.dilate(liverMask, kernel)
@@ -233,9 +218,6 @@ def lookForObjects():
 		for pic, contour in enumerate(contours):
 			area = cv2.contourArea(contour)
 			if area > 500:
-				x, y, w, h = cv2.boundingRect(contour)
-				imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (0, 120, 255), 2)
-				cv2.putText(imageFrame, "COLON", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 120, 255))
 				# Append the name of the model to the list of objects
 				if 'colon' not in objects:
 					if objects == 'User is not holding any objects':
@@ -247,9 +229,6 @@ def lookForObjects():
 		for pic, contour in enumerate(contours):
 			area = cv2.contourArea(contour)
 			if area > 500:
-				x, y, w, h = cv2.boundingRect(contour)
-				imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (86, 194, 0), 2)
-				cv2.putText(imageFrame, "LIVER", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (86, 194, 0))
 				if 'liver' not in objects:
 					if objects == 'User is not holding any objects':
 						objects = 'liver'
@@ -260,9 +239,6 @@ def lookForObjects():
 		for pic, contour in enumerate(contours):
 			area = cv2.contourArea(contour)
 			if area > 1400:
-				x, y, w, h = cv2.boundingRect(contour)
-				imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (237, 117, 47), 2)
-				cv2.putText(imageFrame, "STOMACH", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (237, 117, 47))
 				if 'stomach' not in objects:
 					if objects == 'User is not holding any objects':
 						objects = 'stomach'
@@ -273,9 +249,6 @@ def lookForObjects():
 		for pic, contour in enumerate(contours):
 			area = cv2.contourArea(contour)
 			if area > 500:
-				x, y, w, h = cv2.boundingRect(contour)
-				imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (0, 0, 255), 2)
-				cv2.putText(imageFrame, "BRAIN", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 255))
 				if 'brain' not in objects:
 					if objects == 'User is not holding any objects':
 						objects = 'brain'
@@ -286,9 +259,6 @@ def lookForObjects():
 		for pic, contour in enumerate(contours):
 			area = cv2.contourArea(contour)
 			if area > 500:
-				x, y, w, h = cv2.boundingRect(contour)
-				imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (255, 0, 0), 2)
-				cv2.putText(imageFrame, "HEART", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 0, 0))
 				if 'heart' not in objects:
 					if objects == 'User is not holding any objects':
 						objects = 'heart'
@@ -299,9 +269,6 @@ def lookForObjects():
 		for pic, contour in enumerate(contours):
 			area = cv2.contourArea(contour)
 			if area > 500:
-				x, y, w, h = cv2.boundingRect(contour)
-				imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (255, 0, 255), 2)
-				cv2.putText(imageFrame, "KIDNEY", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 0, 255))
 				if 'kidney' not in objects:
 					if objects == 'User is not holding any objects':
 						objects = 'kidney'
@@ -328,13 +295,12 @@ def sendMessage(messageList: any):
 		model = GPT_MODEL, 
 		temperature = 0.2
 	)
-	print(response)
+	# print(response)
 	_answer = response['choices'][0]['message']['content']
 
 	# Add the response to the message list
 	messageList.append({'role': 'assistant', 'content': _answer})
 
-# NOTE: Add reasoning about mpv for why this function is needed in docs later
 def streamAnswer(audioStream: Iterator[bytes]) -> bytes:
     audioOutput = b""
     for chunk in audioStream:
@@ -379,14 +345,8 @@ if __name__ == '__main__':
 	{humanBodySource}
 	\"\"\"
 	"""
-	# Objects held by user: Stomach.
-
-	# Question: What am I holding, and what is it for?
-
-	# print('Prompt: ' + query + '\n')
 
 	# Send prompt to GPT
-
 	messageHistory = [
 		{'role': 'system', 'content': 'You answer questions in the same language as the question.'},
 		{'role': 'user', 'content': query},
@@ -394,6 +354,7 @@ if __name__ == '__main__':
 
 	print('Sending prompt to GPT...\n')
 	sendMessage(messageHistory)
+	# Get the answer from the last message in the message history
 	answer = next((msg for msg in reversed(messageHistory) if msg['role'] == 'assistant'), None)['content']
 	
 	if answer != '':
