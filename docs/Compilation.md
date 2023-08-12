@@ -69,3 +69,5 @@ pyinstaller studyBotGUI.spec
 ```
 
 This will create a `dist` folder with the executable and some additional files. You can distribute the executable to users so that they can run it without having to install python or libraries, however, they will need to have the `ffmpeg` command-line tool installed and added to the PATH environment variable, as it isn't bundled with the executable.
+
+After completing these steps you should be able to run the program by double-clicking the executable in the `dist` folder. Consider that, in Windows at least, the program may take up to a minute to start. This is not because of the program itself, but because the Antimalware Service Executable scans the program for malware. This is a common issue with programs compiled with no certificate.
