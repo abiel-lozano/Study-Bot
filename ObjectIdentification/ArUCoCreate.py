@@ -1,3 +1,5 @@
+# Script creates ArUco markers of a given size and number
+
 import cv2
 
 arucoDict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)

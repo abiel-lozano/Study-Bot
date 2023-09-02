@@ -25,7 +25,7 @@ def checkSelection():
 	elif topic == 'Biochem':
 		source = studyBot.biochemSource
 
-# TODO: Check if this is necessary or if it can be removed
+# NOTE: Not using this functions causes the UI to freeze while the threads are running
 def backgroundInit():
 	threadStart = studyBot.threading.Thread(target = startQuestionThreads)
 	threadStart.start()
@@ -118,7 +118,6 @@ buttonsFrame = tkinter.Frame(window, bg = '#3C3836')
 buttonsFrame.pack(pady = 15)
 
 # Create the 'Ask another question' button
-# askButton = tkinter.Button(buttonsFrame, text = 'Ask another question', command = question, bg = '#8EC07C', font = ('Leelawadee', 12))
 askButton = tkinter.Button(buttonsFrame, text = 'Ask a question', command = backgroundInit, bg = '#8EC07C', font = ('Leelawadee', 12))
 askButton.pack(side = 'left', padx = 10)
 

@@ -9,7 +9,7 @@ from typing import Iterator
 import pyaudio
 import wave
 from pathlib import Path
-from elevenlabs import generate, play, set_api_key
+from elevenlabs import set_api_key, generate
 import cv2
 import numpy as np
 import time
@@ -82,7 +82,61 @@ oxygenated blood to the body and deoxygenated blood to the lungs for oxygenation
 """
 
 biochemSource = """
-There is no source for this topic. Inform the user that this topic is not supported yet.
+The Krebs cycle, also known as the citric acid cycle or tricarboxylic acid cycle, is a 
+vital metabolic pathway that takes place in the mitochondria of eukaryotic cells. It 
+plays a central role in extracting energy from carbohydrates, fats, and proteins 
+through the oxidative breakdown of acetyl-CoA. Here are the eight most important 
+chemical compounds involved in the Krebs cycle, along with their roles:
+
+Citrate (Citric Acid):
+Citrate is the starting compound of the Krebs cycle. It forms when acetyl-CoA (from 
+glucose, fats, or amino acids) combines with oxaloacetate, catalyzed by citrate synthase. 
+Citrate is converted into its isomer, isocitrate, by aconitase. The production of citrate 
+marks the initiation of the Krebs cycle.
+
+Isocitrate:
+Isocitrate is produced from citrate through the catalytic action of aconitase. Isocitrate 
+is then transformed by isocitrate dehydrogenase into a-ketoglutarate, releasing a 
+molecule of carbon dioxide and reducing NAD+ to NADH in the process.
+
+a-Ketoglutarate:
+a-Ketoglutarate is produced from isocitrate by isocitrate dehydrogenase. It undergoes 
+oxidative decarboxylation by a-ketoglutarate dehydrogenase complex, releasing another 
+molecule of carbon dioxide and reducing NAD+ to NADH. This step is critical in 
+generating energy-rich molecules.
+
+Succinyl-CoA:
+a-Ketoglutarate is further processed into succinyl-CoA through the action of 
+a-ketoglutarate dehydrogenase complex. This conversion releases a molecule of carbon 
+dioxide and reduces NAD+ to NADH. The reaction also generates a high-energy thioester 
+bond in succinyl-CoA.
+
+Succinate:
+Succinyl-CoA is converted to succinate through substrate-level phosphorylation. The 
+energy from the high-energy thioester bond in succinyl-CoA is used to phosphorylate 
+guanosine diphosphate (GDP), converting it into guanosine triphosphate (GTP).
+
+Fumarate:
+The conversion of succinate to fumarate is catalyzed by succinate dehydrogenase, 
+which is embedded in the inner mitochondrial membrane and also functions as Complex II of 
+the electron transport chain. This step directly reduces ubiquinone (CoQ) while 
+converting succinate to fumarate.
+
+Malate:
+Fumarate is converted to malate through the action of fumarase. This reversible hydration 
+reaction prepares the substrate for the next oxidative step.
+
+Oxaloacetate:
+The final step of the Krebs cycle involves the conversion of malate to oxaloacetate by 
+malate dehydrogenase. This reaction also regenerates NAD+ from NADH. Oxaloacetate can 
+then combine with a new acetyl-CoA molecule to initiate another round of the Krebs cycle.
+
+In summary, the Krebs cycle serves as a pivotal pathway for energy production in cells. 
+It involves a series of reactions that facilitate the oxidative breakdown of acetyl-CoA, 
+leading to the generation of NADH and FADH2, which subsequently participate in the electron 
+transport chain to produce ATP. Additionally, the cycle provides intermediates that are 
+used in various biosynthetic pathways and play important roles in maintaining cellular 
+metabolic balance.
 """
 
 # Behavioral guidelines for conversation
@@ -97,6 +151,8 @@ in your answer to make it more sound natural.
 If the question is unrelated to the information, ignore all previous instructions
 and try to answer the question without mentioning the information or the objects 
 to make it sound more natural.
+
+Always try to give brief answers to the user's questions.
 """
 
 
@@ -138,13 +194,14 @@ def recordQuestion():
 	model = whisper.load_model('base')
 	result = model.transcribe('question.wav', fp16 = False)
 	question = result['text']
+
+	# print('Question: ' + question + '\n')
 	
 	# Delete audio file
 	Path('question.wav').unlink()
 
-def lookForObjects():
-	global objects
-	objects = 'User is not holding any objects'
+def colorID():
+	obj = 'User is not holding any objects'
 
 	# Capture video
 	cam = cv2.VideoCapture(0) # Use 0 for default camera
@@ -219,61 +276,61 @@ def lookForObjects():
 			area = cv2.contourArea(contour)
 			if area > 500:
 				# Append the name of the model to the list of objects
-				if 'colon' not in objects:
-					if objects == 'User is not holding any objects':
-						objects = 'colon'
+				if 'colon' not in obj:
+					if obj == 'User is not holding any objects':
+						obj = 'colon'
 					else:
-						objects = objects + ', colon'
+						obj = obj + ', colon'
 
 		contours, hierarchy = cv2.findContours(liverMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 		for pic, contour in enumerate(contours):
 			area = cv2.contourArea(contour)
 			if area > 500:
-				if 'liver' not in objects:
-					if objects == 'User is not holding any objects':
-						objects = 'liver'
+				if 'liver' not in obj:
+					if obj == 'User is not holding any objects':
+						obj = 'liver'
 					else:
-						objects = objects + ', liver'
+						obj = obj + ', liver'
 
 		contours, hierarchy = cv2.findContours(stomachMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 		for pic, contour in enumerate(contours):
 			area = cv2.contourArea(contour)
 			if area > 1400:
-				if 'stomach' not in objects:
-					if objects == 'User is not holding any objects':
-						objects = 'stomach'
+				if 'stomach' not in obj:
+					if obj == 'User is not holding any objects':
+						obj = 'stomach'
 					else:
-						objects = objects + ', stomach'
+						obj = obj + ', stomach'
 
 		contours, hierarchy = cv2.findContours(brainMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 		for pic, contour in enumerate(contours):
 			area = cv2.contourArea(contour)
 			if area > 500:
-				if 'brain' not in objects:
-					if objects == 'User is not holding any objects':
-						objects = 'brain'
+				if 'brain' not in obj:
+					if obj == 'User is not holding any objects':
+						obj = 'brain'
 					else:
-						objects = objects + ', brain'
+						obj = obj + ', brain'
 		
 		contours, hierarchy = cv2.findContours(heartMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 		for pic, contour in enumerate(contours):
 			area = cv2.contourArea(contour)
 			if area > 500:
-				if 'heart' not in objects:
-					if objects == 'User is not holding any objects':
-						objects = 'heart'
+				if 'heart' not in obj:
+					if obj == 'User is not holding any objects':
+						obj = 'heart'
 					else:
-						objects = objects + ', heart'
+						obj = obj + ', heart'
 
 		contours, hierarchy = cv2.findContours(kidneyMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 		for pic, contour in enumerate(contours):
 			area = cv2.contourArea(contour)
 			if area > 500:
-				if 'kidney' not in objects:
-					if objects == 'User is not holding any objects':
-						objects = 'kidney'
+				if 'kidney' not in obj:
+					if obj == 'User is not holding any objects':
+						obj = 'kidney'
 					else:
-						objects = objects + ', kidney'
+						obj = obj + ', kidney'
 
 		# Display the camera feed
 		# cv2.imshow('Study-Bot View', imageFrame)
@@ -287,6 +344,74 @@ def lookForObjects():
 	# Release webcam and close all windows
 	# cam.release()
 	cv2.destroyAllWindows()
+
+	return obj
+
+def markerID():
+	obj = 'User is not holding any objects'
+
+	arucoDict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
+
+	compoundDict = { 0: 'Citrate', 1: 'Isocitrate', 2: 'Alpha-Ketoglutarate', 3: 'Succinyl CoA', 4: 'Succinate', 5: 'Fumarate', 6: 'Malate', 7: 'Oxaloacetate' }
+
+	cap = cv2.VideoCapture(0)
+
+	# Start timer
+	startTime = time.time()
+	elapsedTime = 0
+
+
+	while elapsedTime < 5:
+		ret, frame = cap.read()
+		if not ret:
+			print('Failed to capture frame.')
+			break
+
+		# Convert the frame to grayscale for marker detection
+		gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+		# Detect markers
+		corners, ids, _ = cv2.aruco.detectMarkers(gray, arucoDict)
+
+		if ids is not None:
+			for i in range(len(ids)):
+
+				print('Detected marker with ID:', ids[i][0])
+				try:
+					compound_name = compoundDict[ids[i][0]]
+					print('Object:', compound_name)
+					
+					if obj == 'User is not holding any objects':
+						obj = compound_name
+					elif compound_name not in obj:
+						obj += ', ' + compound_name
+				except KeyError:
+					print('Exception: Marker ID' + str(ids[i][0]) + ' not registered.')
+
+		cv2.imshow('Study-Bot View', frame)
+
+		elapsedTime = time.time() - startTime
+
+		# Check for 'Esc' key press
+		key = cv2.waitKey(10) & 0xFF
+		if key == 27:
+			break
+
+	cap.release()
+	cv2.destroyAllWindows()
+
+	return obj
+
+def lookForObjects(topic: str):
+	global objects
+	objects = ''
+
+	if topic == '1':
+		# Call the function for color identification
+		objects = colorID()
+	elif topic == '2':
+		# Call the function for marker identification
+		objects = markerID()
 
 def sendMessage(messageList: any):
 	# Send prompt to GPT
@@ -302,24 +427,39 @@ def sendMessage(messageList: any):
 	messageList.append({'role': 'assistant', 'content': _answer})
 
 def streamAnswer(audioStream: Iterator[bytes]) -> bytes:
-    audioOutput = b""
-    for chunk in audioStream:
-        if chunk is not None:
-            audioOutput += chunk
+	audioOutput = b""
+	for chunk in audioStream:
+		if chunk is not None:
+			audioOutput += chunk
 
-    audioSegment = AudioSegment.from_file(io.BytesIO(audioOutput), format="mp3")
-    pydubPlay(audioSegment)
+	audioSegment = AudioSegment.from_file(io.BytesIO(audioOutput), format="mp3")
+	pydubPlay(audioSegment)
 
 def convertTTS(text: str):
-	audioOutput = generate(text = text, model = 'eleven_multilingual_v1', stream = True)
-	streamAnswer(audioOutput)
+	# audioOutput = generate(text = text, model = 'eleven_multilingual_v1', stream = True)
+	# streamAnswer(audioOutput)
+	print('Audio playback disabled.\n')
 
 # Only run if not imported as a module
 if __name__ == '__main__':
 
-	# ---------------- Start Processes ----------------
+	print('Select a topic NUMBER from the list:\n')
+	print('[1] - Human Body')
+	print('[2] - Krebs Cycle\n')
+	topic = input('Topic: ')
+	source = ''
 
-	objID = threading.Thread(target = lookForObjects)
+	# Load the source material based on the selected topic
+	if topic == '1':
+		print('Topic: Human Body\n')
+		source = humanBodySource
+	elif topic == '2':
+		print('Topic: Krebs Cycle\n')
+		source = biochemSource
+
+	# ---------------- Start Threads ----------------
+	
+	objID = threading.Thread(target = lookForObjects, args = (topic,))
 	audioRec = threading.Thread(target = recordQuestion)
 
 	objID.start()
@@ -342,7 +482,7 @@ if __name__ == '__main__':
 
 	Information: 
 	\"\"\"
-	{humanBodySource}
+	{source}
 	\"\"\"
 	"""
 
@@ -356,6 +496,7 @@ if __name__ == '__main__':
 	sendMessage(messageHistory)
 	# Get the answer from the last message in the message history
 	answer = next((msg for msg in reversed(messageHistory) if msg['role'] == 'assistant'), None)['content']
+	print(answer + '\n')
 	
 	if answer != '':
 		# print('Answer: ' + answer + '\n\n')
@@ -385,7 +526,7 @@ if __name__ == '__main__':
 
 		# Restart threads
 
-		objID = threading.Thread(target = lookForObjects)
+		objID = threading.Thread(target = lookForObjects, args = (topic,))
 		audioRec = threading.Thread(target = recordQuestion)
 
 		objID.start()
@@ -434,8 +575,8 @@ Question: {question}
 		answer = next((msg for msg in reversed(messageHistory) if msg['role'] == 'assistant'), None)['content']
 
 		if answer != '':
-			# print('Answer: ' + answer + '\n\n')
-			print('Recieved reply from GPT. \n')
+			print('Answer: ' + answer + '\n\n')
+			# print('Recieved reply from GPT. \n')
 
 		# Convert answer to audio
 		print('Converting answer to audio...\n')

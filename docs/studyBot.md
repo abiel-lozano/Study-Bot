@@ -1,5 +1,7 @@
 # Study Bot - studyBot.py
 
+>Note: This documentation was created for the August 2023 version of Study-Bot. Some aspects may be out of date now.
+
 ## Contents
 
 - [Description](#description)
@@ -356,8 +358,10 @@ def streamAnswer(audioStream: Iterator[bytes]) -> bytes:
         if chunk is not None:
             audioOutput += chunk
 
-    audioSegment = AudioSegment.from_file(io.BytesIO(audioOutput), format="mp3")
-    pydubPlay(audioSegment)
+    audioSegment = AudioSegment.from_file(
+		io.BytesIO(audioOutput), format="mp3")
+    
+	pydubPlay(audioSegment)
 
 def convertTTS(text: str):
 	audioOutput = generate(text = text, model = 'eleven_multilingual_v1', stream = True)
