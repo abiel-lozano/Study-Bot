@@ -11,6 +11,7 @@ global source
 answer = ''
 studyBot.question = ''
 studyBot.objects = ''
+studyBot.topic = ''
 source = ''
 firstQuestion = True
 
@@ -21,8 +22,10 @@ def checkSelection():
 	infoDisplay.set(f'Selected topic: {topic}')
 	
 	if topic == 'Human Body':
+		studyBot.topic = '1'
 		source = studyBot.humanBodySource
 	elif topic == 'Biochem':
+		studyBot.topic = '2'
 		source = studyBot.biochemSource
 
 # NOTE: Not using this functions causes the UI to freeze while the threads are running
@@ -35,7 +38,7 @@ def startQuestionThreads():
 	global firstQuestion
 	global messageHistory
 	# Start threads for object identification and question recording
-	threadObjID = studyBot.threading.Thread(target = studyBot.lookForObjects)
+	threadObjID = studyBot.threading.Thread(target = studyBot.lookForObjects, args = (studyBot.topic,))
 	threadQuestionRec = studyBot.threading.Thread(target = studyBot.recordQuestion)
 	threadObjID.start()
 	threadQuestionRec.start()
@@ -88,7 +91,7 @@ Question: {studyBot.question}
 # Create the main window
 window = tkinter.Tk()
 window.title('Study-Bot')
-window.geometry('450x350')
+window.geometry('450x500')
 
 # Set the background color
 window.configure(bg = '#3C3836')

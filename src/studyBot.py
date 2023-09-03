@@ -20,6 +20,7 @@ import credentials # Ignored by git, contains API keys
 global objects
 global question
 global answer
+global topic
 objects = ''
 question = ''
 answer = ''

@@ -30,7 +30,7 @@ a = Analysis(
 
 >Note: The specific location of these files depends on your python installation.
 
-For the GUI version, an additional modification is needed to the `.spec` file. on the `exe` object, the `console` parameter must be set to `False`, otherwise the program will open a console window when it is run:
+For the GUI version, an additional modification is needed to the `.spec` file. on the `exe` object, the `console` parameter must be set to `False`, otherwise the program will open an additional console window when it is run, which is unnecessary and may be annoying and confusing to the user:
 
 ```python
 exe = EXE(
