@@ -28,7 +28,8 @@ def checkSelection():
 		studyBot.topic = '2'
 		source = studyBot.biochemSource
 
-# NOTE: Not using this functions causes the UI to freeze while the threads are running
+# NOTE: Not using this function, and calling startQuestionThreads directly from the button
+# causes the UI to freeze while the threads are running.
 def backgroundInit():
 	threadStart = studyBot.threading.Thread(target = startQuestionThreads)
 	threadStart.start()
