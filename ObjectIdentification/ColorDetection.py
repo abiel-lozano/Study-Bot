@@ -5,21 +5,27 @@ import numpy as np
 import cv2
 
 # Capture video
-cam = cv2.VideoCapture(0)
+cam = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+# cam = cv2.VideoCapture(0)
+
+cam.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+cam.set(cv2.CAP_PROP_FPS, 60)
+cam.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))
 
 # Color ranges
-stomachLower = np.array([90, 	80, 		1			], np.uint8)
+stomachLower = np.array([90, 	80, 		100			], np.uint8)
 stomachUpper = np.array([120, 	255, 		255			], np.uint8)
-colonLower = np.array(	[9, 	255 * 0.55, 255 * 0.35	], np.uint8)
-colonUpper = np.array(	[18, 	255, 		255			], np.uint8)
+colonLower = np.array(	[10, 	255 * 0.55, 255 * 0.35	], np.uint8)
+colonUpper = np.array(	[20.5, 	255, 		255			], np.uint8)
 liverLower = np.array(	[38, 	225 * 0.22, 255 * 0.38	], np.uint8)
 liverUpper = np.array(	[41, 	255, 		255			], np.uint8)
-brainLower = np.array(	[168, 	255 * 0.50, 255 * 0.40	], np.uint8)
-brainUpper = np.array(	[168, 	255, 		255			], np.uint8)
-kidneyLower = np.array(	[26, 	255 * 0.60, 255 * 0.49	], np.uint8)
-kidneyUpper = np.array(	[26, 	255, 		255			], np.uint8)
-heartLower = np.array(	[179, 	255 * 0.50, 255 * 0.45	], np.uint8)
-heartUpper = np.array(	[179, 	255 * 0.97, 255 * 0.69	], np.uint8)
+brainLower = np.array(	[163, 	255 * 0.50, 255 * 0.40	], np.uint8)
+brainUpper = np.array(	[163, 	255, 		255			], np.uint8)
+kidneyLower = np.array(	[24, 	255 * 0.60, 255 * 0.49	], np.uint8)
+kidneyUpper = np.array(	[24, 	255, 		255			], np.uint8)
+heartLower = np.array(	[170, 	255 * 0.50, 255 * 0.35	], np.uint8)
+heartUpper = np.array(	[170, 	255 * 0.97, 255 * 0.69	], np.uint8)
 
 while True:
     # Reading the video from the webcam in image frames
@@ -73,7 +79,7 @@ while True:
     # For each contour, check if the area is greater than 500 pixels
     for pic, contour in enumerate(contours):
         area = cv2.contourArea(contour)
-        if area > 500:
+        if area > 700:
             # Create a bounding rectangle with a title around the detected object
             x, y, w, h = cv2.boundingRect(contour)
             imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (0, 120, 255), 2)
@@ -101,7 +107,7 @@ while True:
     contours, hierarchy = cv2.findContours(brainMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     for pic, contour in enumerate(contours):
         area = cv2.contourArea(contour)
-        if area > 500:
+        if area > 2500:
             x, y, w, h = cv2.boundingRect(contour)
             imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (204, 0, 255), 2)
             # cv2.putText(imageFrame, "BRAIN", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 255))
@@ -119,7 +125,7 @@ while True:
     contours, hierarchy = cv2.findContours(heartMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     for pic, contour in enumerate(contours):
         area = cv2.contourArea(contour)
-        if area > 200:
+        if area > 650:
             x, y, w, h = cv2.boundingRect(contour)
             imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (0, 0, 255), 2)
             # cv2.putText(imageFrame, "HEART", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 0, 0))

@@ -4,7 +4,8 @@ import time
 def detectMarkers(aruco_dict):
     obj = 'User is not holding any objects'
 
-    cap = cv2.VideoCapture(0)
+    # cap = cv2.VideoCapture(1)
+    cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 
     start = time.time()
     elapsedTime = 0
