@@ -102,7 +102,7 @@ def colorID():
 	obj = 'User is not holding any objects'
 
 	# Capture video
-	cam = cv2.VideoCapture(0) # Use 0 for default camera
+	cam = cv2.VideoCapture(0, cv2.CAP_DSHOW) # Use 0 for default camera
 
 	# Start timer
 	startTime = time.time()
