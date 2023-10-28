@@ -9,7 +9,7 @@ from typing import Iterator
 import pyaudio
 import wave
 from pathlib import Path
-from elevenlabs import set_api_key, generate
+from elevenlabs import set_api_key, generate, History, play # History and play are used only by main script
 import cv2
 import numpy as np
 import time

@@ -1,4 +1,6 @@
-import studyBot, tkinter, sys, os
+import studyBot
+import tkinter
+import sys
 
 # NOTE - There is chance this is not necessary
 global answer
@@ -13,8 +15,29 @@ studyBot.topic = ''
 source = ''
 firstQuestion = True
 
+
+# Find history item by history_item_id
+def findAudioWithID(history, itemID):
+	for item in history:
+		if item.history_item_id == itemID:
+			return item
+	return None  # If the item is not found
+		
+# Play specific history item by history_item_id
+def playAudioWithID(history, itemID):
+	item = findAudioWithID(history, itemID)
+	if item is not None:
+		# studyBot.play(item.audio)
+		threadAudio = studyBot.threading.Thread(target = studyBot.play, args = (item.audio,))
+		threadAudio.start()
+		# print('Playing history item with ID:', item.history_item_id)
+	else:
+		print('History item not found')
+
 # Select the source material to be sent to GPT and select object ID function (not implemented yet)
 def checkSelection():
+	playAudioWithID(hist, 'JazmI95H1YV0IxkutnpP')
+
 	global source
 	topic = topicVar.get()
 	infoDisplay.set(f'Selected topic: {topic}')
@@ -48,6 +71,8 @@ def startQuestionThreads():
 	infoDisplay.set(f'Listening for question and looking for objects...')
 	threadObjID.join()
 	threadQuestionRec.join()
+
+	playAudioWithID(hist, '7aNkMntxEq7M9IXZ6Vkv')
 
 	# Display the recorded question and identified object
 	infoDisplay.set(f'Question taken: {studyBot.question} \nObject identified: {studyBot.objects}')
@@ -142,4 +167,7 @@ infoDisplay.set('Welcome to Study-Bot! Please select a topic before asking a que
 infoLabel = tkinter.Label(window, textvariable=infoDisplay, bg = '#83A598', fg = '#282828',font = ('Leelawadee', 12), wraplength = 400)
 infoLabel.pack()
 
+hist = studyBot.History.from_api()
+
+window.after(0, playAudioWithID, hist, 'HNwmc11X0p23y77VLvOY')
 window.mainloop()
