@@ -166,6 +166,7 @@ For each of the objects you wish to identify, set a lower and upper bound with t
 
 >Note: For OpenCV, the H (hue) value is represented as a value between 0 and 180, instead of the standard 0 to 360, and the S (saturation) and V (vibrancy) values are represented as values between 0 and 255 instead of 0 to 100.
 
+<!-- Use camera focus of 250 and white balance of 3150 -->
 ```python
 def lookForObjects():
 	global objects

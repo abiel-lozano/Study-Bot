@@ -1,6 +1,4 @@
-import studyBot
-import tkinter
-import sys
+import studyBot, tkinter, sys, os
 
 # NOTE - There is chance this is not necessary
 global answer
@@ -33,7 +31,11 @@ def checkSelection():
 def backgroundInit():
 	threadStart = studyBot.threading.Thread(target = startQuestionThreads)
 	threadStart.start()
-	# threadStart.join()
+
+	# Disable all the buttons
+	askButton.config(state = 'disabled')
+	exitButton.config(state = 'disabled')
+	selectButton.config(state = 'disabled')
 
 def startQuestionThreads():
 	global firstQuestion
@@ -88,6 +90,11 @@ Question: {studyBot.question}
 	threadConvertTTS = studyBot.threading.Thread(target = studyBot.convertTTS, args = (answer,))
 	threadConvertTTS.start()
 	threadConvertTTS.join()
+
+	# Reenable all the buttons
+	askButton.config(state = 'normal')
+	exitButton.config(state = 'normal')
+	selectButton.config(state = 'normal')
 
 # Create the main window
 window = tkinter.Tk()

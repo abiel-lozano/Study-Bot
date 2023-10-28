@@ -53,7 +53,6 @@ to make it sound more natural.
 Always try to give brief answers to the user's questions.
 """
 
-
 # Recorder configuration
 CHUNK = 1024 # Chunk size
 FORMAT = pyaudio.paInt16 # Audio codec format
@@ -112,15 +111,15 @@ def colorID():
 	stomachLower = np.array([90, 	80, 		100			], np.uint8)
 	stomachUpper = np.array([120, 	255, 		255			], np.uint8)
 	colonLower = np.array(	[10, 	255 * 0.55, 255 * 0.35	], np.uint8)
-	colonUpper = np.array(	[20.5, 	255, 		255			], np.uint8)
+	colonUpper = np.array(	[19.5, 	255, 		255			], np.uint8)
 	liverLower = np.array(	[38, 	225 * 0.22, 255 * 0.38	], np.uint8)
 	liverUpper = np.array(	[41, 	255, 		255			], np.uint8)
-	brainLower = np.array(	[163, 	255 * 0.50, 255 * 0.40	], np.uint8)
-	brainUpper = np.array(	[163, 	255, 		255			], np.uint8)
-	kidneyLower = np.array(	[24, 	255 * 0.60, 255 * 0.49	], np.uint8)
-	kidneyUpper = np.array(	[24, 	255, 		255			], np.uint8)
-	heartLower = np.array(	[170, 	255 * 0.50, 255 * 0.35	], np.uint8)
-	heartUpper = np.array(	[170, 	255 * 0.97, 255 * 0.69	], np.uint8)
+	brainLower = np.array(	[161, 	255 * 0.50, 255 * 0.40	], np.uint8)
+	brainUpper = np.array(	[161, 	255, 		255			], np.uint8)
+	kidneyLower = np.array(	[26, 	255 * 0.60, 255 * 0.69	], np.uint8)
+	kidneyUpper = np.array(	[26, 	255, 		255			], np.uint8)
+	heartLower = np.array(	[179, 	255 * 0.50, 255 * 0.35	], np.uint8)
+	heartUpper = np.array(	[179, 	255 * 0.97, 255 * 0.69	], np.uint8)
 
 	while elapsedTime < 1:
 
