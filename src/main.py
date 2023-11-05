@@ -1,6 +1,7 @@
 import studyBot
 import tkinter
 import sys
+import winsound
 
 # NOTE - There is chance this is not necessary
 global answer
@@ -16,7 +17,7 @@ studyBot.objects = ''
 studyBot.topic = ''
 source = ''
 firstQuestion = True
-		
+
 # Play specific history item by history_item_id
 def playAudioWithID(itemID):
 	global audioHistory
@@ -27,6 +28,9 @@ def playAudioWithID(itemID):
 
 # Select the source material to be sent to GPT and select object ID function (not implemented yet)
 def checkSelection():
+	# Beep
+	winsound.Beep(500, 800)  # frequency, duration
+
 	playAudioWithID('JazmI95H1YV0IxkutnpP')
 
 	global source
@@ -59,6 +63,8 @@ def startQuestionThreads():
 	threadQuestionRec = studyBot.threading.Thread(target = studyBot.recordQuestion)
 	threadObjID.start()
 	threadQuestionRec.start()
+	# Beep
+	winsound.Beep(800, 800)  # frequency, duration
 	infoDisplay.set(f'Listening for question and looking for objects...')
 	threadObjID.join()
 	threadQuestionRec.join()
@@ -160,5 +166,10 @@ infoLabel.pack()
 
 audioHistory = studyBot.History.from_api()
 
-window.after(0, playAudioWithID, 'HNwmc11X0p23y77VLvOY')
+# Beep
+winsound.Beep(500, 800)  # frequency, duration
+
+# play_beep(500, 0.2)
+
+# window.after(0, playAudioWithID, 'HNwmc11X0p23y77VLvOY')
 window.mainloop()
