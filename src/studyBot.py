@@ -1,4 +1,5 @@
-# Study-Bot: Question answering using audio interaction and object detection, CLI version for testing, and functions for GUI version
+# Study-Bot: Question answering using audio interaction and object detection, 
+# CLI version for testing, and functions for GUI version
 
 import openai
 import whisper
@@ -9,7 +10,8 @@ from typing import Iterator
 import pyaudio
 import wave
 from pathlib import Path
-from elevenlabs import set_api_key, generate, History, play # History and play are used only by main script
+# History, play, is_installed, and subprocess are used only by main script
+from elevenlabs import set_api_key, generate, History, play, is_installed, subprocess
 import cv2
 import numpy as np
 import time

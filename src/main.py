@@ -18,22 +18,56 @@ studyBot.topic = ''
 source = ''
 firstQuestion = True
 
-# Play specific history item by history_item_id
+audioSelect = {
+	'topicSelected': 'JazmI95H1YV0IxkutnpP',
+	'questionRecorded': '7aNkMntxEq7M9IXZ6Vkv',
+	'welcome': 'HNwmc11X0p23y77VLvOY',
+	'topicHumanBody': '-blank-',
+	'topicBiochem': '-blank-',
+	'confirmHumanBody': '-blank-',
+	'confirmBiochem': '-blank-',
+}
+
+# NOTE: This is a patch for elevenlabs' play function, to avoid showing an
+# empty black window when playing audio in the compiled version. The lack of
+# this flag is not an issue when running through the interpreter.
+def playPatch(audio: bytes, notebook: bool = False) -> None:
+	if notebook:
+		from IPython.display import Audio, display
+		display(Audio(audio, rate=44100, autoplay=True))
+	else:
+		# Access subprocess module through elevenlabs from studyBot 
+		# to avoid double import
+		if not studyBot.is_installed("ffplay"):
+			raise ValueError("ffplay from ffmpeg not found, necessary to play audio.")
+		
+		args = ["ffplay", "-autoexit", "-", "-nodisp"]
+		proc = studyBot.subprocess.Popen(
+			args = args,
+			stdout = studyBot.subprocess.PIPE,
+			stdin = studyBot.subprocess.PIPE,
+			stderr = studyBot.subprocess.PIPE,
+			# Flag prevents black window from showing
+			creationflags = studyBot.subprocess.CREATE_NO_WINDOW,
+		)
+		out, err = proc.communicate(input=audio)
+		proc.poll()
+
+# Play specific history item ID
 def playAudioWithID(itemID):
 	global audioHistory
+
 	for item in audioHistory:
 		if item.history_item_id == itemID:
-			threadAudio = studyBot.threading.Thread(target = studyBot.play, args = (item.audio,))
+			threadAudio = studyBot.threading.Thread(target = playPatch, args = (item.audio,))
 			threadAudio.start()
 
-# Select the source material to be sent to GPT and select object ID function (not implemented yet)
+# Select source material to be sent to GPT and select object ID function
 def checkSelection():
-	# Beep
-	winsound.Beep(500, 800)  # frequency, duration
-
-	playAudioWithID('JazmI95H1YV0IxkutnpP')
-
 	global source
+
+	winsound.Beep(600, 800) # frequency, duration
+	playAudioWithID(audioSelect['topicSelected'])
 	topic = topicVar.get()
 	infoDisplay.set(f'Selected topic: {topic}')
 	
@@ -43,6 +77,7 @@ def checkSelection():
 	elif topic == 'Biochem':
 		studyBot.topic = '2'
 		source = studyBot.biochemSource
+	# Add new topics here
 
 # NOTE: Not using this function, and calling startQuestionThreads directly from the button
 # causes the UI to freeze while the threads are running.
@@ -50,10 +85,15 @@ def backgroundInit():
 	threadStart = studyBot.threading.Thread(target = startQuestionThreads)
 	threadStart.start()
 
-	# Disable all the buttons
+	# Disable all buttons while question is being processed
 	askButton.config(state = 'disabled')
 	exitButton.config(state = 'disabled')
 	selectButton.config(state = 'disabled')
+
+	# Unbind keys while question is being processed
+	window.unbind('1')
+	window.unbind('3')
+	window.unbind('4')
 
 def startQuestionThreads():
 	global firstQuestion
@@ -63,18 +103,17 @@ def startQuestionThreads():
 	threadQuestionRec = studyBot.threading.Thread(target = studyBot.recordQuestion)
 	threadObjID.start()
 	threadQuestionRec.start()
-	# Beep
-	winsound.Beep(800, 800)  # frequency, duration
+	winsound.Beep(700, 800)
 	infoDisplay.set(f'Listening for question and looking for objects...')
 	threadObjID.join()
 	threadQuestionRec.join()
 
-	playAudioWithID('7aNkMntxEq7M9IXZ6Vkv')
+	playAudioWithID(audioSelect['questionRecorded'])
 
-	# Display the recorded question and identified object
+	# Display recorded question and identified object
 	infoDisplay.set(f'Question taken: {studyBot.question} \nObject identified: {studyBot.objects}')
 
-	# Prepare messageHistory depending on whether this is the first question or not
+	# Prepare messageHistory if this is the first question or not
 	if firstQuestion:
 		firstQuestion = False
 		query = f"""{studyBot.instructions}
@@ -104,7 +143,7 @@ Question: {studyBot.question}
 	threadSendMessage.start()
 	threadSendMessage.join()
 
-	# Get the answer of the last message of messageHistory
+	# Get answer of last message from messageHistory
 	answer = next((msg for msg in reversed(messageHistory) if msg['role'] == 'assistant'), None)['content']
 	infoDisplay.set(f'Answer: {answer}')
 
@@ -113,32 +152,63 @@ Question: {studyBot.question}
 	threadConvertTTS.start()
 	threadConvertTTS.join()
 
-	# Reenable all the buttons
+	# Reenable all buttons
 	askButton.config(state = 'normal')
 	exitButton.config(state = 'normal')
 	selectButton.config(state = 'normal')
 
-# Create the main window
+	# Rebind keys
+	window.bind('1', lambda e: selectNextOption())
+	window.bind('3', lambda e: backgroundInit())
+	window.bind('4', lambda e: close())
+
+
+# Select next option in dropdown menu
+def selectNextOption():
+	currentOption = topicVar.get()
+	currentIndex = options.index(currentOption)
+	nextIndex = (currentIndex + 1) % len(options)
+	nextOption = options[nextIndex]
+	topicVar.set(nextOption)
+
+	# Play audio for selected option
+	# if next_option == 'Human Body':
+	# 	playAudioWithID(audioSelect['topicHumanBody'])
+	# elif next_option == 'Biochem':
+	# 	playAudioWithID(audioSelect['topicBiochem'])
+	# Add new topics here
+
+def close():
+	# Closing signal
+	winsound.Beep(700, 200) 
+	studyBot.time.sleep(0.01)
+	winsound.Beep(600, 200)
+	studyBot.time.sleep(0.01)
+	winsound.Beep(500, 200)
+	sys.exit()
+
+# Create main window
 window = tkinter.Tk()
 window.title('Study-Bot')
 window.geometry('450x500')
 
-# Set the background color
+# Set background color
 window.configure(bg = '#3C3836')
 
-# Create the title label
+# Create title label
 titleLabel = tkinter.Label(window, text = 'Study-Bot', font = ('Leelawadee', 24, 'bold'), bg = '#3C3836', fg = '#FBF1C7')
 titleLabel.pack(pady = 15)
 
-# Create the topic dropdown
+# Create topic dropdown
 topicLabel = tkinter.Label(window, text = 'Select Topic:', bg = '#3C3836', fg = '#FBF1C7', font = ('Leelawadee', 12))
 topicLabel.pack(pady = 15)
 
-# Create the topic frame
+# Create topic frame
 topicFrame = tkinter.Frame(window, bg = '#3C3836')
 topicFrame.pack(pady = 15)
 
 topicVar = tkinter.StringVar(window)
+topicVar.set('Human Body') # default value
 topicDropdown = tkinter.OptionMenu(topicFrame, topicVar, 'Human Body', 'Biochem')
 topicDropdown.config(width = 15)
 topicDropdown.pack(side = 'left', padx = 10)
@@ -146,30 +216,49 @@ topicDropdown.pack(side = 'left', padx = 10)
 selectButton = tkinter.Button(topicFrame, text = 'Select', command = checkSelection, bg = '#FABD2F', font = ('Leelawadee', 12))
 selectButton.pack(side = 'left', padx = 10)
 
-# Create the buttons frame
+# Create buttons frame
 buttonsFrame = tkinter.Frame(window, bg = '#3C3836')
 buttonsFrame.pack(pady = 15)
 
-# Create the 'Ask another question' button
+# Create 'Ask another question' button
 askButton = tkinter.Button(buttonsFrame, text = 'Ask a question', command = backgroundInit, bg = '#8EC07C', font = ('Leelawadee', 12))
 askButton.pack(side = 'left', padx = 10)
 
-# Create the 'Exit' button
-exitButton = tkinter.Button(buttonsFrame, text = 'Exit', command = sys.exit, bg = '#FB4934', font = ('Leelawadee', 12))
+# Create 'Exit' button
+exitButton = tkinter.Button(buttonsFrame, text = 'Exit', command = close, bg = '#FB4934', font = ('Leelawadee', 12))
 exitButton.pack(side = 'left', padx = 10)
 
-# Create the infoDisplay text label
+# Create infoDisplay text label
 infoDisplay = tkinter.StringVar()
 infoDisplay.set('Welcome to Study-Bot! Please select a topic before asking a question.')
 infoLabel = tkinter.Label(window, textvariable=infoDisplay, bg = '#83A598', fg = '#282828',font = ('Leelawadee', 12), wraplength = 400)
 infoLabel.pack()
 
+# Access from_api() method from History class through studyBot module
 audioHistory = studyBot.History.from_api()
 
-# Beep
-winsound.Beep(500, 800)  # frequency, duration
+menu = topicDropdown['menu']
+numOptions = menu.index('end') + 1
+options = []
 
-# play_beep(500, 0.2)
+for i in range(numOptions):
+	optionLabel = menu.entrycget(i, 'label')
+	options.append(optionLabel)
 
-# window.after(0, playAudioWithID, 'HNwmc11X0p23y77VLvOY')
+# Create keyboard bindings for all functions activated by buttons with keys 1, 2, 3 and 4
+window.bind('1', lambda e: selectNextOption())
+window.bind('2', lambda e: checkSelection())
+window.bind('3', lambda e: backgroundInit())
+window.bind('4', lambda e: close())
+
+# System sounds are not always immediately enabled, which causes the first beep to be inaudible.
+# This beep is used to 'wake up' the system sounds.
+winsound.Beep(37, 100) # Unaudible frequency in most speakers and by most people
+
+# Boot-up signal
+window.after(0, winsound.Beep, 500, 200)
+window.after(310, winsound.Beep, 630, 200)
+window.after(610, winsound.Beep, 750, 200)
+
+window.after(1000, playAudioWithID, audioSelect['welcome']) # Play welcome audio
 window.mainloop()
