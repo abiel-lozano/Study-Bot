@@ -11,6 +11,7 @@ sources.txt
 image_recognition.py
 src/credentials.py
 src/__pycache__
+Tools/credentials.py
 
 # Compilation output
 *.exe

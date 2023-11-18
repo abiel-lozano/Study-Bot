@@ -79,6 +79,8 @@ def checkSelection():
 		source = studyBot.biochemSource
 	# Add new topics here
 
+	window.unbind('1')
+
 # NOTE: Not using this function, and calling startQuestionThreads directly from the button
 # causes the UI to freeze while the threads are running.
 def backgroundInit():
@@ -86,12 +88,14 @@ def backgroundInit():
 	threadStart.start()
 
 	# Disable all buttons while question is being processed
+	topicDropdown.config(state = 'disabled')
+	selectButton.config(state = 'disabled')
 	askButton.config(state = 'disabled')
 	exitButton.config(state = 'disabled')
-	selectButton.config(state = 'disabled')
 
 	# Unbind keys while question is being processed
 	window.unbind('1')
+	window.unbind('2')
 	window.unbind('3')
 	window.unbind('4')
 
@@ -153,12 +157,14 @@ Question: {studyBot.question}
 	threadConvertTTS.join()
 
 	# Reenable all buttons
+	topicDropdown.config(state = 'normal')
+	selectButton.config(state = 'normal')
 	askButton.config(state = 'normal')
 	exitButton.config(state = 'normal')
-	selectButton.config(state = 'normal')
 
 	# Rebind keys
 	window.bind('1', lambda e: selectNextOption())
+	window.bind('2', lambda e: checkSelection())
 	window.bind('3', lambda e: backgroundInit())
 	window.bind('4', lambda e: close())
 
@@ -196,11 +202,23 @@ window.geometry('450x500')
 window.configure(bg = '#3C3836')
 
 # Create title label
-titleLabel = tkinter.Label(window, text = 'Study-Bot', font = ('Leelawadee', 24, 'bold'), bg = '#3C3836', fg = '#FBF1C7')
+titleLabel = tkinter.Label(
+	window, 
+	text = 'Study-Bot', 
+	font = ('Leelawadee', 24, 'bold'), 
+	bg = '#3C3836', 
+	fg = '#FBF1C7'
+)
 titleLabel.pack(pady = 15)
 
 # Create topic dropdown
-topicLabel = tkinter.Label(window, text = 'Select Topic:', bg = '#3C3836', fg = '#FBF1C7', font = ('Leelawadee', 12))
+topicLabel = tkinter.Label(
+	window, 
+	text = 'Select Topic:', 
+	bg = '#3C3836', 
+	fg = '#FBF1C7', 
+	font = ('Leelawadee', 12)
+)
 topicLabel.pack(pady = 15)
 
 # Create topic frame
@@ -211,27 +229,67 @@ topicVar = tkinter.StringVar(window)
 topicVar.set('Human Body') # default value
 topicDropdown = tkinter.OptionMenu(topicFrame, topicVar, 'Human Body', 'Biochem')
 topicDropdown.config(width = 15)
-topicDropdown.pack(side = 'left', padx = 10)
+topicDropdown.pack(
+	side = 'left', 
+	padx = 10
+)
 
-selectButton = tkinter.Button(topicFrame, text = 'Select', command = checkSelection, bg = '#FABD2F', font = ('Leelawadee', 12))
-selectButton.pack(side = 'left', padx = 10)
+selectButton = tkinter.Button(
+	topicFrame, 
+	text = 'Select', 
+	command = checkSelection, 
+	bg = '#FABD2F', 
+	font = ('Leelawadee', 12)
+)
+selectButton.pack(
+	side = 'left', 
+	padx = 10
+)
 
 # Create buttons frame
-buttonsFrame = tkinter.Frame(window, bg = '#3C3836')
+buttonsFrame = tkinter.Frame(
+	window, 
+	bg = '#3C3836'
+)
 buttonsFrame.pack(pady = 15)
 
 # Create 'Ask another question' button
-askButton = tkinter.Button(buttonsFrame, text = 'Ask a question', command = backgroundInit, bg = '#8EC07C', font = ('Leelawadee', 12))
-askButton.pack(side = 'left', padx = 10)
+askButton = tkinter.Button(
+	buttonsFrame, 
+	text = 'Ask a question', 
+	command = backgroundInit, 
+	bg = '#8EC07C', 
+	font = ('Leelawadee', 12)
+)
+askButton.pack(
+	side = 'left', 
+	padx = 10
+)
 
 # Create 'Exit' button
-exitButton = tkinter.Button(buttonsFrame, text = 'Exit', command = close, bg = '#FB4934', font = ('Leelawadee', 12))
-exitButton.pack(side = 'left', padx = 10)
+exitButton = tkinter.Button(
+	buttonsFrame, 
+	text = 'Exit', 
+	command = close, 
+	bg = '#FB4934', 
+	font = ('Leelawadee', 12)
+)
+exitButton.pack(
+	side = 'left', 
+	padx = 10
+)
 
 # Create infoDisplay text label
 infoDisplay = tkinter.StringVar()
 infoDisplay.set('Welcome to Study-Bot! Please select a topic before asking a question.')
-infoLabel = tkinter.Label(window, textvariable=infoDisplay, bg = '#83A598', fg = '#282828',font = ('Leelawadee', 12), wraplength = 400)
+infoLabel = tkinter.Label(
+	window, 
+	textvariable=infoDisplay, 
+	bg = '#83A598', 
+	fg = '#282828',
+	font = ('Leelawadee', 12), 
+	wraplength = 400
+)
 infoLabel.pack()
 
 # Access from_api() method from History class through studyBot module
@@ -245,11 +303,12 @@ for i in range(numOptions):
 	optionLabel = menu.entrycget(i, 'label')
 	options.append(optionLabel)
 
-# Create keyboard bindings for all functions activated by buttons with keys 1, 2, 3 and 4
+# Keyboard bindings for all functions with keys 1, 2, 3, 4 and Esc
 window.bind('1', lambda e: selectNextOption())
 window.bind('2', lambda e: checkSelection())
 window.bind('3', lambda e: backgroundInit())
 window.bind('4', lambda e: close())
+window.bind('<Escape>', lambda e: close())
 
 # System sounds are not always immediately enabled, which causes the first beep to be inaudible.
 # This beep is used to 'wake up' the system sounds.
@@ -257,7 +316,9 @@ winsound.Beep(37, 100) # Unaudible frequency in most speakers and by most people
 
 # Boot-up signal
 window.after(0, winsound.Beep, 500, 200)
+studyBot.time.sleep(0.01)
 window.after(310, winsound.Beep, 630, 200)
+studyBot.time.sleep(0.01)
 window.after(610, winsound.Beep, 750, 200)
 
 window.after(1000, playAudioWithID, audioSelect['welcome']) # Play welcome audio

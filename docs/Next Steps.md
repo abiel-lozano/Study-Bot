@@ -1,1 +1,0 @@
-next steps for the project, recommendations regarding services, and user manual

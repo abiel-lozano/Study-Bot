@@ -31,7 +31,7 @@ answer = ''
 GPT_MODEL = 'gpt-3.5-turbo-16k'
 
 # Credentials
-openai.api_key = credentials.openAiKey
+openai.api_key = credentials.openAIKey
 set_api_key(credentials.elevenLabsKey)
 
 # Information sources
