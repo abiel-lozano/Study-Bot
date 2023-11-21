@@ -1,5 +1,6 @@
 # Study-Bot: Color Detection for Human Body Models
 # Based on the tutorial by goodday451999, posted on GeeksforGeeks: https://www.geeksforgeeks.org/multiple-color-detection-in-real-time-using-python-opencv/
+# Use this to determine the color ranges for the objects to detect
 
 import numpy as np
 import cv2

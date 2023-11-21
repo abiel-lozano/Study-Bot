@@ -275,17 +275,18 @@ def markerID():
 		if ids is not None:
 			for i in range(len(ids)):
 
-				print('Detected marker with ID:', ids[i][0])
+				# print('Detected marker with ID:', ids[i][0])
 				try:
 					compound_name = compoundDict[ids[i][0]]
-					print('Object:', compound_name)
+					# print('Object:', compound_name)
 					
 					if obj == 'User is not holding any objects':
 						obj = compound_name
 					elif compound_name not in obj:
 						obj += ', ' + compound_name
 				except KeyError:
-					print('Exception: Marker ID' + str(ids[i][0]) + ' not registered.')
+					continue
+					# print('Exception: Marker ID' + str(ids[i][0]) + ' not registered.')
 
 		cv2.imshow('Study-Bot View', frame)
 
@@ -336,9 +337,9 @@ def streamAnswer(audioStream: Iterator[bytes]) -> bytes:
 	pydubPlay(audioSegment)
 
 def convertTTS(text: str):
-	audioOutput = generate(text = text, model = 'eleven_multilingual_v1', stream = True)
-	streamAnswer(audioOutput)
-	# print('Audio playback disabled.\n')
+	# audioOutput = generate(text = text, model = 'eleven_multilingual_v1', stream = True)
+	# streamAnswer(audioOutput)
+	print('Audio playback disabled.\n')
 
 # Only run if not imported as a module
 if __name__ == '__main__':

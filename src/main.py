@@ -19,13 +19,13 @@ source = ''
 firstQuestion = True
 
 audioSelect = {
-	'topicSelected': 'JazmI95H1YV0IxkutnpP',
+	'topicSelected': 	'JazmI95H1YV0IxkutnpP',
 	'questionRecorded': '7aNkMntxEq7M9IXZ6Vkv',
-	'welcome': 'HNwmc11X0p23y77VLvOY',
-	'topicHumanBody': '-blank-',
-	'topicBiochem': '-blank-',
-	'confirmHumanBody': '-blank-',
-	'confirmBiochem': '-blank-',
+	'welcome': 			'HNwmc11X0p23y77VLvOY',
+	'topicHumanBody': 	'ppXHdy46xuZtg3ysNoxu',
+	'topicBiochem': 	'IjsDkrqkOCQ64XyqL5ZV',
+	'confirmHumanBody': 'OCE5HysrlHaX1AoGDd1j',
+	'confirmBiochem': 	'CPjy6303qpWpSUEl07xz',
 }
 
 # NOTE: This is a patch for elevenlabs' play function, to avoid showing an
@@ -65,21 +65,30 @@ def playAudioWithID(itemID):
 # Select source material to be sent to GPT and select object ID function
 def checkSelection():
 	global source
+	global messageHistory
+	global firstQuestion
+	global query
 
 	winsound.Beep(600, 800) # frequency, duration
-	playAudioWithID(audioSelect['topicSelected'])
+	# playAudioWithID(audioSelect['topicSelected'])
 	topic = topicVar.get()
 	infoDisplay.set(f'Selected topic: {topic}')
 	
 	if topic == 'Human Body':
 		studyBot.topic = '1'
 		source = studyBot.humanBodySource
+		playAudioWithID(audioSelect['confirmHumanBody'])
 	elif topic == 'Biochem':
 		studyBot.topic = '2'
 		source = studyBot.biochemSource
+		playAudioWithID(audioSelect['confirmBiochem'])
 	# Add new topics here
 
-	window.unbind('1')
+	# Reset message history, firstQuestion, and query
+	messageHistory = []
+	firstQuestion = True
+	query = ''
+	
 
 # NOTE: Not using this function, and calling startQuestionThreads directly from the button
 # causes the UI to freeze while the threads are running.
@@ -98,10 +107,13 @@ def backgroundInit():
 	window.unbind('2')
 	window.unbind('3')
 	window.unbind('4')
+	window.unbind('<Escape>')
 
 def startQuestionThreads():
 	global firstQuestion
 	global messageHistory
+	global query
+
 	# Start threads for object identification and question recording
 	threadObjID = studyBot.threading.Thread(target = studyBot.lookForObjects, args = (studyBot.topic,))
 	threadQuestionRec = studyBot.threading.Thread(target = studyBot.recordQuestion)
@@ -167,6 +179,7 @@ Question: {studyBot.question}
 	window.bind('2', lambda e: checkSelection())
 	window.bind('3', lambda e: backgroundInit())
 	window.bind('4', lambda e: close())
+	window.bind('<Escape>', lambda e: close())
 
 
 # Select next option in dropdown menu
@@ -178,10 +191,10 @@ def selectNextOption():
 	topicVar.set(nextOption)
 
 	# Play audio for selected option
-	# if next_option == 'Human Body':
-	# 	playAudioWithID(audioSelect['topicHumanBody'])
-	# elif next_option == 'Biochem':
-	# 	playAudioWithID(audioSelect['topicBiochem'])
+	if nextOption == 'Human Body':
+		playAudioWithID(audioSelect['topicHumanBody'])
+	elif nextOption == 'Biochem':
+		playAudioWithID(audioSelect['topicBiochem'])
 	# Add new topics here
 
 def close():
@@ -310,9 +323,10 @@ window.bind('3', lambda e: backgroundInit())
 window.bind('4', lambda e: close())
 window.bind('<Escape>', lambda e: close())
 
-# System sounds are not always immediately enabled, which causes the first beep to be inaudible.
-# This beep is used to 'wake up' the system sounds.
-winsound.Beep(37, 100) # Unaudible frequency in most speakers and by most people
+# NOTE: System sounds are not always immediately enabled, which causes 
+# the first beep to be inaudible. This beep is used to 'wake up' the 
+# system sounds.
+winsound.Beep(37, 1000) # Unaudible frequency in most speakers and by most people
 
 # Boot-up signal
 window.after(0, winsound.Beep, 500, 200)

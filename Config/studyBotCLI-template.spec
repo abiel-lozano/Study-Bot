@@ -5,7 +5,7 @@ block_cipher = None
 
 
 a = Analysis(
-    ['src\\studyBot.py'],
+    ['..\\src\\studyBot.py'],
     pathex=[],
     binaries=[],
     datas=[

@@ -8,3 +8,6 @@ Currently, the project identifies objects based on color or ARUCo marks. Impleme
 
 ## Voice Customization
 Allow users to change accent or speed of the TTS voice to their liking.
+
+## Fun Facts and Follow-up Suggestions
+Suggest learning about fun facts or new questions based on the user's last question.

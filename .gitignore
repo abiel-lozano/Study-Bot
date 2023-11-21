@@ -10,10 +10,11 @@ sources.txt
 # Misc
 image_recognition.py
 src/credentials.py
-src/__pycache__
 Tools/credentials.py
+*/__pycache__
 
 # Compilation output
+Bin
 *.exe
 *.pyc
 studyBotCLI.spec

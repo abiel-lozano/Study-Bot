@@ -1,7 +1,6 @@
-# Prompt tester: Use this to check if your prompt will give
-# appropriate results for a new topic, testing different 
-# custom instructions, different AI models, and temperature 
-# settings.
+# Prompt tester: Test if the model gives appropriate answers 
+# given the source material, different custom instructions, 
+# models, and temperature settings.
 
 import openai
 import credentials
