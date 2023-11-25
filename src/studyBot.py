@@ -34,11 +34,6 @@ GPT_MODEL = 'gpt-3.5-turbo-16k'
 openai.api_key = credentials.openAIKey
 set_api_key(credentials.elevenLabsKey)
 
-# Information sources
-humanBodySource = sourceMaterial.humanBody
-
-biochemSource = sourceMaterial.krebsCycle
-
 # Behavioral guidelines for conversation
 instructions = """
 Try to use the information below to help the user study by answering 
@@ -302,14 +297,14 @@ def markerID():
 
 	return obj
 
-def lookForObjects(topic: str):
+def lookForObjects(topic: int):
 	global objects
 	objects = ''
 
-	if topic == '1':
+	if topic == 1:
 		# Call the function for color identification
 		objects = colorID()
-	elif topic == '2':
+	elif topic == 2:
 		# Call the function for marker identification
 		objects = markerID()
 
@@ -347,16 +342,16 @@ if __name__ == '__main__':
 	print('Select a topic NUMBER from the list:\n')
 	print('[1] - Human Body')
 	print('[2] - Krebs Cycle\n')
-	topic = input('Topic: ')
+	topic = int(input('Topic: '))
 	source = ''
 
 	# Load the source material based on the selected topic
-	if topic == '1':
+	if topic == 1:
 		print('Topic: Human Body\n')
-		source = humanBodySource
-	elif topic == '2':
+		source = sourceMaterial.humanBody
+	elif topic == 2:
 		print('Topic: Krebs Cycle\n')
-		source = biochemSource
+		source = sourceMaterial.krebsCycle
 
 	# ---------------- Start Threads ----------------
 	

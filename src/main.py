@@ -14,7 +14,7 @@ global audioHistory
 answer = ''
 studyBot.question = ''
 studyBot.objects = ''
-studyBot.topic = ''
+studyBot.topic = 0
 source = ''
 firstQuestion = True
 
@@ -75,16 +75,18 @@ def checkSelection():
 	infoDisplay.set(f'Selected topic: {topic}')
 	
 	if topic == 'Human Body':
-		studyBot.topic = '1'
-		source = studyBot.humanBodySource
+		studyBot.topic = 1
+		source = studyBot.sourceMaterial.humanBody
 		playAudioWithID(audioSelect['confirmHumanBody'])
+
 	elif topic == 'Biochem':
-		studyBot.topic = '2'
-		source = studyBot.biochemSource
+		studyBot.topic = 1
+		source = studyBot.sourceMaterial.krebsCycle
 		playAudioWithID(audioSelect['confirmBiochem'])
+	
 	# Add new topics here
 
-	# Reset message history, firstQuestion, and query
+	# Resets message history, firstQuestion, and query if the topic is changed
 	messageHistory = []
 	firstQuestion = True
 	query = ''
@@ -324,7 +326,7 @@ window.bind('4', lambda e: close())
 window.bind('<Escape>', lambda e: close())
 
 # NOTE: System sounds are not always immediately enabled, which causes 
-# the first beep to be inaudible. This beep is used to 'wake up' the 
+# the first sounds to be inaudible. This beep is used to 'wake up' the 
 # system sounds.
 winsound.Beep(37, 1000) # Unaudible frequency in most speakers and by most people
 
