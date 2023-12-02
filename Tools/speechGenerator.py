@@ -1,5 +1,5 @@
 # This script is used to generate audio for accesibility features, 
-# to access history generated audio and playing specific files.
+# to access history generated audio, and playing specific files.
 
 from elevenlabs import set_api_key, generate, History, play
 import credentials
@@ -7,7 +7,8 @@ import credentials
 set_api_key(credentials.elevenLabsKey)
 
 # 1 - Generate audio from text
-text = 'BIOCHEMISTRY SELECTED. BEFORE PRESSING THE ASK BUTTON, BE READY TO PRESENT THE OBJECTS TO THE CAMERA AND TO ASK YOUR QUESTION RIGHT AFTER PRESSING THE BUTTON. BEFORE ASKING YOUR NEXT QUESTION, PLEASE WAIT FOR THE PREVIOUS RESPONSE TO BE READ OUT LOUD.'
+# NOTE: Consider that good orthography is needed for good results
+text = 'TEXT THAT WILL BE CONVERTED TO AUDIO HERE!'
 generate(text = text, model = 'eleven_multilingual_v1')
 
 # 2 - Check history to get history_item_id
@@ -29,7 +30,7 @@ def playAudioWithID(history, itemID):
 		print('Playing history item with ID:', item.history_item_id)
 		play(item.audio)
 	else:
-		print('History item not found')
+		print('Something went wrong, history item not found.')
 
 # 3 - Play specific history item by history_item_id to check your work
 select = history[0].history_item_id

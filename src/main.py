@@ -18,8 +18,7 @@ studyBot.topic = 0
 source = ''
 firstQuestion = True
 
-audioSelect = {
-	'topicSelected': 	'JazmI95H1YV0IxkutnpP',
+ENG = {
 	'questionRecorded': '7aNkMntxEq7M9IXZ6Vkv',
 	'welcome': 			'HNwmc11X0p23y77VLvOY',
 	'topicHumanBody': 	'ppXHdy46xuZtg3ysNoxu',
@@ -27,6 +26,18 @@ audioSelect = {
 	'confirmHumanBody': 'OCE5HysrlHaX1AoGDd1j',
 	'confirmBiochem': 	'CPjy6303qpWpSUEl07xz',
 }
+
+ESP = {
+	'questionRecorded': 'bYlleFyvske67zV4Wr2Z',
+	'welcome': 			'wij7p8zqa3uKAJMevWFT',
+	'topicHumanBody': 	'OIZ9eoFel81KKe7eMjEN',
+	'topicBiochem': 	'KLMTeyIhaa2hTeFahZAU',
+	'confirmHumanBody': 'A0AHMdfV5qFgohvvwIdp',
+	'confirmBiochem': 	'NybAwxFeEYpFKEKymRvu',
+}
+
+# Select audio language here
+audioSelect = ESP
 
 # NOTE: This is a patch for elevenlabs' play function, to avoid showing an
 # empty black window when playing audio in the compiled version. The lack of
@@ -70,7 +81,7 @@ def checkSelection():
 	global query
 
 	winsound.Beep(600, 800) # frequency, duration
-	# playAudioWithID(audioSelect['topicSelected'])
+	
 	topic = topicVar.get()
 	infoDisplay.set(f'Selected topic: {topic}')
 	
