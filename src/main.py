@@ -10,6 +10,7 @@ global query
 global firstQuestion
 global source
 global audioHistory
+global audioInstructions
 
 answer = ''
 studyBot.question = ''
@@ -37,7 +38,7 @@ ESP = {
 }
 
 # Select audio language here
-audioSelect = ESP
+audioSelect = ENG
 
 # NOTE: This is a patch for elevenlabs' play function, to avoid showing an
 # empty black window when playing audio in the compiled version. The lack of
@@ -64,14 +65,28 @@ def playPatch(audio: bytes, notebook: bool = False) -> None:
 		out, err = proc.communicate(input=audio)
 		proc.poll()
 
+def toggleAudioInstructions(*args):
+	global audioInstructions
+
+	if audioInstructions.get():
+		print('Audio instructions enabled')
+	else:
+		print('Audio instructions disabled')
+
+def toggleCheckbox(event = None):
+	global audioInstructions
+	audioInstructions.set(not audioInstructions.get())
+
 # Play specific history item ID
 def playAudioWithID(itemID):
 	global audioHistory
+	global audioInstructions
 
-	for item in audioHistory:
-		if item.history_item_id == itemID:
-			threadAudio = studyBot.threading.Thread(target = playPatch, args = (item.audio,))
-			threadAudio.start()
+	if audioInstructions.get():
+		for item in audioHistory:
+			if item.history_item_id == itemID:
+				threadAudio = studyBot.threading.Thread(target = playPatch, args = (item.audio,))
+				threadAudio.start()
 
 # Select source material to be sent to GPT and select object ID function
 def checkSelection():
@@ -119,7 +134,7 @@ def backgroundInit():
 	window.unbind('1')
 	window.unbind('2')
 	window.unbind('3')
-	window.unbind('4')
+	window.unbind('5')
 	window.unbind('<Escape>')
 
 def startQuestionThreads():
@@ -137,7 +152,7 @@ def startQuestionThreads():
 	threadObjID.join()
 	threadQuestionRec.join()
 
-	playAudioWithID(audioSelect['questionRecorded'])
+	# playAudioWithID(audioSelect['questionRecorded'])
 
 	# Display recorded question and identified object
 	infoDisplay.set(f'Question taken: {studyBot.question} \nObject identified: {studyBot.objects}')
@@ -191,7 +206,7 @@ Question: {studyBot.question}
 	window.bind('1', lambda e: selectNextOption())
 	window.bind('2', lambda e: checkSelection())
 	window.bind('3', lambda e: backgroundInit())
-	window.bind('4', lambda e: close())
+	window.bind('5', lambda e: close())
 	window.bind('<Escape>', lambda e: close())
 
 
@@ -219,10 +234,14 @@ def close():
 	winsound.Beep(500, 200)
 	sys.exit()
 
+def stopRecording():
+	studyBot.stopRecording()
+	playAudioWithID(audioSelect['questionRecorded'])
+
 # Create main window
 window = tkinter.Tk()
 window.title('Study-Bot')
-window.geometry('450x500')
+window.geometry('450x350')
 
 # Set background color
 window.configure(bg = '#3C3836')
@@ -237,15 +256,24 @@ titleLabel = tkinter.Label(
 )
 titleLabel.pack(pady = 15)
 
-# Create topic dropdown
-topicLabel = tkinter.Label(
-	window, 
-	text = 'Select Topic:', 
-	bg = '#3C3836', 
-	fg = '#FBF1C7', 
-	font = ('Leelawadee', 12)
+# Audio instructions checkbox
+audioInstructions = tkinter.BooleanVar()
+audioInstructions.set(True)
+audioInstructions.trace('w', lambda *args: toggleAudioInstructions())
+
+audioCheckBox = tkinter.Checkbutton(
+    window, 
+    text = 'Audio feedback and instructions',
+    font = ('Leelawadee', 12),
+    bg = '#3C3836',
+    fg = '#FBF1C7',
+    selectcolor = '#3C3836',
+    activebackground = '#3C3836',
+    activeforeground = '#FBF1C7',
+    variable = audioInstructions
 )
-topicLabel.pack(pady = 15)
+
+audioCheckBox.pack(pady = 7)
 
 # Create topic frame
 topicFrame = tkinter.Frame(window, bg = '#3C3836')
@@ -282,13 +310,27 @@ buttonsFrame.pack(pady = 15)
 # Create 'Ask another question' button
 askButton = tkinter.Button(
 	buttonsFrame, 
-	text = 'Ask a question', 
+	text = 'Ask Question', 
 	command = backgroundInit, 
 	bg = '#8EC07C', 
 	font = ('Leelawadee', 12)
 )
 askButton.pack(
 	side = 'left', 
+	padx = 10
+)
+
+# Create stop recording button
+stopButton = tkinter.Button(
+	buttonsFrame,
+	text = 'Stop Recording',
+	command = stopRecording,
+	bg = '#FE8019',
+	font = ('Leelawadee', 12)
+)
+
+stopButton.pack(
+	side = 'left',
 	padx = 10
 )
 
@@ -333,8 +375,10 @@ for i in range(numOptions):
 window.bind('1', lambda e: selectNextOption())
 window.bind('2', lambda e: checkSelection())
 window.bind('3', lambda e: backgroundInit())
-window.bind('4', lambda e: close())
+window.bind('4', lambda e: stopRecording())
+window.bind('5', lambda e: close())
 window.bind('<Escape>', lambda e: close())
+window.bind('<space>', lambda e: toggleCheckbox())
 
 # NOTE: System sounds are not always immediately enabled, which causes 
 # the first sounds to be inaudible. This beep is used to 'wake up' the 

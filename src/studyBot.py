@@ -24,9 +24,11 @@ global objects
 global question
 global answer
 global topic
+global stop
 objects = ''
 question = ''
 answer = ''
+stop = False
 
 GPT_MODEL = 'gpt-3.5-turbo-16k'
 
@@ -61,13 +63,15 @@ WAVE_OUTPUT_FILENAME = "question.wav"
 def recordQuestion():
 	# ---------------- Audio Recording ----------------
 	global question
+	global stop
+	stop = False
 	audio = pyaudio.PyAudio() # Initialize PyAudio
 	# Open audio stream for recording
 	stream = audio.open(format = FORMAT, channels = CHANNELS, rate = RATE, input = True, frames_per_buffer = CHUNK)
 	frames = []
 
 	# Record audio stream in chunks
-	for i in range(0, int(RATE / CHUNK * RECORD_SECONDS)):
+	while not stop:
 		data = stream.read(CHUNK)
 		frames.append(data)
 
@@ -94,11 +98,15 @@ def recordQuestion():
 	# Delete audio file
 	Path('question.wav').unlink()
 
+def stopRecording():
+	global stop
+	stop = True
+
 def colorID():
 	obj = 'User is not holding any objects'
 
 	# Capture video
-	cam = cv2.VideoCapture(0) # Use 0 for default camera
+	cam = cv2.VideoCapture(0, cv2.CAP_DSHOW) # Use 0 for default camera
 
 	# Start timer
 	startTime = time.time()
@@ -236,7 +244,7 @@ def colorID():
 			break
 
 	# Release webcam and close all windows
-	# cam.release()
+	cam.release()
 	cv2.destroyAllWindows()
 
 	return obj
@@ -248,7 +256,7 @@ def markerID():
 
 	compoundDict = { 0: 'Citrate', 1: 'Isocitrate', 2: 'Alpha-Ketoglutarate', 3: 'Succinyl CoA', 4: 'Succinate', 5: 'Fumarate', 6: 'Malate', 7: 'Oxaloacetate' }
 
-	cap = cv2.VideoCapture(0)
+	cap = cv2.VideoCapture(0, cv2.CAP_DSHOW) # Use 0 for default camera
 
 	# Start timer
 	startTime = time.time()
@@ -338,6 +346,7 @@ def convertTTS(text: str):
 
 # Only run if not imported as a module
 if __name__ == '__main__':
+	keyboard.add_hotkey('s', stopRecording)
 
 	print('Select a topic NUMBER from the list:\n')
 	print('[1] - Human Body')
