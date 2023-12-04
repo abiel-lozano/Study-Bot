@@ -14,7 +14,7 @@ generate(text = text, model = 'eleven_multilingual_v1')
 # 2 - Check history to get history_item_id
 history = History.from_api()
 # print('First history item:', history[0].history_item_id)
-# print(history) # Messy output, uncomment only when needed
+# print(history) # Messy raw output, uncomment only when needed
 
 # Find history item by history_item_id
 def findAudioWithID(history, itemID):

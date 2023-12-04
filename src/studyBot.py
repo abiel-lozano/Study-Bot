@@ -57,8 +57,7 @@ CHUNK = 1024 # Chunk size
 FORMAT = pyaudio.paInt16 # Audio codec format
 CHANNELS = 2
 RATE = 44100 # Sample rate
-RECORD_SECONDS = 5 # Recording duration
-WAVE_OUTPUT_FILENAME = "question.wav"
+OUTPUT_FILE = 'question.wav'
 
 def recordQuestion():
 	# ---------------- Audio Recording ----------------
@@ -81,7 +80,7 @@ def recordQuestion():
 	audio.terminate()
 
 	# Save recording as WAV
-	wf = wave.open(WAVE_OUTPUT_FILENAME, 'wb')
+	wf = wave.open(OUTPUT_FILE, 'wb')
 	wf.setnchannels(CHANNELS)
 	wf.setsampwidth(audio.get_sample_size(FORMAT))
 	wf.setframerate(RATE)
@@ -90,13 +89,11 @@ def recordQuestion():
 
 	# ---------------- STT Conversion -----------------
 	model = whisper.load_model('base')
-	result = model.transcribe('question.wav', fp16 = False)
+	result = model.transcribe(OUTPUT_FILE, fp16 = False)
 	question = result['text']
-
-	# print('Question: ' + question + '\n')
 	
 	# Delete audio file
-	Path('question.wav').unlink()
+	Path(OUTPUT_FILE).unlink()
 
 def stopRecording():
 	global stop

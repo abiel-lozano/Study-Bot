@@ -65,17 +65,14 @@ def playPatch(audio: bytes, notebook: bool = False) -> None:
 		out, err = proc.communicate(input=audio)
 		proc.poll()
 
-def toggleAudioInstructions(*args):
-	global audioInstructions
-
-	if audioInstructions.get():
-		print('Audio instructions enabled')
-	else:
-		print('Audio instructions disabled')
-
-def toggleCheckbox(event = None):
+def toggleAudioDesc(event = None):
 	global audioInstructions
 	audioInstructions.set(not audioInstructions.get())
+
+	if audioInstructions.get():
+		winsound.Beep(700, 300)
+	else:
+		winsound.Beep(500, 300)
 
 # Play specific history item ID
 def playAudioWithID(itemID):
@@ -98,19 +95,23 @@ def checkSelection():
 	winsound.Beep(600, 800) # frequency, duration
 	
 	topic = topicVar.get()
-	infoDisplay.set(f'Selected topic: {topic}')
+	# Remove the first 4 characters of topic string
+	infoDisplay.set(f'Selected topic: {topic[4:]}')
 	
-	if topic == 'Human Body':
+	if topic == '<1> Human Body':
 		studyBot.topic = 1
 		source = studyBot.sourceMaterial.humanBody
 		playAudioWithID(audioSelect['confirmHumanBody'])
 
-	elif topic == 'Biochem':
+	elif topic == '<1> Biochem':
 		studyBot.topic = 1
 		source = studyBot.sourceMaterial.krebsCycle
 		playAudioWithID(audioSelect['confirmBiochem'])
-	
 	# Add new topics here
+
+	if window.bind('3') == '':
+		window.bind('3', lambda e: backgroundInit())
+		askButton.config(state = 'normal')
 
 	# Resets message history, firstQuestion, and query if the topic is changed
 	messageHistory = []
@@ -127,6 +128,7 @@ def backgroundInit():
 	# Disable all buttons while question is being processed
 	topicDropdown.config(state = 'disabled')
 	selectButton.config(state = 'disabled')
+	stopButton.config(state = 'normal')
 	askButton.config(state = 'disabled')
 	exitButton.config(state = 'disabled')
 
@@ -134,7 +136,7 @@ def backgroundInit():
 	window.unbind('1')
 	window.unbind('2')
 	window.unbind('3')
-	window.unbind('5')
+	window.bind('4', lambda e: stopRecording())
 	window.unbind('<Escape>')
 
 def startQuestionThreads():
@@ -147,15 +149,13 @@ def startQuestionThreads():
 	threadQuestionRec = studyBot.threading.Thread(target = studyBot.recordQuestion)
 	threadObjID.start()
 	threadQuestionRec.start()
-	winsound.Beep(700, 800)
+	winsound.Beep(700, 600)
 	infoDisplay.set(f'Listening for question and looking for objects...')
 	threadObjID.join()
 	threadQuestionRec.join()
 
-	# playAudioWithID(audioSelect['questionRecorded'])
-
 	# Display recorded question and identified object
-	infoDisplay.set(f'Question taken: {studyBot.question} \nObject identified: {studyBot.objects}')
+	infoDisplay.set(f'Question taken: {studyBot.question} \nObject identified: {studyBot.objects} \nMessaging GPT, please wait...')
 
 	# Prepare messageHistory if this is the first question or not
 	if firstQuestion:
@@ -182,7 +182,6 @@ Question: {studyBot.question}
 		messageHistory.append({'role': 'user', 'content': query})
 
 	# Message GPT
-	infoDisplay.set(f'Messaging GPT, please wait...')
 	threadSendMessage = studyBot.threading.Thread(target = studyBot.sendMessage, args = (messageHistory,))
 	threadSendMessage.start()
 	threadSendMessage.join()
@@ -196,7 +195,7 @@ Question: {studyBot.question}
 	threadConvertTTS.start()
 	threadConvertTTS.join()
 
-	# Reenable all buttons
+	# Reenable buttons
 	topicDropdown.config(state = 'normal')
 	selectButton.config(state = 'normal')
 	askButton.config(state = 'normal')
@@ -206,8 +205,10 @@ Question: {studyBot.question}
 	window.bind('1', lambda e: selectNextOption())
 	window.bind('2', lambda e: checkSelection())
 	window.bind('3', lambda e: backgroundInit())
-	window.bind('5', lambda e: close())
 	window.bind('<Escape>', lambda e: close())
+
+	# Unbind stop recording key
+	window.unbind('4')
 
 
 # Select next option in dropdown menu
@@ -219,9 +220,9 @@ def selectNextOption():
 	topicVar.set(nextOption)
 
 	# Play audio for selected option
-	if nextOption == 'Human Body':
+	if nextOption == '<1> Human Body':
 		playAudioWithID(audioSelect['topicHumanBody'])
-	elif nextOption == 'Biochem':
+	elif nextOption == '<1> Biochem':
 		playAudioWithID(audioSelect['topicBiochem'])
 	# Add new topics here
 
@@ -236,7 +237,10 @@ def close():
 
 def stopRecording():
 	studyBot.stopRecording()
+	winsound.Beep(700, 300)
 	playAudioWithID(audioSelect['questionRecorded'])
+	stopButton.config(state = 'disabled')
+	window.unbind('4')
 
 # Create main window
 window = tkinter.Tk()
@@ -259,11 +263,10 @@ titleLabel.pack(pady = 15)
 # Audio instructions checkbox
 audioInstructions = tkinter.BooleanVar()
 audioInstructions.set(True)
-audioInstructions.trace('w', lambda *args: toggleAudioInstructions())
 
 audioCheckBox = tkinter.Checkbutton(
     window, 
-    text = 'Audio feedback and instructions',
+    text = '<Spacebar> Audio feedback and instructions',
     font = ('Leelawadee', 12),
     bg = '#3C3836',
     fg = '#FBF1C7',
@@ -280,8 +283,13 @@ topicFrame = tkinter.Frame(window, bg = '#3C3836')
 topicFrame.pack(pady = 15)
 
 topicVar = tkinter.StringVar(window)
-topicVar.set('Human Body') # default value
-topicDropdown = tkinter.OptionMenu(topicFrame, topicVar, 'Human Body', 'Biochem')
+topicVar.set('<1> Human Body') # default value
+topicDropdown = tkinter.OptionMenu(
+	topicFrame, 
+	topicVar,
+	'<1> Human Body',
+	'<1> Biochem'
+)
 topicDropdown.config(width = 15)
 topicDropdown.pack(
 	side = 'left', 
@@ -290,7 +298,7 @@ topicDropdown.pack(
 
 selectButton = tkinter.Button(
 	topicFrame, 
-	text = 'Select', 
+	text = '<2> Select Topic', 
 	command = checkSelection, 
 	bg = '#FABD2F', 
 	font = ('Leelawadee', 12)
@@ -310,7 +318,7 @@ buttonsFrame.pack(pady = 15)
 # Create 'Ask another question' button
 askButton = tkinter.Button(
 	buttonsFrame, 
-	text = 'Ask Question', 
+	text = '<3> Ask Question', 
 	command = backgroundInit, 
 	bg = '#8EC07C', 
 	font = ('Leelawadee', 12)
@@ -323,7 +331,7 @@ askButton.pack(
 # Create stop recording button
 stopButton = tkinter.Button(
 	buttonsFrame,
-	text = 'Stop Recording',
+	text = '<4> Stop Recording',
 	command = stopRecording,
 	bg = '#FE8019',
 	font = ('Leelawadee', 12)
@@ -337,7 +345,7 @@ stopButton.pack(
 # Create 'Exit' button
 exitButton = tkinter.Button(
 	buttonsFrame, 
-	text = 'Exit', 
+	text = '<esc> Exit', 
 	command = close, 
 	bg = '#FB4934', 
 	font = ('Leelawadee', 12)
@@ -374,16 +382,18 @@ for i in range(numOptions):
 # Keyboard bindings for all functions with keys 1, 2, 3, 4 and Esc
 window.bind('1', lambda e: selectNextOption())
 window.bind('2', lambda e: checkSelection())
-window.bind('3', lambda e: backgroundInit())
-window.bind('4', lambda e: stopRecording())
-window.bind('5', lambda e: close())
 window.bind('<Escape>', lambda e: close())
-window.bind('<space>', lambda e: toggleCheckbox())
+window.bind('<space>', lambda e: toggleAudioDesc())
+
+# Stop and ask buttons disabled by default
+stopButton.config(state = 'disabled')
+askButton.config(state = 'disabled')
+
 
 # NOTE: System sounds are not always immediately enabled, which causes 
 # the first sounds to be inaudible. This beep is used to 'wake up' the 
 # system sounds.
-winsound.Beep(37, 1000) # Unaudible frequency in most speakers and by most people
+winsound.Beep(37, 500) # Unaudible frequency in most speakers and by most people
 
 # Boot-up signal
 window.after(0, winsound.Beep, 500, 200)
