@@ -10,10 +10,10 @@ class TestApp(App):
         layout = GridLayout(cols = 1, spacing = 10, padding = 10)
 
         # Title Label
-        title_label = Label(text = 'Study-Bot', font_size = 24)
-        layout.add_widget(title_label)
+        titleLabel = Label(text = 'Study-Bot', font_size = 24)
+        layout.add_widget(titleLabel)
 
-        # Dropdown with three options
+        # Dropdown Menu
         dropdown = DropDown()
         options = ['Human Body', 'Krebs Cycle']
         for option in options:
@@ -24,16 +24,16 @@ class TestApp(App):
             btn.bind(on_release = lambda btn_option: dropdown.select(btn_option.text))
             dropdown.add_widget(btn)
 
-        dropdown_button = Button(
+        dropdownButton = Button(
             text = 'Select an option', size_hint_y = None, height = 30, 
             size_hint_x = None, width = 150
         )
-        dropdown_button.bind(on_release = dropdown.open)
-        dropdown.bind(on_select = lambda instance, x: setattr(dropdown_button, 'text', x))
+        dropdownButton.bind(on_release = dropdown.open)
+        dropdown.bind(on_select = lambda instance, x: setattr(dropdownButton, 'text', x))
 
 
         # Three Buttons with left margin and reduced vertical spacing
-        button_layout = BoxLayout(padding = (20, 0), spacing = 50)  # Add left margin and reduce vertical spacing
+        buttonLayout = BoxLayout(padding = (20, 0), spacing = 50)  # Add left margin and reduce vertical spacing
         button1 = Button(
             text = 'Select', size_hint_y = None, height = 30,
             background_color = (0.885, 1, 0.689, 1), size_hint_x = None, width = 150
@@ -47,18 +47,18 @@ class TestApp(App):
             background_color = (0.572, 0.188, 0.188, 1), size_hint_x = None, width = 150
         )
         
-        button_layout.add_widget(dropdown_button)
-        button_layout.add_widget(button1)
-        button_layout.add_widget(button2)
-        button_layout.add_widget(button3)
+        buttonLayout.add_widget(dropdownButton)
+        buttonLayout.add_widget(button1)
+        buttonLayout.add_widget(button2)
+        buttonLayout.add_widget(button3)
 
-        layout.add_widget(button_layout)
+        layout.add_widget(buttonLayout)
 
         text = """Welcome to Study-Bot! Please select a topic before asking a question."""
 
         # Variable Text Display Element
-        variable_text = Label(text = text)
-        layout.add_widget(variable_text)
+        variableText = Label(text = text)
+        layout.add_widget(variableText)
 
         return layout
 

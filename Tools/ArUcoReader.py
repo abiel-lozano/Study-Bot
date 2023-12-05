@@ -1,3 +1,6 @@
+# Script to test ArUco markers asociated with educational objects
+# 
+
 import cv2
 import time
 
@@ -22,8 +25,10 @@ def detectMarkers(aruco_dict):
         7: 'Oxaloacetate'
     }
 
+    # Try and detect markers for 5 seconds
     while elapsedTime < 5:
         ret, frame = cap.read()
+
         if not ret:
             print('Failed to capture frame.')
             break
@@ -35,20 +40,25 @@ def detectMarkers(aruco_dict):
         corners, ids, _ = cv2.aruco.detectMarkers(gray, aruco_dict)
 
         if ids is not None:
+            # For each marker found in current frame, print ID
             for i in range(len(ids)):
-
                 print('Detected marker with ID:', ids[i][0])
+
                 try:
-                    compound_name = compoundDict[ids[i][0]]
-                    print('Object:', compound_name)
+                    # Try to get the name of the object associated with the marker
+                    compoundName = compoundDict[ids[i][0]]
+                    print('Object:', compoundName)
                     
+                    # Append compound to list while avoiding repeats
                     if obj == 'User is not holding any objects':
-                        obj = compound_name
-                    elif compound_name not in obj:
-                        obj += ', ' + compound_name
+                        obj = compoundName
+                    elif compoundName not in obj:
+                        obj += ', ' + compoundName
+                # If marker ID is not registered, print error message
                 except KeyError:
                     print('Exception: Marker ID' + str(ids[i][0]) + ' not registered.')
 
+        # Display the frame
         cv2.imshow('Frame', frame)
 
         elapsedTime = time.time() - start

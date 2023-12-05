@@ -60,9 +60,9 @@ RATE = 44100 # Sample rate
 OUTPUT_FILE = 'question.wav'
 
 def recordQuestion():
-	# ---------------- Audio Recording ----------------
 	global question
 	global stop
+
 	stop = False
 	audio = pyaudio.PyAudio() # Initialize PyAudio
 	# Open audio stream for recording
@@ -87,7 +87,7 @@ def recordQuestion():
 	wf.writeframes(b''.join(frames))
 	wf.close()
 
-	# ---------------- STT Conversion -----------------
+	# STT Conversion
 	model = whisper.load_model('base')
 	result = model.transcribe(OUTPUT_FILE, fp16 = False)
 	question = result['text']
@@ -173,7 +173,7 @@ def colorID():
 		# For each countour, check if the area is greater than the threshold
 		for pic, contour in enumerate(contours):
 			area = cv2.contourArea(contour)
-			if area > 500:
+			if area > 700:
 				# Append the name of the model to the list of objects
 				if 'colon' not in obj:
 					if obj == 'User is not holding any objects':
@@ -204,7 +204,7 @@ def colorID():
 		contours, hierarchy = cv2.findContours(brainMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 		for pic, contour in enumerate(contours):
 			area = cv2.contourArea(contour)
-			if area > 500:
+			if area > 2500:
 				if 'brain' not in obj:
 					if obj == 'User is not holding any objects':
 						obj = 'brain'
@@ -214,7 +214,7 @@ def colorID():
 		contours, hierarchy = cv2.findContours(heartMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 		for pic, contour in enumerate(contours):
 			area = cv2.contourArea(contour)
-			if area > 500:
+			if area > 650:
 				if 'heart' not in obj:
 					if obj == 'User is not holding any objects':
 						obj = 'heart'
@@ -224,15 +224,12 @@ def colorID():
 		contours, hierarchy = cv2.findContours(kidneyMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 		for pic, contour in enumerate(contours):
 			area = cv2.contourArea(contour)
-			if area > 500:
+			if area > 50:
 				if 'kidney' not in obj:
 					if obj == 'User is not holding any objects':
 						obj = 'kidney'
 					else:
 						obj = obj + ', kidney'
-
-		# Display the camera feed
-		# cv2.imshow('Study-Bot View', imageFrame)
 
 		elapsedTime = time.time() - startTime
 
@@ -262,6 +259,7 @@ def markerID():
 
 	while elapsedTime < 5:
 		ret, frame = cap.read()
+
 		if not ret:
 			print('Failed to capture frame.')
 			break
@@ -273,21 +271,20 @@ def markerID():
 		corners, ids, _ = cv2.aruco.detectMarkers(gray, arucoDict)
 
 		if ids is not None:
+			# For each marker found in current frame
 			for i in range(len(ids)):
-
-				# print('Detected marker with ID:', ids[i][0])
 				try:
-					compound_name = compoundDict[ids[i][0]]
-					# print('Object:', compound_name)
-					
+					# Try to get the name of the compound from the dictionary
+					compoundName = compoundDict[ids[i][0]]
+					# Append compound to list while avoiding repeats
 					if obj == 'User is not holding any objects':
-						obj = compound_name
-					elif compound_name not in obj:
-						obj += ', ' + compound_name
+						obj = compoundName
+					elif compoundName not in obj:
+						obj += ', ' + compoundName
 				except KeyError:
 					continue
-					# print('Exception: Marker ID' + str(ids[i][0]) + ' not registered.')
 
+		# Display the frame
 		cv2.imshow('Study-Bot View', frame)
 
 		elapsedTime = time.time() - startTime
@@ -327,7 +324,7 @@ def sendMessage(messageList: any):
 	messageList.append({'role': 'assistant', 'content': _answer})
 
 def streamAnswer(audioStream: Iterator[bytes]) -> bytes:
-	audioOutput = b""
+	audioOutput = b''
 	
 	for chunk in audioStream:
 		if chunk is not None:
@@ -337,9 +334,9 @@ def streamAnswer(audioStream: Iterator[bytes]) -> bytes:
 	pydubPlay(audioSegment)
 
 def convertTTS(text: str):
-	# audioOutput = generate(text = text, model = 'eleven_multilingual_v1', stream = True)
-	# streamAnswer(audioOutput)
-	print('Audio playback disabled.\n')
+	audioOutput = generate(text = text, model = 'eleven_multilingual_v1', stream = True)
+	streamAnswer(audioOutput)
+	# print('Audio playback disabled.\n')
 
 # Only run if not imported as a module
 if __name__ == '__main__':
@@ -359,8 +356,7 @@ if __name__ == '__main__':
 		print('Topic: Krebs Cycle\n')
 		source = sourceMaterial.krebsCycle
 
-	# ---------------- Start Threads ----------------
-	
+	# Start question processing threads
 	objID = threading.Thread(target = lookForObjects, args = (topic,))
 	audioRec = threading.Thread(target = recordQuestion)
 
@@ -401,17 +397,14 @@ if __name__ == '__main__':
 	print(answer + '\n')
 	
 	if answer != '':
-		# print('Answer: ' + answer + '\n\n')
-		print('Recieved reply from GPT. \n')
+		print('Answer: ' + answer + '\n\n')
 
 	# Convert answer to audio
 	print('Converting answer to audio...\n')
 	convertTTS(answer)
 
-	# -------------- Conversation Handling --------------
-
+	# Conversation loop, handles any follow-up questions
 	while True:
-		# Wait for the user to press space to ask another question
 		print('Press space to ask another question, or press q to quit.\n')
 
 		while True:
@@ -443,12 +436,6 @@ if __name__ == '__main__':
 		print('Question recorded.\n')
 		print('Question: ' + question + '\n')
 
-		# Build prompt with chat history
-		# Add last response from GPT to message history
-		messageHistory.append({'role': 'assistant', 'content': answer})
-		answer = ''
-
-		# Build new prompt and add to chat history
 
 		# NOTE: Add this to the query if the model's response has any deviations from previous instructions
 		"""
@@ -461,16 +448,15 @@ if __name__ == '__main__':
 		to make it sound more natural.
 		"""
 
+		# Build new prompt and add to chat history
 		query = f"""Objects held by user: {objects}.
 Question: {question}
 """
-
 		messageHistory.append({'role': 'user', 'content': query})
+		answer = ''
 
 		# Send prompt to GPT
-	
-		print('Prompt: ' + query + '\n')
-
+		# print('Prompt: ' + query + '\n') # For debugging only
 		print('Sending prompt to GPT...\n')
 
 		sendMessage(messageHistory)
@@ -478,8 +464,6 @@ Question: {question}
 
 		if answer != '':
 			print('Answer: ' + answer + '\n\n')
-			# print('Recieved reply from GPT. \n')
 
-		# Convert answer to audio
 		print('Converting answer to audio...\n')
 		convertTTS(answer)

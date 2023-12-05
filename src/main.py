@@ -67,6 +67,7 @@ def playPatch(audio: bytes, notebook: bool = False) -> None:
 
 def toggleAudioDesc(event = None):
 	global audioInstructions
+	# Invert boolean value
 	audioInstructions.set(not audioInstructions.get())
 
 	if audioInstructions.get():
@@ -79,7 +80,9 @@ def playAudioWithID(itemID):
 	global audioHistory
 	global audioInstructions
 
+	# Check if user disabled audio instructions
 	if audioInstructions.get():
+		# Find item with matching ID
 		for item in audioHistory:
 			if item.history_item_id == itemID:
 				threadAudio = studyBot.threading.Thread(target = playPatch, args = (item.audio,))
@@ -95,20 +98,23 @@ def checkSelection():
 	winsound.Beep(600, 800) # frequency, duration
 	
 	topic = topicVar.get()
-	# Remove the first 4 characters of topic string
+	# Remove the first 4 characters of topic string for cleaner display
 	infoDisplay.set(f'Selected topic: {topic[4:]}')
 	
+	# Set the topic for the studyBot module
+	# Set the source material for the message
+	# Play audio confirmation for selected topic
 	if topic == '<1> Human Body':
 		studyBot.topic = 1
 		source = studyBot.sourceMaterial.humanBody
 		playAudioWithID(audioSelect['confirmHumanBody'])
-
 	elif topic == '<1> Biochem':
-		studyBot.topic = 1
+		studyBot.topic = 2
 		source = studyBot.sourceMaterial.krebsCycle
 		playAudioWithID(audioSelect['confirmBiochem'])
 	# Add new topics here
 
+	# Check if the 'Ask Question' button isn't already bound
 	if window.bind('3') == '':
 		window.bind('3', lambda e: backgroundInit())
 		askButton.config(state = 'normal')
@@ -120,24 +126,28 @@ def checkSelection():
 	
 
 # NOTE: Not using this function, and calling startQuestionThreads directly from the button
-# causes the UI to freeze while the threads are running.
+# causes the UI to freeze while the threads are running. This allows the threads to run
+# in the background, while the UI is still responsive.
 def backgroundInit():
+	# Gets the show running by calling all the study-Bot functions
 	threadStart = studyBot.threading.Thread(target = startQuestionThreads)
 	threadStart.start()
 
-	# Disable all buttons while question is being processed
+	# Disable buttons while question is being processed
 	topicDropdown.config(state = 'disabled')
 	selectButton.config(state = 'disabled')
-	stopButton.config(state = 'normal')
 	askButton.config(state = 'disabled')
 	exitButton.config(state = 'disabled')
+	# Enable stop button
+	stopButton.config(state = 'normal')
 
 	# Unbind keys while question is being processed
 	window.unbind('1')
 	window.unbind('2')
 	window.unbind('3')
-	window.bind('4', lambda e: stopRecording())
 	window.unbind('<Escape>')
+	# Bind stop recording key
+	window.bind('4', lambda e: stopRecording())
 
 def startQuestionThreads():
 	global firstQuestion
@@ -157,7 +167,8 @@ def startQuestionThreads():
 	# Display recorded question and identified object
 	infoDisplay.set(f'Question taken: {studyBot.question} \nObject identified: {studyBot.objects} \nMessaging GPT, please wait...')
 
-	# Prepare messageHistory if this is the first question or not
+	# Assemble prompt for GPT
+	# Prepare messageHistory if this is the first question
 	if firstQuestion:
 		firstQuestion = False
 		query = f"""{studyBot.instructions}
@@ -175,6 +186,7 @@ def startQuestionThreads():
 			{'role': 'system', 'content': 'You answer questions in the same language as the question.'},
 			{'role': 'user', 'content': query},
 		]
+	# Otherwise, just add the question to the messageHistory
 	else:
 		query = f"""Objects held by user: {studyBot.objects}
 Question: {studyBot.question}
@@ -210,12 +222,10 @@ Question: {studyBot.question}
 	# Unbind stop recording key
 	window.unbind('4')
 
-
 # Select next option in dropdown menu
 def selectNextOption():
-	currentOption = topicVar.get()
-	currentIndex = options.index(currentOption)
-	nextIndex = (currentIndex + 1) % len(options)
+	currentIndex = options.index(topicVar.get()) # Get index of current option
+	nextIndex = (currentIndex + 1) % len(options) # Get index of next option by adding 1 and wrapping around
 	nextOption = options[nextIndex]
 	topicVar.set(nextOption)
 
@@ -236,9 +246,10 @@ def close():
 	sys.exit()
 
 def stopRecording():
-	studyBot.stopRecording()
-	winsound.Beep(700, 300)
-	playAudioWithID(audioSelect['questionRecorded'])
+	studyBot.stopRecording() # Access stopRecording() method from studyBot module
+	winsound.Beep(700, 300) # Stop signal
+	playAudioWithID(audioSelect['questionRecorded']) # Play audio confirmation
+	# Disable stop button and unbind stop key
 	stopButton.config(state = 'disabled')
 	window.unbind('4')
 
@@ -371,12 +382,11 @@ infoLabel.pack()
 # Access from_api() method from History class through studyBot module
 audioHistory = studyBot.History.from_api()
 
-menu = topicDropdown['menu']
-numOptions = menu.index('end') + 1
 options = []
 
-for i in range(numOptions):
-	optionLabel = menu.entrycget(i, 'label')
+# For each option in the dropdown menu, add it to the options list
+for i in range(topicDropdown['menu'].index('end') + 1): # Size of dropdown menu
+	optionLabel = topicDropdown['menu'].entrycget(i, 'label')
 	options.append(optionLabel)
 
 # Keyboard bindings for all functions with keys 1, 2, 3, 4 and Esc

@@ -1,4 +1,4 @@
-# Study-Bot: Color Detection for Human Body Models
+# Script for color-based object detection
 # Based on the tutorial by goodday451999, posted on GeeksforGeeks: https://www.geeksforgeeks.org/multiple-color-detection-in-real-time-using-python-opencv/
 # Use this to determine the color ranges for the objects to detect
 
@@ -84,8 +84,6 @@ while True:
             # Create a bounding rectangle with a title around the detected object
             x, y, w, h = cv2.boundingRect(contour)
             imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (0, 120, 255), 2)
-            # cv2.putText(imageFrame, "COLON", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 120, 255))
-            # print("Colon detected")
 
     contours, hierarchy = cv2.findContours(liverMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     for pic, contour in enumerate(contours):
@@ -93,8 +91,6 @@ while True:
         if area > 500:
             x, y, w, h = cv2.boundingRect(contour)
             imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (86, 194, 0), 2)
-            # cv2.putText(imageFrame, "LIVER", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (86, 194, 0))
-            # print("Liver detected")
 
     contours, hierarchy = cv2.findContours(stomachMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     for pic, contour in enumerate(contours):
@@ -102,8 +98,6 @@ while True:
         if area > 1400:
             x, y, w, h = cv2.boundingRect(contour)
             imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (237, 117, 47), 2)
-            # cv2.putText(imageFrame, "STOMACH", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (237, 117, 47))
-            # print("Stomach detected")
 
     contours, hierarchy = cv2.findContours(brainMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     for pic, contour in enumerate(contours):
@@ -111,8 +105,6 @@ while True:
         if area > 2500:
             x, y, w, h = cv2.boundingRect(contour)
             imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (204, 0, 255), 2)
-            # cv2.putText(imageFrame, "BRAIN", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 255))
-            # print("Brain detected")
 
     contours, hierarchy = cv2.findContours(kidneyMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     for pic, contour in enumerate(contours):
@@ -120,8 +112,6 @@ while True:
         if area > 50:
             x, y, w, h = cv2.boundingRect(contour)
             imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (0, 255, 255), 2)
-            # cv2.putText(imageFrame, "KIDNEY", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 255, 255))
-            # print("Kidney detected")
 
     contours, hierarchy = cv2.findContours(heartMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     for pic, contour in enumerate(contours):
@@ -129,8 +119,6 @@ while True:
         if area > 650:
             x, y, w, h = cv2.boundingRect(contour)
             imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (0, 0, 255), 2)
-            # cv2.putText(imageFrame, "HEART", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 0, 0))
-            # print("Heart detected")
 
     # Display camera feed
     cv2.imshow("Color-Based Object Detection", imageFrame)

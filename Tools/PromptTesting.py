@@ -38,7 +38,7 @@ response = openai.ChatCompletion.create(
 		{'role': 'user', 'content': query},
 	],
     model = GPT_MODEL,
-    temperature = 0, # High temperature will make the AI more 'creative', low temperature will make the AI more 'factual' and reliant on the given source
+    temperature = 0, # High temperature will make the response more 'creative', low temperature will make the AI more 'factual' and reliant on the given source
 )
 
 print('Answer:', response['choices'][0]['message']['content'])
