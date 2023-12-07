@@ -10,8 +10,8 @@ from typing import Iterator
 import pyaudio
 import wave
 from pathlib import Path
-# History, play, is_installed, and subprocess are used only by main script
-from elevenlabs import set_api_key, generate, History, play, is_installed, subprocess
+# History, is_installed, and subprocess are used only by main script, do not remove
+from elevenlabs import set_api_key, generate, History, is_installed, subprocess
 import cv2
 import numpy as np
 import time
@@ -246,8 +246,10 @@ def colorID():
 def markerID():
 	obj = 'User is not holding any objects'
 
+	# Choose the predefined dictionary to use
 	arucoDict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
 
+	# Define the names of the objects
 	compoundDict = { 0: 'Citrate', 1: 'Isocitrate', 2: 'Alpha-Ketoglutarate', 3: 'Succinyl CoA', 4: 'Succinate', 5: 'Fumarate', 6: 'Malate', 7: 'Oxaloacetate' }
 
 	cap = cv2.VideoCapture(0, cv2.CAP_DSHOW) # Use 0 for default camera
@@ -326,10 +328,12 @@ def sendMessage(messageList: any):
 def streamAnswer(audioStream: Iterator[bytes]) -> bytes:
 	audioOutput = b''
 	
+	# For each chunk of audio in stream, add it to the output
 	for chunk in audioStream:
 		if chunk is not None:
 			audioOutput += chunk
 
+	# Play audio output using PyDub
 	audioSegment = AudioSegment.from_file(io.BytesIO(audioOutput), format="mp3")
 	pydubPlay(audioSegment)
 
@@ -340,6 +344,7 @@ def convertTTS(text: str):
 
 # Only run if not imported as a module
 if __name__ == '__main__':
+	# Listen for keyboard input to stop recording
 	keyboard.add_hotkey('s', stopRecording)
 
 	print('Select a topic NUMBER from the list:\n')

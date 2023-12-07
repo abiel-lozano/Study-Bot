@@ -1,27 +1,19 @@
 # Study-Bot
 
-Study-Bot is an open-source project developed by Edumakers from Tecnológico de Monterrey. It is designed to help visually impaired students review their academic course material. It is an AI-powered study companion that incorporates various technologies, including [Whisper](https://openai.com/research/whisper), [GPT-3.5](https://platform.openai.com/docs/models/gpt-3-5), [Elevenlabs](https://beta.elevenlabs.io/), and [OpenCV](https://opencv.org/). For testing purposes, sample course material was generated using [ChatGPT](https://openai.com/blog/chatgpt).
-<!-- Note: The topic used for testing was recently changed from Embryology to Human Body -->
-This project is currently under development. So far, it can listen to the user's question, analyze the source material of the topic they want to study, detect the physical educational material that they are holding by color, generate an answer, and read it out loud to the user. Users can also interact with it through a CLI or a GUI version of the program.
+**Study-Bot** is an open-source project developed by **Edumakers** from **Tecnológico de Monterrey**. It is designed to help visually impaired students review their academic course material. It is an AI-powered study companion that incorporates various technologies, including [Whisper](https://openai.com/research/whisper), [GPT-3.5-turbo-16k](https://platform.openai.com/docs/models/gpt-3-5), [Elevenlabs](https://beta.elevenlabs.io/), and [OpenCV](https://opencv.org/). For testing purposes, sample course material was generated using [ChatGPT](https://openai.com/blog/chatgpt).
 
-The next steps are to create a more advanced user interface for the desktop application. The users will also be able to select the topic they want to study, instead of it being hard-coded into the program. We also seek to create a computer vision model that can detect the physical educational material without depending on color, as well as some performance improvements.
+**Study-Bot** can: listen to the user's question, analyze the source material of the topic they want to study, detect the physical educational material that they are holding by its color or ArUco marker, generate an answer, and read it out loud to the user as an accessible executable application.
+
+Some good next steps could be to embed this system into a more advanced user interface for distribution as a desktop application, create a computer vision model that can detect the physical educational material without depending on color or ArUco markers, as well as some performance improvements and new interactive features.
 
 ## Contributors
 
 - Aarón Francisco Urbina de la Cruz ( [@Prodygyt](https://github.com/Prodygyt) )
 - Abiel Adrián Lozano Herrejón ( [@abiel-lozano](https://github.com/abiel-lozano) )
 
-
-## Table of Contents
-
-- [Installation](#installation)
-- [Usage](#usage)
-- [Technologies Used](#technologies-used)
-- [License](#license)
-
 ## Installation
 
-It is recomended to use [Python 3.9.9](https://www.python.org/downloads/release/python-399/) so that the ```whisper``` library can be used without issues. To avoid having to remove your current Python installation, you may want to use a virtual enviroment to use this specific version of Python. To install the required dependencies, run the following command:
+It is recomended to use [Python 3.9.9](https://www.python.org/downloads/release/python-399/) so that the `whisper` library can be used without issues. To avoid having to remove your current **Python** installation, you may want to use a virtual enviroment to use this specific version of **Python**. To install the required dependencies, run the following command:
 
 ```bash
 pip install -r requirements.txt
@@ -29,20 +21,20 @@ pip install -r requirements.txt
 
 ## Usage
 
-Study-Bot can be used as CLI program or with the GUI. There are some additional steps that need to be taken before running any of these version, please refer to the documents in the ```docs``` folder for more information.
+**Study-Bot** can be used as a **CLI** program or with the **GUI**. There are some additional steps that need to be taken before running any of these versions, please refer to the `Documentation` folder for a comprehensive guide on how to use this project.
 
-## Technologies Used
+## What We Used
 
-Study-Bot relies on the following existing services and technologies:
+**Study-Bot** relies on the following existing services and technologies:
 
-- **[Whisper:](https://openai.com/research/whisper)** Used for speech-to-text conversion, allowing users to speak their questions to be fed into the GPT-3.5 model.
+- **[Whisper:](https://openai.com/research/whisper)** Used for speech-to-text conversion, allowing users to speak their questions to be fed into the GPT model.
 
-- **[GPT-3.5:](https://platform.openai.com/docs/models/gpt-3-5)** Employed for question processing and answer generation.
+- **[gpt-3.5-turbo-16k:](https://platform.openai.com/docs/models/gpt-3-5)** Used for question processing and answer generation. The 16k version of the model was chosen for its 16,385-token context window size, which is needed to process a large amount of source material.
 
-- **[Elevenlabs:](https://beta.elevenlabs.io/)** Used for text-to-speech conversion, allowing users to hear the answers generated by the GPT-3.5 model.
+- **[Elevenlabs:](https://beta.elevenlabs.io/)** Used for text-to-speech conversion, allowing users to hear the answers generated by the GPT model.
 
-- **[OpenCV:](https://opencv.org/)** Used for physical object identification, to aid the GPT-3.5 model in answering questions with the added context of what the user is holding.
+- **[OpenCV:](https://opencv.org/)** Used for physical object identification, to aid the GPT-3.5-16k model in answering questions with the added context of what the user is holding.
 
-## License
+## Contributing and Codebase Usage
 
-Coming soon...
+You may use this project as reference for your own projects, or fork it to make your own contributions, and other uses. GitHub issues regarding feature requests and bug reports are welcome and are specially valued if it includes feedback from visually impaired users.

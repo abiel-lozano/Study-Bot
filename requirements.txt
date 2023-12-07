@@ -1,15 +1,11 @@
 openai
 whisper
 pyaudio
-wave
-pathlib
 elevenlabs
 cv2
 numpy
-time
 threading
 keyboard
 pydub
 pyinstaller
-sys
 opencv-contrib-python
