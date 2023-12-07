@@ -2,7 +2,7 @@
 
 **Study-Bot** is an open-source project developed by **Edumakers** from **Tecnológico de Monterrey**. It is designed to help visually impaired students review their academic course material. It is an AI-powered study companion that incorporates various technologies, including [Whisper](https://openai.com/research/whisper), [GPT-3.5-turbo-16k](https://platform.openai.com/docs/models/gpt-3-5), [Elevenlabs](https://beta.elevenlabs.io/), and [OpenCV](https://opencv.org/). For testing purposes, sample course material was generated using [ChatGPT](https://openai.com/blog/chatgpt).
 
-**Study-Bot** can: listen to the user's question, analyze the source material of the topic they want to study, detect the physical educational material that they are holding by its color or ArUco marker, generate an answer, and read it out loud to the user as an accessible executable application.
+**Study-Bot** can: listen to the user's question, analyze the source material of the topic they want to study, detect the physical educational material that they are holding by its color or ArUco marker, generate an answer, and read it out loud to the user as an accessible executable application. For development and testing purposes, it can be run through the **Python** interpreter as a **CLI** program or with a **GUI**.
 
 Some good next steps could be to embed this system into a more advanced user interface for distribution as a desktop application, create a computer vision model that can detect the physical educational material without depending on color or ArUco markers, as well as some performance improvements and new interactive features.
 
@@ -11,17 +11,14 @@ Some good next steps could be to embed this system into a more advanced user int
 - Aarón Francisco Urbina de la Cruz ( [@Prodygyt](https://github.com/Prodygyt) )
 - Abiel Adrián Lozano Herrejón ( [@abiel-lozano](https://github.com/abiel-lozano) )
 
-## Installation
+## Installation and Usage
 
 It is recomended to use [Python 3.9.9](https://www.python.org/downloads/release/python-399/) so that the `whisper` library can be used without issues. To avoid having to remove your current **Python** installation, you may want to use a virtual enviroment to use this specific version of **Python**. To install the required dependencies, run the following command:
 
 ```bash
 pip install -r requirements.txt
 ```
-
-## Usage
-
-**Study-Bot** can be used as a **CLI** program or with the **GUI**. There are some additional steps that need to be taken before running any of these versions, please refer to the `Documentation` folder for a comprehensive guide on how to use this project.
+There are some additional steps that need to be taken before being able to run the project, such as the aquisition of your own API keys for the AI services needed. For more information, please refer to the `Documentation` folder for a comprehensive guide on how to use this project.
 
 ## What We Used
 
