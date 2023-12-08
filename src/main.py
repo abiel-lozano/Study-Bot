@@ -65,16 +65,6 @@ def playPatch(audio: bytes, notebook: bool = False) -> None:
 		out, err = proc.communicate(input=audio)
 		proc.poll()
 
-def toggleAudioDesc(event = None):
-	global audioInstructions
-	# Invert boolean value
-	audioInstructions.set(not audioInstructions.get())
-
-	if audioInstructions.get():
-		winsound.Beep(700, 300)
-	else:
-		winsound.Beep(500, 300)
-
 # Play specific history item ID
 def playAudioWithID(itemID):
 	global audioHistory
@@ -87,6 +77,30 @@ def playAudioWithID(itemID):
 			if item.history_item_id == itemID:
 				threadAudio = studyBot.threading.Thread(target = playPatch, args = (item.audio,))
 				threadAudio.start()
+
+def toggleAudioDesc(event = None):
+	global audioInstructions
+	# Invert boolean value
+	audioInstructions.set(not audioInstructions.get())
+
+	if audioInstructions.get():
+		winsound.Beep(700, 300)
+	else:
+		winsound.Beep(500, 300)
+
+# Select next option in dropdown menu
+def selectNextOption():
+	currentIndex = options.index(topicVar.get()) # Get index of current option
+	nextIndex = (currentIndex + 1) % len(options) # Get index of next option by adding 1 and wrapping around
+	nextOption = options[nextIndex]
+	topicVar.set(nextOption)
+
+	# Play audio for selected option
+	if nextOption == '<1> Human Body':
+		playAudioWithID(audioSelect['topicHumanBody'])
+	elif nextOption == '<1> Biochem':
+		playAudioWithID(audioSelect['topicBiochem'])
+	# Add new topics here
 
 # Select source material to be sent to GPT and select object ID function
 def checkSelection():
@@ -124,7 +138,6 @@ def checkSelection():
 	firstQuestion = True
 	query = ''
 	
-
 # NOTE: Not using this function, and calling startQuestionThreads directly from the button
 # causes the UI to freeze while the threads are running. This allows the threads to run
 # in the background, while the UI is still responsive.
@@ -137,7 +150,6 @@ def backgroundInit():
 	topicDropdown.config(state = 'disabled')
 	selectButton.config(state = 'disabled')
 	askButton.config(state = 'disabled')
-	exitButton.config(state = 'disabled')
 	# Enable stop button
 	stopButton.config(state = 'normal')
 
@@ -145,7 +157,6 @@ def backgroundInit():
 	window.unbind('1')
 	window.unbind('2')
 	window.unbind('3')
-	window.unbind('<Escape>')
 	# Bind stop recording key
 	window.bind('4', lambda e: stopRecording())
 
@@ -211,39 +222,14 @@ Question: {studyBot.question}
 	topicDropdown.config(state = 'normal')
 	selectButton.config(state = 'normal')
 	askButton.config(state = 'normal')
-	exitButton.config(state = 'normal')
 
 	# Rebind keys
 	window.bind('1', lambda e: selectNextOption())
 	window.bind('2', lambda e: checkSelection())
 	window.bind('3', lambda e: backgroundInit())
-	window.bind('<Escape>', lambda e: close())
 
 	# Unbind stop recording key
 	window.unbind('4')
-
-# Select next option in dropdown menu
-def selectNextOption():
-	currentIndex = options.index(topicVar.get()) # Get index of current option
-	nextIndex = (currentIndex + 1) % len(options) # Get index of next option by adding 1 and wrapping around
-	nextOption = options[nextIndex]
-	topicVar.set(nextOption)
-
-	# Play audio for selected option
-	if nextOption == '<1> Human Body':
-		playAudioWithID(audioSelect['topicHumanBody'])
-	elif nextOption == '<1> Biochem':
-		playAudioWithID(audioSelect['topicBiochem'])
-	# Add new topics here
-
-def close():
-	# Closing signal
-	winsound.Beep(700, 200) 
-	studyBot.time.sleep(0.01)
-	winsound.Beep(600, 200)
-	studyBot.time.sleep(0.01)
-	winsound.Beep(500, 200)
-	sys.exit()
 
 def stopRecording():
 	studyBot.stopRecording() # Access stopRecording() method from studyBot module
@@ -252,6 +238,15 @@ def stopRecording():
 	# Disable stop button and unbind stop key
 	stopButton.config(state = 'disabled')
 	window.unbind('4')
+
+def close():
+	# Closing signal
+	winsound.Beep(700, 200) 
+	studyBot.time.sleep(0.01) # Avoid overlapping sounds and popping
+	winsound.Beep(600, 200)
+	studyBot.time.sleep(0.01)
+	winsound.Beep(500, 200)
+	sys.exit()
 
 # Create main window
 window = tkinter.Tk()
@@ -407,7 +402,7 @@ winsound.Beep(37, 500) # Unaudible frequency in most speakers and by most people
 
 # Boot-up signal
 window.after(0, winsound.Beep, 500, 200)
-studyBot.time.sleep(0.01)
+studyBot.time.sleep(0.01) # Avoid overlapping sounds and popping
 window.after(310, winsound.Beep, 630, 200)
 studyBot.time.sleep(0.01)
 window.after(610, winsound.Beep, 750, 200)

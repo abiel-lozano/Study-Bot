@@ -13,6 +13,7 @@ Allow users to change accent or speed of the TTS voice to their liking.
 Suggest learning about fun facts or new questions based on the user's last question.
 
 ## Remove dependencies on additional modules
+Find a way to patch `whisper` so that it does not need `ffmpeg` to be installed separately, or find a module that can do STT conversions with similar accuracy without the need for `ffmpeg`.
 
 ## Concurrent thread termination problem
-Find a way to stop all threads when the user presses the question button during question processing, or when the program is closed during question processing.
+Find a way to stop all threads when the user presses the question button during question processing, or when the program is closed during question processing, without making a mess of the threads.

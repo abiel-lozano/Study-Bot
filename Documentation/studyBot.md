@@ -2,20 +2,6 @@
 
 >This documentation was created for the December 2023 version of Study-Bot.
 
-## Contents
-
-- [Description](#description)
-- [Usage](#usage)
-- [Code Walkthrough](#code-walkthrough)
-	- [Imports](#imports)
-	- [Initialize Variables and API Configuration](#initialize-variables-and-api-configuration)
-	- [Audio Recording: `recordQuestion()`](#audio-recording-recordquestion)
-	- [Object Recognition: `lookForObjects()`](#object-recognition-lookforobjects)
-	- [Answer Generation: `sendMessage()`](#answer-generation-sendmessage)
-	- [Text to Speech: `convertTTS()` and `streamAnswer()`](#text-to-speech-converttts-and-streamanswer)
-	- [Start Conversation, Use of Multithreading!](#start-conversation-use-of-multithreading)
-		- [Conversation Handling](#conversation-handling)
-
 ## Description
 
 This script contains all of Study-Bot's functionalities, and when it is run as a standalone script, it will serve as a command-line interface for the user to interact with the bot. This is used mostly for testing new features and debugging and is not really intended for production usage. 
@@ -170,7 +156,7 @@ def stopRecording():
 ---
 ### Object Recognition: `lookForObjects()`
 
-*Different sets* of educational materials require *different methods* of object recognition, so we select the function accordingly. The function `lookForObjects()` is called when the user asks a question, and it will populate the object list with the objects that the user is holding. This  list is a simple string containing natural language, as it needs to be read by **GPT**. The function `colorID()` is used to detect the objects for the human body set based on color, and the function `markerID()` is used to detect the objects for the Krebs cycle set based on the ArUco markers on the objects.
+*Different sets* of educational materials require *different methods* of object recognition, so the function is selected accordingly. The function `lookForObjects()` is called when the user asks a question, and it will populate the object list with the objects that the user is holding. This  list is a simple string containing natural language, as it needs to be read by **GPT**. The function `colorID()` is used to detect the objects for the human body set based on color, and the function `markerID()` is used to detect the objects for the Krebs cycle set based on the ArUco markers on the objects.
 
 ```python
 def lookForObjects(topic: int):
@@ -237,11 +223,11 @@ def colorID():
 
 When initializing the camera, using the `CAP_DSHOW` flag reduces the time it takes to open the camera by a considerable amount. This is because the flag tells OpenCV to use a different API to access the camera, which is faster than the default API.
 
-For each object, we create binary masks where color-matched pixels are white and non-matching are black. To minimize false negatives, we apply a dilation morphological transformation. This enlarges object boundaries in the binary image by sliding a structuring element (kernel) over the image and replacing each pixel with the maximum pixel value within the kernel's neighborhood.
+For each object, create binary masks where color-matched pixels are white and non-matching are black. To minimize false negatives, apply a dilation morphological transformation. This enlarges object boundaries in the binary image by sliding a structuring element (kernel) over the image and replacing each pixel with the maximum pixel value within the kernel's neighborhood.
 
-We use a 5x5 square-shaped kernel for most organs, and a 12x12 for the kidney, since it was harder to detect it's specific color range. This fills gaps in the binary masks, making the objects more solid and continuous, and improving detection. 
+Use a 5x5 square-shaped kernel for most organs, and a 12x12 for the kidney, since it was harder to detect it's specific color range. This fills gaps in the binary masks, making the objects more solid and continuous, and improving detection. 
 
-We use the bitwise AND operation with binary masks to extract regions of interest from the original image. If both corresponding pixels are non-zero (white in the binary mask), the output image pixel retains its original color; otherwise, it turns black.
+Use the bitwise AND operation with binary masks to extract regions of interest from the original image. If both corresponding pixels are non-zero (white in the binary mask), the output image pixel retains its original color; otherwise, it turns black.
 
 ```python
 		# Create a 5x5 square-shaped filter called kernel
@@ -277,11 +263,11 @@ We use the bitwise AND operation with binary masks to extract regions of interes
 		resKidney = cv2.bitwise_and(imageFrame, imageFrame, mask=kidneyMask)
 ```
 
-We create a contour around the zone that matches the color range of the object. The binary masks generated earlier are used as the input to the `cv2.findContours()` function to find contours in the image that correspond to the color range of the object.
+Create a contour around the zone that matches the color range of the object. The binary masks generated earlier are used as the input to the `cv2.findContours()` function to find contours in the image that correspond to the color range of the object.
 
-The function returns a list of contours, and we iterate over each contour found in the previous step using a loop, determine its `area`, and compare ir to a predefined **size threshold**.
+The function returns a list of contours, then, iterate over each contour found in the previous step using a loop, determine its `area`, and compare ir to a predefined **size threshold**.
 
-If the `area` is greater than the threshold, it indicates that the detected region is significant enough to be considered a positive detection for the object, so we add the name of the object to the list, while avoiding repeats. This operation is repeated for each object of the set.
+If the `area` is greater than the threshold, it indicates that the detected region is significant enough to be considered a positive detection for the object, so its name is added to the list, while avoiding repeats. This operation is repeated for each object of the set.
 
 ```python
 		# Create a contour around the zone that matches the color range
@@ -360,9 +346,9 @@ pip install opencv-contrib-python
 
 This function uses **OpenCV's** ArUco module to detect the ArUco markers attached to the objects of a set. Similar to `colorID()`, it will look for the markers for *5* seconds, and if it finds any, it will add to the `objects` variable what it has found, and will leave the default message if it doesn't find anything.
 
-**OpenCV** has predefined dictionaries of ArUco markers, and we will use the `DICT_4X4_50` dictionary, which contains 50 different markers of 4x4 bits. To obtain the images with the markers, refer to the script in `Tools/ArUcoCreate.py`.
+**OpenCV** has predefined dictionaries of ArUco markers, and the `DICT_4X4_50` dictionary is used here, which contains 50 different markers of 4x4 bits. To obtain the images with the markers, refer to the script in `Tools/ArUcoCreate.py`.
 
-We create this dictionary to asociate the number of an ArUco marker with the name of the object it is attached to.
+Create this dictionary to asociate the number of an ArUco marker with the name of the object it is attached to.d
 
 ```python
 def markerID():
@@ -381,7 +367,7 @@ def markerID():
 	elapsedTime = 0
 ```
 
-For each captured frame, we convert it to grayscale and use the `cv2.aruco.detectMarkers()` function to get a matrix of the detected markers and their corresponding IDs. If any markers are detected, we iterate over the matrix and add the name of the object to the list, while avoiding repeats.
+For each captured frame, convert it to grayscale and use the `cv2.aruco.detectMarkers()` function to get a matrix of the detected markers and their corresponding IDs. If any markers are detected, iterate over the matrix and add the name of the object to the list, while avoiding repeats.
 
 ```python
 	while elapsedTime < 5:
@@ -422,12 +408,12 @@ For each captured frame, we convert it to grayscale and use the `cv2.aruco.detec
 			break
 ```
 
-In this case we *do* display the frame, since it is more important to have the camera feed visible to the user, or the person assisting them, to make sure that the objects are correctly aligned with the camera.
+In this case the frame is displayed since it is more important to have the camera feed visible to the user, or the person assisting them, to make sure that the objects are correctly aligned with the camera when scanning for markers rather than detecting colors.
 
 ---
 ### Answer Generation: `sendMessage()`
 
-This function simply takes a message list as input and sends it to the **OpenAI API**. We use the chat completions endpoint to allow follow up questions to previous messages. The `temperature` parameter is used to control the 'randomness' of the response. A lower temperature value will result in more predictable responses, as the model is said to take a more objective and factual approach to the response.
+This function simply takes a message list as input and sends it to the **OpenAI API**. Use the chat completions endpoint to allow follow up questions to previous messages. The `temperature` parameter is used to control the 'randomness' of the response. A lower temperature value will result in more predictable responses, as the model is said to take a more objective and factual approach to the response.
 
 After the answer is extracted from the API's JSON response, it is appended to `messageList` globally. Note that the answer is saved as a dictionary with the role of the message (`assistant` or `user`), as this is important information for the model to understand who sent which message when generating a response.
 
@@ -452,7 +438,7 @@ To convert **GPT's** text answer into speech, call the **Elevenlabs API** to gen
 
 The `stream` parameter is set as True to play the audio as it is being generated, instead of waiting for the entire text to be converted to begin audio playback. The audio is streamed to the `streamAnswer()` function, which plays the audio using the `pydub` library.
 
->Note: There is a function in the **Elevenlabs** library audio streaming, however, we use our own since the library's function requires the use of **mpv**, a command line media player. While it might be the better option for using this API through Python, it is not ideal for our specific use case, since we want non-technical users to be able to use the program without installing *too many* additional dependencies.
+>Note: There is a function in the **Elevenlabs** library audio streaming, however, a different one is needed since the library's function requires the use of **mpv**, a command line media player. While it might be the better option for using this API through Python, it is not ideal for our specific use case, since we want non-technical users to be able to use the program without installing *too many* additional dependencies.
 
 ```python
 def streamAnswer(audioStream: Iterator[bytes]) -> bytes:
@@ -474,7 +460,7 @@ def convertTTS(text: str):
 ---
 ### Start Conversation, Use of Multithreading!
 
-If this script is run as a standalone script, we use this as a topic selector to choose the source material for the conversation.
+If this script is run as a standalone script, use this as a topic selector to choose the source material for the conversation.
 
 ```python
 	# Listen for keyboard input to stop recording
@@ -495,7 +481,7 @@ If this script is run as a standalone script, we use this as a topic selector to
 		source = sourceMaterial.krebsCycle
 ```
 
-Transcribing audio into text and detecting objects are very time consuming tasks. To avoid having to wait for one to finish before the other can start, we use **multithreading** to run both processes simultaneously. Create two threads for these processes and wait for them to finish before continuing with the rest of the program.
+Transcribing audio into text and detecting objects are very time consuming tasks. To avoid having to wait for one to finish before the other can start, use **multithreading** to run both processes simultaneously. Create two threads for these processes and wait for them to finish before continuing with the rest of the program.
 
 ```python
 	# Start question processing threads
