@@ -1,8 +1,8 @@
 openai
-whisper
+openai-whisper
 pyaudio
 elevenlabs
-cv2
+opencv-python
 numpy
 threading
 keyboard
