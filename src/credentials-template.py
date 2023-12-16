@@ -1,2 +1,2 @@
-openAiKey = ''
+openAIKey = ''
 elevenLabsKey = ''

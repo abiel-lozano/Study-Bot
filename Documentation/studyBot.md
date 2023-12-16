@@ -179,7 +179,7 @@ For each of the objects you wish to identify, set a lower and upper bound with t
 
 >Note: For **OpenCV**, the H (hue) value is represented as a value between 0 and 180, instead of the standard 0 to 360, and the S (saturation) and V (vibrancy) values are represented as values between 0 and 255 instead of 0 to 100.
 
-<!-- Use white balance of 3154 for own camera -->
+<!-- Use white balance of 3154 for our camera -->
 ```python
 def colorID():
 	obj = 'User is not holding any objects'
@@ -338,7 +338,7 @@ To calibrate this method of object detection to a specific set of models, refer 
 
 **ArUco Marker identification:** `markerID()`	
 
-Consider that the ArUco module is not included in the default OpenCV installation, so you need to install the specific module as follows: 
+Consider that the ArUco module is not included in the default OpenCV installation, so you need to install a specific module named `opencv-contrib-python`. This is included in the `requirements.txt` file, but you can install it manually as follows: 
 
 ```bash
 pip install opencv-contrib-python
@@ -413,7 +413,13 @@ In this case the frame is displayed since it is more important to have the camer
 ---
 ### Answer Generation: `sendMessage()`
 
-This function simply takes a message list as input and sends it to the **OpenAI API**. Use the chat completions endpoint to allow follow up questions to previous messages. The `temperature` parameter is used to control the 'randomness' of the response. A lower temperature value will result in more predictable responses, as the model is said to take a more objective and factual approach to the response.
+This function simply takes a message list as input and sends it to the **OpenAI API**. Use the chat completions endpoint to allow follow up questions to previous messages. Consider that `ChatCompletions` is no longer available on the latest versions of the `openai` library. **Study-Bot** was developed using version `0.27.8`, and this specific version is indicated in the `requirements.txt` file; it can also be installed manually as:
+
+```bash
+pip install openai==0.27.8
+```
+
+The `temperature` parameter is used to control the 'randomness' of the response. A lower temperature value will result in more predictable responses, as the model is said to take a more objective and factual approach to the response.
 
 After the answer is extracted from the API's JSON response, it is appended to `messageList` globally. Note that the answer is saved as a dictionary with the role of the message (`assistant` or `user`), as this is important information for the model to understand who sent which message when generating a response.
 

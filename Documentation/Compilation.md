@@ -12,7 +12,7 @@ Before trying to compile, make sure that you have set up your **API keys** and t
 
 This project needs to be compiled through a `.spec` file instead of giving the script directly to `pyinstaller` as an argument.
 
-This is a configuration file that tells `pyinstaller` how to compile the program. You can use the templates provided in [Config/studyBotCLI-template.spec](../Config/studyBotCLI-template.spec) amd [Config/studyBotGUI-template.spec](../Config/studyBotGUI-template.spec), depending on which version you wish to compile.
+This is a configuration file that tells `pyinstaller` how to compile the program. You can use the templates provided in [Config/studyBotCLI-template.spec](../Config/studyBotCLI-template.spec) and [Config/studyBotGUI-template.spec](../Config/studyBotGUI-template.spec), depending on which version you wish to compile.
 
 This is required because the script needs to import some additional, temporary files for the `whisper` module that are not automatically bundled by `pyinstaller`. On the `datas` parameter of the `a` object in `.spec` file, you must add the path to where these files are located:
 
