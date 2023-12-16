@@ -1,6 +1,6 @@
 # Study-Bot - studyBot.py
 
->This documentation was created for the December 2023 version of Study-Bot.
+>This documentation was created for version 1.0 of Study-Bot, in December 2023
 
 ## Description
 
