@@ -25,19 +25,17 @@ import sys
 import winsound
 ```
 
-- `studyBot`: Import all of Study-Bot's functions, variables, and imported modules.
+- `studyBot`: Import all functions, variables, and modulues imported in `studyBot.py`.
 - `tkinter`: Used to create simple GUIs for Python scripts.
 - `sys`: Provides access system-specific parameters and functions, used to exit the program.
 - `winsound`: Allows control of **Windows** system sounds, used to play beeps as signals to the user.
 
 ### Global Variables, studyBot Variables, and Audio Assistance
 
-Just like in `studyBot.py`, global variables are used in functions with **multithreading**.
-
-These dictionaries contain the IDs of audio generated with **Elevenlabs**. The audio recordings are used to play audio instructions and feedback to the user. The IDs come from from the generation history of a specific **Elevenlabs** account, so you will need to generate *your own audio files* and replace the IDs in the dictionaries. See [Tools/speechGenerator.py](../Tools/speechGenerator.py) for more information on how to obtain these IDs.
+These dictionaries contain the IDs of audio generated with **Elevenlabs**. The audio recordings are used to play audio instructions and feedback to the user. The IDs come from the generation history of a specific **Elevenlabs** account, so you will need to generate *your own audio files* and replace the IDs in the dictionaries. See [Tools/speechGenerator.py](../Tools/speechGenerator.py) for more information on how to obtain these IDs.
 
 ```python
-# NOTE - There is chance this is not necessary
+# NOTE - There is a chance this is not necessary
 global answer
 global messageHistory
 global query
@@ -77,38 +75,36 @@ audioSelect = ENG
 
 ### Audio Assistance: `playPatch()`, `toggleAudioDesc`, and `playAudioWithID()`
 
-The `playPatch()` is a patch of the `play()` function from `elevenlabs`. This was necessary because the default `play()` function would create a blank window while playing audio when **Study-Bot** runs as a compiled executable. 
+The `playPatch()` function is a patch of the `play()` function from `elevenlabs`. This was necessary because the default `play()` function would create a blank window while playing audio when **Study-Bot** runs as a compiled executable. 
 
 This is fixed by simply adding the `CREATE_NO_WINDOW` flag to the `subprocess.Popen()` function. The `subprocess` module and `is_installed()` are used through the `studyBot` module to avoid double imports.
 
 ```python
 # NOTE: This is a patch for elevenlabs' play function, to avoid showing an
 # empty black window when playing audio in the compiled version. The lack of
-# this flag is not an issue when running through the interpreter.
-def playPatch(audio: bytes, notebook: bool = False) -> None:
-	if notebook:
-		from IPython.display import Audio, display
-		display(Audio(audio, rate=44100, autoplay=True))
-	else:
-		# Access subprocess module through elevenlabs from studyBot 
-		# to avoid double import
-		if not studyBot.is_installed("ffplay"):
-			raise ValueError("ffplay from ffmpeg not found, necessary to play audio.")
-		
-		args = ["ffplay", "-autoexit", "-", "-nodisp"]
-		proc = studyBot.subprocess.Popen(
-			args = args,
-			stdout = studyBot.subprocess.PIPE,
-			stdin = studyBot.subprocess.PIPE,
-			stderr = studyBot.subprocess.PIPE,
-			# Flag prevents black window from showing
-			creationflags = studyBot.subprocess.CREATE_NO_WINDOW,
-		)
-		out, err = proc.communicate(input=audio)
-		proc.poll()
+# this flag is not an issue when using the Python interpreter. The specific 
+# playback method for Jupiter Notebooks was removed, as it is not necessary
+# for this application.
+def playPatch(audio: bytes) -> None:
+	# Access subprocess module through elevenlabs from studyBot 
+	# to avoid double import
+	if not studyBot.is_installed("ffplay"):
+		raise ValueError("ffplay from ffmpeg not found, necessary to play audio.")
+	
+	args = ["ffplay", "-autoexit", "-", "-nodisp"]
+	proc = studyBot.subprocess.Popen(
+		args = args,
+		stdout = studyBot.subprocess.PIPE,
+		stdin = studyBot.subprocess.PIPE,
+		stderr = studyBot.subprocess.PIPE,
+		# Flag prevents black window from showing
+		creationflags = studyBot.subprocess.CREATE_NO_WINDOW,
+	)
+	out, err = proc.communicate(input=audio)
+	proc.poll()
 ```	
 
-Play a specific audio file from your **Elevenlabs** history with this. Create a new thread for `playPatch()` so that it can run in the background without freezing the UI. Consider that this function assumes that your `History` has been fetched from the API, and that the ID exists.
+Play a specific audio file from your **Elevenlabs** history with this. Create a new thread for `playPatch()` so that it can run in the background without freezing the UI. Consider that this function assumes that your `History` has been fetched from the API, and that the audio ID exists.
 
 ```python
 # Play specific history item ID
@@ -160,7 +156,7 @@ def selectNextOption():
 	# Add new topics here
 ```
 
-The `checkSelection()` function is called when the user presses the `Select Topic` button or the `2` key. It checks the value of the dropdown menu and sets the `source` variable to the corresponding source text, sets the `studyBot.topic` variable for object identification, and plays the audio that tells the user what they just selected. 
+The `checkSelection()` function is called when the user presses the `Select Topic` button or the `2` key. It checks the value of the dropdown menu and sets the `source` variable to the corresponding source text, sets the `studyBot.topic` variable for choosing the object identification method, and plays the audio that tells the user what they just selected. 
 
 It also updates the `infoDisplay` variable to show the selected topic, which is displayed in the UI, and used as a replacement for `print()` in the CLI version for showing the program's status.
 
@@ -211,7 +207,7 @@ To allow the GUI to run while the program is processing the question, **multithr
 
 This is achieved by calling `backgroundInit()`, which starts a new thread with `startQuestionThreads()` that calls the functions that process the question and generate the answer. It will create threads for each of the required processes that call functions from the studyBot module.
 
-From `backgroundInit()`, disable the topic selector, 'Select Topic' button, and the 'Ask Question' button, as well as unbinding the keys to those functions, since the user is not supposed to ask another question or change the topic during question processing. 
+From `backgroundInit()`, the topic selector, 'Select Topic' button, and the 'Ask Question' button are disabled, and the keys to those functions are unbinded, since the user is not supposed to ask another question or change the topic during question processing.
 
 The button for `stopRecording()` and its key binding are enabled during this time, which allows the user to stop the recording of their question when they are done speaking.
 
@@ -313,7 +309,7 @@ After the answer was read out loud, the state of the buttons and binding is reve
 
 Notice how the flow of this script for the GUI version is quite similar to the CLI version. The main difference other than the heavier use of threads and the use of `infoDisplay` is the handling of the conversation. 
 
-The source and custom instructions are only included in the first message, otherwise only send the question and objects to the `studyBot.sendMessage()` function, and check this using a simple boolean variable.
+The source and custom instructions are only included in the first message, otherwise only the question and objects are sent to the `studyBot.sendMessage()` function, and this is checked using a simple boolean variable.
 
 ### Other Functions: `stopRecording()`, `close()`
 

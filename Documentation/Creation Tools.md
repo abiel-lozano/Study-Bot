@@ -1,6 +1,6 @@
 # Tools Folder
 
-This folder contains tools that can assist in the customization of **Study-Bot**. These scripts are not required to run **Study-Bot**, but can be used adding topics, and testing new features.
+This folder contains tools that can assist in the customization of **Study-Bot**. These scripts are not required to run **Study-Bot**, but can be used for adding new topics, and testing new features.
 
 ### `ArUcoCreate.py` and `ArUcoReader.py`
 
@@ -16,4 +16,4 @@ Allows direct interaction with the chosen GPT model. This script is used to test
 
 ### `speechGenerator.py`
 
-This script is used to generate the audio recordings for **Study-Bot's** accessibility feature. It will convert the given text into speech, and provide the audio ID for the newly created recording, so that it can be accessed and played by later. Consider that a valid **Elevenlabs API** key is required in a file named `credentials.py` to use this script to work.
+This script is used to generate the audio recordings for **Study-Bot's** accessibility feature. It will convert the given text into speech, and provide the audio ID for the newly created recording, so that it can be accessed and played later. Consider that a valid **Elevenlabs API** key is required in a file named `credentials.py` to use this script to work.

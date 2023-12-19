@@ -20,21 +20,22 @@ source = ''
 firstQuestion = True
 
 ENG = {
-	'questionRecorded': '7aNkMntxEq7M9IXZ6Vkv',
-	'welcome': 			'HNwmc11X0p23y77VLvOY',
-	'topicHumanBody': 	'ppXHdy46xuZtg3ysNoxu',
-	'topicBiochem': 	'IjsDkrqkOCQ64XyqL5ZV',
-	'confirmHumanBody': 'OCE5HysrlHaX1AoGDd1j',
-	'confirmBiochem': 	'CPjy6303qpWpSUEl07xz',
+	# Audio Name ------- ID -------------------------- Description
+	'questionRecorded': '7aNkMntxEq7M9IXZ6Vkv', # Question recorded, please wait.
+	'welcome': 			'HNwmc11X0p23y77VLvOY', # Welcome to Study-Bot! To begin, select a topic from the dropdown menu and click the select button.
+	'topicHumanBody': 	'ppXHdy46xuZtg3ysNoxu', # Human Body.
+	'topicBiochem': 	'IjsDkrqkOCQ64XyqL5ZV', # Biochemistry.
+	'confirmHumanBody': 'OCE5HysrlHaX1AoGDd1j', # Human Body selected. Before pressing the ask buton, be ready to present the objects to the camera and to ask you question right after pressing the button. Before asking the next question, please wait for the previous response to be read out loud.
+	'confirmBiochem': 	'CPjy6303qpWpSUEl07xz', # Biochemistry selected. Before pressing the ask buton, be ready to present the objects to the camera and to ask you question right after pressing the button. Before asking the next question, please wait for the previous response to be read out loud.
 }
 
 ESP = {
-	'questionRecorded': 'bYlleFyvske67zV4Wr2Z',
-	'welcome': 			'wij7p8zqa3uKAJMevWFT',
-	'topicHumanBody': 	'OIZ9eoFel81KKe7eMjEN',
-	'topicBiochem': 	'KLMTeyIhaa2hTeFahZAU',
-	'confirmHumanBody': 'A0AHMdfV5qFgohvvwIdp',
-	'confirmBiochem': 	'NybAwxFeEYpFKEKymRvu',
+	'questionRecorded': 'bYlleFyvske67zV4Wr2Z', # Pregunta grabada, por favor espere.
+	'welcome': 			'wij7p8zqa3uKAJMevWFT', # Bienvenido a Study-Bot! Para comenzar, seleccione un tema del menú desplegable y haga clic en el botón de selección.
+	'topicHumanBody': 	'OIZ9eoFel81KKe7eMjEN', # Cuerpo humano.
+	'topicBiochem': 	'KLMTeyIhaa2hTeFahZAU', # Bioquímica.
+	'confirmHumanBody': 'A0AHMdfV5qFgohvvwIdp', # Cuerpo humano seleccionado. Antes de presionar el botón de preguntar, esté listo para presentar los objetos a la cámara y para hacer su pregunta justo después de presionar el botón. Antes de hacer la siguiente pregunta, espere a que la respuesta anterior se lea en voz alta.
+	'confirmBiochem': 	'NybAwxFeEYpFKEKymRvu', # Bioquímica seleccionada. Antes de presionar el botón de preguntar, esté listo para presentar los objetos a la cámara y para hacer su pregunta justo después de presionar el botón. Antes de hacer la siguiente pregunta, espere a que la respuesta anterior se lea en voz alta.
 }
 
 # Select audio language here
@@ -42,28 +43,26 @@ audioSelect = ENG
 
 # NOTE: This is a patch for elevenlabs' play function, to avoid showing an
 # empty black window when playing audio in the compiled version. The lack of
-# this flag is not an issue when running through the interpreter.
-def playPatch(audio: bytes, notebook: bool = False) -> None:
-	if notebook:
-		from IPython.display import Audio, display
-		display(Audio(audio, rate=44100, autoplay=True))
-	else:
-		# Access subprocess module through elevenlabs from studyBot 
-		# to avoid double import
-		if not studyBot.is_installed("ffplay"):
-			raise ValueError("ffplay from ffmpeg not found, necessary to play audio.")
-		
-		args = ["ffplay", "-autoexit", "-", "-nodisp"]
-		proc = studyBot.subprocess.Popen(
-			args = args,
-			stdout = studyBot.subprocess.PIPE,
-			stdin = studyBot.subprocess.PIPE,
-			stderr = studyBot.subprocess.PIPE,
-			# Flag prevents black window from showing
-			creationflags = studyBot.subprocess.CREATE_NO_WINDOW,
-		)
-		out, err = proc.communicate(input=audio)
-		proc.poll()
+# this flag is not an issue when using the Python interpreter. The specific 
+# playback method for notebooks was removed, as it is not necessary
+# for this application.
+def playPatch(audio: bytes) -> None:
+	# Access subprocess module through elevenlabs from studyBot 
+	# to avoid double import
+	if not studyBot.is_installed("ffplay"):
+		raise ValueError("ffplay from ffmpeg not found, necessary to play audio.")
+	
+	args = ["ffplay", "-autoexit", "-", "-nodisp"]
+	proc = studyBot.subprocess.Popen(
+		args = args,
+		stdout = studyBot.subprocess.PIPE,
+		stdin = studyBot.subprocess.PIPE,
+		stderr = studyBot.subprocess.PIPE,
+		# Flag prevents black window from showing
+		creationflags = studyBot.subprocess.CREATE_NO_WINDOW,
+	)
+	out, err = proc.communicate(input=audio)
+	proc.poll()
 
 # Play specific history item ID
 def playAudioWithID(itemID):
