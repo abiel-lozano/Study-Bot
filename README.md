@@ -2,11 +2,9 @@
 
 **Study-Bot** is an open-source project developed by **Edumakers** from **Tecnológico de Monterrey**. It is designed to help visually impaired students review their academic course material. It is an AI-powered study companion that incorporates various technologies, including [Whisper](https://openai.com/research/whisper), [GPT-3.5-turbo-16k](https://platform.openai.com/docs/models/gpt-3-5), [Elevenlabs text-to-speech](https://github.com/elevenlabs/elevenlabs-python), and [OpenCV](https://opencv.org/). For testing purposes, sample course material was generated using [ChatGPT](https://openai.com/blog/chatgpt).
 
-**Study-Bot** can: listen to the user's question, analyze the source material of the topic they want to study, detect the physical educational material that they are holding by its color or ArUco marker, generate an answer, and read it out loud to the user as an accessible executable application. For development and testing purposes, it can be run through the **Python** interpreter as a **CLI** program or with a **GUI**.
+<img src="Documentation/Images/StudyBotGUI.png" alt="Study-Bot GUI" align="right" width="325"/>
 
-<p align="center">
-  <img src="Documentation/Images/StudyBotGUI.png" alt="Study-Bot GUI" width="325"/>
-</p>
+**Study-Bot** can: listen to the user's question, analyze the source material of the topic they want to study, detect the physical educational material that they are holding by its color or ArUco marker, generate an answer, and read it out loud to the user as an accessible executable application. For development and testing purposes, it can be run through the **Python** interpreter as a **CLI** program or with a **GUI**.
 
 Some good next steps could be to embed this system into a more advanced user interface for distribution as a desktop application, create a computer vision model that can detect the physical educational material without depending on color or ArUco markers, as well as some performance improvements and new interactive features.
 
