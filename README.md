@@ -2,9 +2,9 @@
 
 **Study-Bot** is an open-source project developed by **Edumakers** from **Tecnológico de Monterrey**. It is designed to help visually impaired students review their academic course material. It is an AI-powered study companion that incorporates various technologies, including [Whisper](https://openai.com/research/whisper), [GPT-3.5-turbo-16k](https://platform.openai.com/docs/models/gpt-3-5), [Elevenlabs text-to-speech](https://github.com/elevenlabs/elevenlabs-python), and [OpenCV](https://opencv.org/). For testing purposes, sample course material was generated using [ChatGPT](https://openai.com/blog/chatgpt).
 
-<dl><dd><dl><dd><dl><dd><dl><dd>
-<img src="Documentation/Images/StudyBotGUI.png" alt="Study-Bot GUI" align="left" width="275"/>
-</dd></dl></dd></dl></dd></dl></dd></dl>
+<dl><dd><dl><dd><dl><dd>
+<img src="Documentation/Images/StudyBotGUI.png" alt="Study-Bot GUI" align="left" width="300"/>
+</dd></dl></dd></dl></dd></dl>
 
 **Study-Bot** can: listen to the user's question, analyze the source material of the topic they want to study, detect the physical educational material that they are holding by its color or ArUco marker, generate an answer, and read it out loud to the user as an accessible executable application. For development and testing purposes, it can be run through the **Python** interpreter as a **CLI** program or with a **GUI**.
 
@@ -28,7 +28,7 @@ There are some additional steps that need to be taken before being able to run t
 
 **Study-Bot** relies on the following existing services and technologies:
 
-<img src="Documentation/Images/Functional Diagram.png" alt="Functional Diagram" width="450" align="right"/>
+<img src="Documentation/Images/Functional Diagram.png" alt="Functional Diagram" width="550" align="right"/>
 
 - **[Whisper:](https://openai.com/research/whisper)** Used for speech-to-text conversion, allowing users to speak their questions to be fed into the GPT model.
 
