@@ -31,7 +31,7 @@ There are some additional steps that need to be taken before being able to run t
 
 **Study-Bot** relies on the following existing services and technologies:
 
-<img src="Documentation/Images/Functional Diagram.png" alt="Functional Diagram" width="550" align="right"/>
+<img src="Documentation/Images/Functional Diagram.png" alt="Functional Diagram" width="500" align="right"/>
 
 - **[Whisper:](https://openai.com/research/whisper)** Used for speech-to-text conversion, allowing users to speak their questions to be fed into the GPT model.
 
