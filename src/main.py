@@ -20,7 +20,7 @@ source = ''
 firstQuestion = True
 
 ENG = {
-	# Audio Name ------- ID -------------------------- Description
+	# Audio Name ------- ID -------------------- Suggested Audio Descriptions
 	'questionRecorded': '7aNkMntxEq7M9IXZ6Vkv', # Question recorded, please wait.
 	'welcome': 			'HNwmc11X0p23y77VLvOY', # Welcome to Study-Bot! To begin, select a topic from the dropdown menu and click the select button.
 	'topicHumanBody': 	'ppXHdy46xuZtg3ysNoxu', # Human Body.

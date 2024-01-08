@@ -1,4 +1,8 @@
 # Script creates ArUco markers of a given size and number
+# Images are dumped in the working directory, move them later
+
+# Size: size of the generated images in pixels, image is 1:1 (min 6, recommended 300)
+# Number: number of markers to generate (max 50)
 
 import cv2
 

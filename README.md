@@ -43,4 +43,4 @@ There are some additional steps that need to be taken before being able to run t
 
 ## Contributing and Codebase Usage
 
-You may use this project as reference for your own projects, or fork it to make your own contributions, and other uses. GitHub issues regarding feature requests and bug reports are welcome and are specially valued if it includes feedback from visually impaired users.
+Use this project as reference for your own, or fork it to make your own contributions. GitHub issues regarding feature requests and bug reports are welcome and specially valued if it includes feedback from visually impaired users.

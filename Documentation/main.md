@@ -52,21 +52,22 @@ source = ''
 firstQuestion = True
 
 ENG = {
-	'questionRecorded': '7aNkMntxEq7M9IXZ6Vkv',
-	'welcome': 	    'HNwmc11X0p23y77VLvOY',
-	'topicHumanBody':   'ppXHdy46xuZtg3ysNoxu',
-	'topicBiochem':     'IjsDkrqkOCQ64XyqL5ZV',
-	'confirmHumanBody': 'OCE5HysrlHaX1AoGDd1j',
-	'confirmBiochem':   'CPjy6303qpWpSUEl07xz',
+	# Audio Name ------- ID ------------------- Description
+	'questionRecorded': '7aNkMntxEq7M9IXZ6Vkv', # Question recorded, please wait.
+	'welcome': 	    'HNwmc11X0p23y77VLvOY',  # Welcome to Study-Bot! To begin, select a topic from the dropdown menu and click the select button.
+	'topicHumanBody':   'ppXHdy46xuZtg3ysNoxu', # Human Body.
+	'topicBiochem':     'IjsDkrqkOCQ64XyqL5ZV', # Biochemistry.
+	'confirmHumanBody': 'OCE5HysrlHaX1AoGDd1j', # Human Body selected. Before pressing the ask buton, be ready to present the objects to the camera and to ask you question right after pressing the button. Before asking the next question, please wait for the previous response to be read out loud.
+	'confirmBiochem':   'CPjy6303qpWpSUEl07xz', # Biochemistry selected. Before pressing the ask buton, be ready to present the objects to the camera and to ask you question right after pressing the button. Before asking the next question, please wait for the previous response to be read out loud.
 }
 
 ESP = {
-	'questionRecorded': 'bYlleFyvske67zV4Wr2Z',
-	'welcome': 	    'wij7p8zqa3uKAJMevWFT',
-	'topicHumanBody':   'OIZ9eoFel81KKe7eMjEN',
-	'topicBiochem':     'KLMTeyIhaa2hTeFahZAU',
-	'confirmHumanBody': 'A0AHMdfV5qFgohvvwIdp',
-	'confirmBiochem':   'NybAwxFeEYpFKEKymRvu',
+	'questionRecorded': 'bYlleFyvske67zV4Wr2Z', # Pregunta grabada, por favor espere.
+	'welcome': 	    'wij7p8zqa3uKAJMevWFT', # Bienvenido a Study-Bot! Para comenzar, seleccione un tema del menú desplegable y haga clic en el botón de selección.
+	'topicHumanBody':   'OIZ9eoFel81KKe7eMjEN', # Cuerpo humano.
+	'topicBiochem':     'KLMTeyIhaa2hTeFahZAU', # Bioquímica.
+	'confirmHumanBody': 'A0AHMdfV5qFgohvvwIdp',  # Cuerpo humano seleccionado. Antes de presionar el botón de preguntar, esté listo para presentar los objetos a la cámara y para hacer su pregunta justo después de presionar el botón. Antes de hacer la siguiente pregunta, espere a que la respuesta anterior se lea en voz alta.
+	'confirmBiochem':   'NybAwxFeEYpFKEKymRvu', # Bioquímica seleccionada. Antes de presionar el botón de preguntar, esté listo para presentar los objetos a la cámara y para hacer su pregunta justo después de presionar el botón. Antes de hacer la siguiente pregunta, espere a que la respuesta anterior se lea en voz alta.
 }
 
 # Select audio language here
@@ -121,7 +122,7 @@ def playAudioWithID(itemID):
 				threadAudio.start()
 ```
 
-Toggle audio instructions with the  spacebar. This function is called when the spacebar is pressed, and it toggles the value of the `audioInstructions` variable, which is a `tkinter.BooleanVar()`, distinct from a regular boolean variable. This is because `tkinter` variables can be linked to UI elements, such as the *checkbox*, and they will update automatically when the variable is changed and vice versa.
+Toggle audio instructions with the  spacebar. This function is called when the spacebar is pressed, and it toggles the value of the `audioInstructions` variable, which is a `tkinter.BooleanVar()`, distinct from a regular boolean variable. This is because `tkinter` variables can be linked to UI elements, such as the *checkbox*, and they will update automatically when the variable is changed.
 
 ```python
 def toggleAudioDesc(event = None):

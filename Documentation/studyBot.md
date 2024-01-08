@@ -340,7 +340,14 @@ If the `area` is greater than the threshold, it indicates that the detected regi
 						obj = obj + ', kidney'
 ```
 
-To calibrate this method of object detection to a specific set of models, refer to the script located in `Tools/colorDetection.py` to find the color ranges that work best for the set of models and test using different `area` thresholds.
+To calibrate this method of object detection to a specific set of objects, refer to the script located in `Tools/colorDetection.py` to find the color ranges that work best for the set of models and test using different `area` thresholds.
+
+A properly calibrated set of color ranges and area thresholds should yield a level of detection accuracy resembling the image below, in which there is no false positives between similar colors and the amount of areas detected (or rectangles shown) for each object is close or equal to one.
+
+<img src="Images/Color Detection.png" alt="Color Detection" width="400" 
+align="center"/>
+
+>Image generated using the `colorDetection.py` script, which added rectangles around the areas of the image which met the criteria. These educational models are 3D prints which represent some of the organs of the human body.
 
 **ArUco Marker identification:** `markerID()`	
 
