@@ -99,11 +99,11 @@ def stopRecording():
 	global stop
 	stop = True
 
-def colorID():
+def colorID(camera: int = 0):
 	obj = 'User is not holding any objects'
 
 	# Capture video
-	cam = cv2.VideoCapture(0, cv2.CAP_DSHOW) # Use 0 for default camera
+	cam = cv2.VideoCapture(camera, cv2.CAP_DSHOW) # Use 0 for default camera
 
 	# Start timer
 	startTime = time.time()
@@ -243,7 +243,7 @@ def colorID():
 
 	return obj
 
-def markerID():
+def markerID(camera: int = 0):
 	obj = 'User is not holding any objects'
 
 	# Choose the predefined dictionary to use
@@ -252,7 +252,7 @@ def markerID():
 	# Define the names of the objects
 	compoundDict = { 0: 'Citrate', 1: 'Isocitrate', 2: 'Alpha-Ketoglutarate', 3: 'Succinyl CoA', 4: 'Succinate', 5: 'Fumarate', 6: 'Malate', 7: 'Oxaloacetate' }
 
-	cap = cv2.VideoCapture(0, cv2.CAP_DSHOW) # Use 0 for default camera
+	cap = cv2.VideoCapture(camera, cv2.CAP_DSHOW) # Use 0 for default camera
 
 	# Start timer
 	startTime = time.time()
@@ -301,16 +301,17 @@ def markerID():
 
 	return obj
 
-def lookForObjects(topic: int):
+# Takes the topic number and camera number as arguments, if no camera number is provided, the default camera is used
+def lookForObjects(topic: int, camera: int = 0):
 	global objects
 	objects = ''
 
 	if topic == 1:
 		# Call the function for color identification
-		objects = colorID()
+		objects = colorID(camera)
 	elif topic == 2:
 		# Call the function for marker identification
-		objects = markerID()
+		objects = markerID(camera)
 
 def sendMessage(messageList: any):
 	# Send prompt to GPT

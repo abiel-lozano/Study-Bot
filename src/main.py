@@ -163,9 +163,10 @@ def startQuestionThreads():
 	global firstQuestion
 	global messageHistory
 	global query
+	global cameraVar
 
 	# Start threads for object identification and question recording
-	threadObjID = studyBot.threading.Thread(target = studyBot.lookForObjects, args = (studyBot.topic,))
+	threadObjID = studyBot.threading.Thread(target = studyBot.lookForObjects, args = (studyBot.topic, int(cameraVar.get()[7:])-1)) # Get camera selection from dropdown menu
 	threadQuestionRec = studyBot.threading.Thread(target = studyBot.recordQuestion)
 	threadObjID.start()
 	threadQuestionRec.start()
@@ -247,6 +248,25 @@ def close():
 	winsound.Beep(500, 200)
 	sys.exit()
 
+# Given a camera index, open the camera for 3 seconds and display the feed
+def testCamera(index):
+	cap = studyBot.cv2.VideoCapture(index, studyBot.cv2.CAP_DSHOW)
+	start = studyBot.time.time()
+	elapsedTime = 0
+
+	while elapsedTime < 3:
+		ret, frame = cap.read()
+		if not ret:
+			print('Failed to capture frame.')
+			break
+		studyBot.cv2.imshow('Frame', frame)
+		elapsedTime = studyBot.time.time() - start
+		key = studyBot.cv2.waitKey(10) & 0xFF
+		if key == 27:
+			break
+	cap.release()
+	studyBot.cv2.destroyAllWindows()
+
 # Create main window
 window = tkinter.Tk()
 window.title('Study-Bot')
@@ -280,8 +300,45 @@ audioCheckBox = tkinter.Checkbutton(
     activeforeground = '#FBF1C7',
     variable = audioInstructions
 )
-
 audioCheckBox.pack(pady = 7)
+
+# Using cv2 from studyBot, determine how many cameras are available, 
+# create a dropdown menu for the user to select the camera.
+
+i = 0
+while True:
+	try:
+		testCap = studyBot.cv2.VideoCapture(i, studyBot.cv2.CAP_DSHOW)
+		if not testCap.isOpened():
+			break
+		testCap.release()
+	except:
+		break
+	i += 1
+
+# Create camera frame
+camFrame = tkinter.Frame(window, bg = '#3C3836')
+camFrame.pack(pady = 10)
+
+cameraVar = tkinter.StringVar(camFrame)
+cameraVar.set(f'Camera 1') # default value
+cameraDropdown = tkinter.OptionMenu(
+    camFrame, 
+    cameraVar,
+    *[f'Camera {i + 1}' for i in range(i)] # Dropdown menu items
+)
+cameraDropdown.config(width = 15)
+cameraDropdown.pack(side='left', padx=10)
+
+# Create camera test button
+cameraButton = tkinter.Button(
+    camFrame, 
+    text = 'Test Camera', 
+    command = lambda: testCamera(int(cameraVar.get()[7:])-1), # Get camera index from string
+    bg = '#b16286', 
+    font = ('Leelawadee', 12)
+)
+cameraButton.pack(side='left')
 
 # Create topic frame
 topicFrame = tkinter.Frame(window, bg = '#3C3836')
@@ -366,8 +423,7 @@ infoDisplay.set('Welcome to Study-Bot! Please select a topic before asking a que
 infoLabel = tkinter.Label(
 	window, 
 	textvariable=infoDisplay, 
-	bg = '#83A598', 
-	fg = '#282828',
+	bg = '#458588',
 	font = ('Leelawadee', 12), 
 	wraplength = 400
 )
@@ -392,7 +448,6 @@ window.bind('<space>', lambda e: toggleAudioDesc())
 # Stop and ask buttons disabled by default
 stopButton.config(state = 'disabled')
 askButton.config(state = 'disabled')
-
 
 # NOTE: System sounds are not always immediately enabled, which causes 
 # the first sounds to be inaudible. This beep is used to 'wake up' the 
