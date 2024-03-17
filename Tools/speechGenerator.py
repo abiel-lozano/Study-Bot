@@ -7,7 +7,6 @@ import credentials
 set_api_key(credentials.elevenLabsKey)
 
 # 1 - Generate audio from text
-# NOTE: Consider that good orthography is needed for good results
 text = 'TEXT THAT WILL BE CONVERTED TO AUDIO HERE!'
 generate(text = text, model = 'eleven_multilingual_v1')
 

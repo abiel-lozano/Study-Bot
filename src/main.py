@@ -21,21 +21,23 @@ firstQuestion = True
 
 ENG = {
 	# Audio Name ------- ID -------------------- Suggested Audio Descriptions
-	'questionRecorded': '7aNkMntxEq7M9IXZ6Vkv', # Question recorded, please wait.
 	'welcome': 			'HNwmc11X0p23y77VLvOY', # Welcome to Study-Bot! To begin, select a topic from the dropdown menu and click the select button.
+	'language': 		'chwuaLHe1nnAY3VBJRoI', # English
 	'topicHumanBody': 	'ppXHdy46xuZtg3ysNoxu', # Human Body.
 	'topicBiochem': 	'IjsDkrqkOCQ64XyqL5ZV', # Biochemistry.
 	'confirmHumanBody': 'OCE5HysrlHaX1AoGDd1j', # Human Body selected. Before pressing the ask buton, be ready to present the objects to the camera and to ask you question right after pressing the button. Before asking the next question, please wait for the previous response to be read out loud.
 	'confirmBiochem': 	'CPjy6303qpWpSUEl07xz', # Biochemistry selected. Before pressing the ask buton, be ready to present the objects to the camera and to ask you question right after pressing the button. Before asking the next question, please wait for the previous response to be read out loud.
+	'questionRecorded': '7aNkMntxEq7M9IXZ6Vkv', # Question recorded, please wait.
 }
 
 ESP = {
-	'questionRecorded': 'bYlleFyvske67zV4Wr2Z', # Pregunta grabada, por favor espere.
 	'welcome': 			'wij7p8zqa3uKAJMevWFT', # Bienvenido a Study-Bot! Para comenzar, seleccione un tema del menú desplegable y haga clic en el botón de selección.
+	'language': 		'yAcNwzwkL3XzKjpxqTRf', # Español
 	'topicHumanBody': 	'OIZ9eoFel81KKe7eMjEN', # Cuerpo humano.
 	'topicBiochem': 	'KLMTeyIhaa2hTeFahZAU', # Bioquímica.
 	'confirmHumanBody': 'A0AHMdfV5qFgohvvwIdp', # Cuerpo humano seleccionado. Antes de presionar el botón de preguntar, esté listo para presentar los objetos a la cámara y para hacer su pregunta justo después de presionar el botón. Antes de hacer la siguiente pregunta, espere a que la respuesta anterior se lea en voz alta.
 	'confirmBiochem': 	'NybAwxFeEYpFKEKymRvu', # Bioquímica seleccionada. Antes de presionar el botón de preguntar, esté listo para presentar los objetos a la cámara y para hacer su pregunta justo después de presionar el botón. Antes de hacer la siguiente pregunta, espere a que la respuesta anterior se lea en voz alta.
+	'questionRecorded': 'bYlleFyvske67zV4Wr2Z', # Pregunta grabada, por favor espere.
 }
 
 # Select audio language here
@@ -76,6 +78,7 @@ def playAudioWithID(itemID):
 			if item.history_item_id == itemID:
 				threadAudio = studyBot.threading.Thread(target = playPatch, args = (item.audio,))
 				threadAudio.start()
+				break
 
 def toggleAudioDesc(event = None):
 	global audioInstructions
@@ -86,6 +89,20 @@ def toggleAudioDesc(event = None):
 		winsound.Beep(700, 300)
 	else:
 		winsound.Beep(500, 300)
+
+# Switch between English and Spanish audio, depending on the selected language
+def selectAudioLanguage():
+	global audioSelect
+	global audioInstructions
+
+	if langVar.get() == '<C> English':
+		audioSelect = ESP
+		langVar.set('<C> Español')
+	else:
+		audioSelect = ENG
+		langVar.set('<C> English')
+
+	playAudioWithID(audioSelect['language'])
 
 # Select next option in dropdown menu
 def selectNextOption():
@@ -270,7 +287,7 @@ def testCamera(index):
 # Create main window
 window = tkinter.Tk()
 window.title('Study-Bot')
-window.geometry('450x350')
+window.geometry('450x450')
 
 # Set background color
 window.configure(bg = '#3C3836')
@@ -318,7 +335,7 @@ while True:
 
 # Create camera frame
 camFrame = tkinter.Frame(window, bg = '#3C3836')
-camFrame.pack(pady = 10)
+camFrame.pack(pady = 7)
 
 cameraVar = tkinter.StringVar(camFrame)
 cameraVar.set(f'Camera 1') # default value
@@ -339,6 +356,35 @@ cameraButton = tkinter.Button(
     font = ('Leelawadee', 12)
 )
 cameraButton.pack(side='left')
+
+# Create audio language frame
+langFrame = tkinter.Frame(window, bg = '#3C3836')
+langFrame.pack(pady = 7)
+
+# Create language label
+langLabel = tkinter.Label(
+    langFrame,  # Change this from window to langFrame
+    text = 'Select audio language:', 
+    bg = '#3C3836', 
+    font = ('Leelawadee', 12), 
+    fg = '#FBF1C7'
+)
+langLabel.pack(pady=10)  # Add some vertical padding
+
+langVar = tkinter.StringVar(window)
+langVar.set('<C> English') # default value
+langDropdown = tkinter.OptionMenu(
+    langFrame, 
+    langVar,
+    '<C> English',
+    '<C> Spanish'
+)
+
+langDropdown.config(width = 15)
+langDropdown.pack(
+    side = 'right', 
+    padx = 10
+)
 
 # Create topic frame
 topicFrame = tkinter.Frame(window, bg = '#3C3836')
@@ -444,6 +490,7 @@ window.bind('1', lambda e: selectNextOption())
 window.bind('2', lambda e: checkSelection())
 window.bind('<Escape>', lambda e: close())
 window.bind('<space>', lambda e: toggleAudioDesc())
+window.bind('c', lambda e: selectAudioLanguage())
 
 # Stop and ask buttons disabled by default
 stopButton.config(state = 'disabled')
@@ -452,14 +499,14 @@ askButton.config(state = 'disabled')
 # NOTE: System sounds are not always immediately enabled, which causes 
 # the first sounds to be inaudible. This beep is used to 'wake up' the 
 # system sounds.
-winsound.Beep(37, 500) # Unaudible frequency in most speakers and by most people
+winsound.Beep(37, 1100) # Unaudible frequency in most speakers and by most people
 
 # Boot-up signal
-window.after(0, winsound.Beep, 500, 200)
+window.after(0, winsound.Beep, 500, 350)
 studyBot.time.sleep(0.01) # Avoid overlapping sounds and popping
-window.after(310, winsound.Beep, 630, 200)
+window.after(310, winsound.Beep, 630, 350)
 studyBot.time.sleep(0.01)
-window.after(610, winsound.Beep, 750, 200)
+window.after(610, winsound.Beep, 750, 350)
 
 window.after(1000, playAudioWithID, audioSelect['welcome']) # Play welcome audio
 window.mainloop()
