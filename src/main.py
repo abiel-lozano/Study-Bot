@@ -63,7 +63,7 @@ def playPatch(audio: bytes) -> None:
 		# Flag prevents black window from showing
 		creationflags = studyBot.subprocess.CREATE_NO_WINDOW,
 	)
-	out, err = proc.communicate(input=audio)
+	out, err = proc.communicate(input = audio)
 	proc.poll()
 
 # Play specific history item ID
@@ -274,20 +274,31 @@ def testCamera(index):
 	while elapsedTime < 3:
 		ret, frame = cap.read()
 		if not ret:
-			print('Failed to capture frame.')
 			break
 		studyBot.cv2.imshow('Frame', frame)
 		elapsedTime = studyBot.time.time() - start
 		key = studyBot.cv2.waitKey(10) & 0xFF
 		if key == 27:
 			break
+		
 	cap.release()
 	studyBot.cv2.destroyAllWindows()
+
+# Using cv2 from studyBot, determine how many cameras are available
+i = 0
+while True:
+	testCap = studyBot.cv2.VideoCapture(i, studyBot.cv2.CAP_DSHOW)
+
+	if not testCap.isOpened():
+		break
+
+	testCap.release()
+	i += 1
 
 # Create main window
 window = tkinter.Tk()
 window.title('Study-Bot')
-window.geometry('450x450')
+window.geometry('450x500')
 
 # Set background color
 window.configure(bg = '#3C3836')
@@ -307,31 +318,46 @@ audioInstructions = tkinter.BooleanVar()
 audioInstructions.set(True)
 
 audioCheckBox = tkinter.Checkbutton(
-    window, 
-    text = '<Spacebar> Audio feedback and instructions',
-    font = ('Leelawadee', 12),
-    bg = '#3C3836',
-    fg = '#FBF1C7',
-    selectcolor = '#3C3836',
-    activebackground = '#3C3836',
-    activeforeground = '#FBF1C7',
-    variable = audioInstructions
+	window, 
+	text = '<Spacebar> Audio feedback and instructions',
+	font = ('Leelawadee', 12),
+	bg = '#3C3836',
+	fg = '#FBF1C7',
+	selectcolor = '#3C3836',
+	activebackground = '#3C3836',
+	activeforeground = '#FBF1C7',
+	variable = audioInstructions
 )
-audioCheckBox.pack(pady = 7)
+audioCheckBox.pack(pady = 0)
 
-# Using cv2 from studyBot, determine how many cameras are available, 
-# create a dropdown menu for the user to select the camera.
+# Create audio language frame
+langFrame = tkinter.Frame(window, bg = '#3C3836')
+langFrame.pack(pady = 8)
 
-i = 0
-while True:
-	try:
-		testCap = studyBot.cv2.VideoCapture(i, studyBot.cv2.CAP_DSHOW)
-		if not testCap.isOpened():
-			break
-		testCap.release()
-	except:
-		break
-	i += 1
+# Create language label
+langLabel = tkinter.Label(
+	langFrame,
+	text = 'Select audio language:', 
+	bg = '#3C3836', 
+	font = ('Leelawadee', 12), 
+	fg = '#FBF1C7'
+)
+langLabel.pack(pady=8)
+
+langVar = tkinter.StringVar(window)
+langVar.set('<C> English') # default value
+langDropdown = tkinter.OptionMenu(
+	langFrame, 
+	langVar,
+	'<C> English',
+	'<C> Spanish'
+)
+
+langDropdown.config(width = 15)
+langDropdown.pack(
+	side = 'right', 
+	padx = 10
+)
 
 # Create camera frame
 camFrame = tkinter.Frame(window, bg = '#3C3836')
@@ -340,51 +366,22 @@ camFrame.pack(pady = 7)
 cameraVar = tkinter.StringVar(camFrame)
 cameraVar.set(f'Camera 1') # default value
 cameraDropdown = tkinter.OptionMenu(
-    camFrame, 
-    cameraVar,
-    *[f'Camera {i + 1}' for i in range(i)] # Dropdown menu items
+	camFrame, 
+	cameraVar,
+	*[f'Camera {i + 1}' for i in range(i)] # Dropdown menu items
 )
 cameraDropdown.config(width = 15)
-cameraDropdown.pack(side='left', padx=10)
+cameraDropdown.pack(side = 'left', padx = 10)
 
 # Create camera test button
 cameraButton = tkinter.Button(
-    camFrame, 
-    text = 'Test Camera', 
-    command = lambda: testCamera(int(cameraVar.get()[7:])-1), # Get camera index from string
-    bg = '#b16286', 
-    font = ('Leelawadee', 12)
+	camFrame, 
+	text = 'Test Camera', 
+	command = lambda: testCamera(int(cameraVar.get()[7:])-1), # Get camera index from string
+	bg = '#b16286', 
+	font = ('Leelawadee', 12)
 )
-cameraButton.pack(side='left')
-
-# Create audio language frame
-langFrame = tkinter.Frame(window, bg = '#3C3836')
-langFrame.pack(pady = 7)
-
-# Create language label
-langLabel = tkinter.Label(
-    langFrame,  # Change this from window to langFrame
-    text = 'Select audio language:', 
-    bg = '#3C3836', 
-    font = ('Leelawadee', 12), 
-    fg = '#FBF1C7'
-)
-langLabel.pack(pady=10)  # Add some vertical padding
-
-langVar = tkinter.StringVar(window)
-langVar.set('<C> English') # default value
-langDropdown = tkinter.OptionMenu(
-    langFrame, 
-    langVar,
-    '<C> English',
-    '<C> Spanish'
-)
-
-langDropdown.config(width = 15)
-langDropdown.pack(
-    side = 'right', 
-    padx = 10
-)
+cameraButton.pack(side = 'left', padx = 5)
 
 # Create topic frame
 topicFrame = tkinter.Frame(window, bg = '#3C3836')
@@ -421,7 +418,7 @@ buttonsFrame = tkinter.Frame(
 	window, 
 	bg = '#3C3836'
 )
-buttonsFrame.pack(pady = 15)
+buttonsFrame.pack(pady = 10)
 
 # Create 'Ask another question' button
 askButton = tkinter.Button(
@@ -432,7 +429,7 @@ askButton = tkinter.Button(
 	font = ('Leelawadee', 12)
 )
 askButton.pack(
-	side = 'left', 
+	side = 'left',
 	padx = 10
 )
 
@@ -450,18 +447,22 @@ stopButton.pack(
 	padx = 10
 )
 
+# Create buttons frame
+exitFrame = tkinter.Frame(
+	window, 
+	bg = '#3C3836'
+)
+exitFrame.pack(pady = 8)
+
 # Create 'Exit' button
 exitButton = tkinter.Button(
-	buttonsFrame, 
+	exitFrame, 
 	text = '<esc> Exit', 
 	command = close, 
 	bg = '#FB4934', 
 	font = ('Leelawadee', 12)
 )
-exitButton.pack(
-	side = 'left', 
-	padx = 10
-)
+exitButton.pack()
 
 # Create infoDisplay text label
 infoDisplay = tkinter.StringVar()

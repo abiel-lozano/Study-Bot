@@ -50,6 +50,8 @@ and try to answer the question without mentioning the information or the objects
 to make it sound more natural.
 
 Always try to give brief answers to the user's questions.
+
+If the user question is empty, or unintelligible, give a summary of the topic.
 """
 
 # Recorder configuration
