@@ -8,10 +8,7 @@ a = Analysis(
     ['..\\src\\main.py'],
     pathex=[],
     binaries=[],
-    datas=[
-    ('[LOCATION OF SITE PACKAGES]/site-packages/whisper/assets/mel_filters.npz', 'whisper/assets'),
-    ('[LOCATION OF SITE PACKAGES]/site-packages/whisper/assets/multilingual.tiktoken', 'whisper/assets')
-    ],
+    datas=[],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -31,7 +28,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='studyBotGUI',
+    name='Study-Bot',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
