@@ -5,6 +5,7 @@
 image_recognition.py
 src/credentials.py
 Tools/credentials.py
+Tests/AudioInteraction/credentials.py
 */__pycache__
 
 # Compilation output

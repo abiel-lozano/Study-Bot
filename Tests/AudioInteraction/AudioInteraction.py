@@ -1,76 +1,75 @@
+# Test audio interaction in isolation without visual context or GUI
+# Records a question, converts it to text, and uses it as a prompt to 
+# generate an answer using GPT-3.5-turbo-16k
+# The answer is then converted to audio and played back to the user
+# Requires API keys in credentials.py
+
 import pyaudio
 import wave
-import ffmpeg
-import whisper
-import openai
+import credentials
+from openai import OpenAI
 from pathlib import Path
 from elevenlabs import generate, play, set_api_key
 
-openai.api_key = '' # OpenAI API key
-set_api_key('') # Elevenlabs API key
-GPT_MODEL = "gpt-3.5-turbo"
+client = OpenAI(api_key = credentials.openAIKey)
 
-def record():
-    # Recording parameters:
-	CHUNK = 1024 # Chunk size
-	FORMAT = pyaudio.paInt16 # Audio codec format
-	CHANNELS = 2
-	RATE = 44100 # Sample rate
-	RECORD_SECONDS = 5 # Recording duration
-	WAVE_OUTPUT_FILENAME = 'output.wav'
+# set_api_key('') # Elevenlabs API key
+GPT_MODEL = "gpt-3.5-turbo-16k"
 
-	audio = pyaudio.PyAudio()
+# Recorder configuration
+CHUNK = 1024 # Chunk size
+FORMAT = pyaudio.paInt16 # Audio codec format
+CHANNELS = 2
+RATE = 44100 # Sample rate
+OUTPUT_FILE = 'question.wav'
 
+question = ''
+
+def recordQuestion():
+	global question
+	global stop
+	print('Setting up audio recording...')
+	audio = pyaudio.PyAudio() # Initialize PyAudio
 	# Open audio stream for recording
 	stream = audio.open(format = FORMAT, channels = CHANNELS, rate = RATE, input = True, frames_per_buffer = CHUNK)
-	print('Recording question...')
-
-	# Initalize audio buffer
 	frames = []
-
-	# Record audio stream in chunks
-	for i in range(0, int(RATE / CHUNK * RECORD_SECONDS)):
+	
+	print('Recording...')
+	for i in range(0, int(RATE / CHUNK * 5)):
 		data = stream.read(CHUNK)
 		frames.append(data)
-
-	print('Recording stopped.')
 
 	# Stop and close audio stream
 	stream.stop_stream()
 	stream.close()
 	audio.terminate()
 
-	# Save the recorded audio as a WAV file
-	wf = wave.open(WAVE_OUTPUT_FILENAME, 'wb')
+	print('Recording stopped')
+
+	# Save recording as WAV
+	wf = wave.open(OUTPUT_FILE, 'wb')
 	wf.setnchannels(CHANNELS)
 	wf.setsampwidth(audio.get_sample_size(FORMAT))
 	wf.setframerate(RATE)
 	wf.writeframes(b''.join(frames))
 	wf.close()
-	
-	# Convert WAV to MP3
-	input_audio = ffmpeg.input(WAVE_OUTPUT_FILENAME)
-	output_audio = ffmpeg.output(input_audio, 'output.mp3')
-	ffmpeg.run(output_audio)
-	
-	print('File saved as "output.mp3"')
+	print('File saved as "question.wav"')
 
-record()
+	# STT Conversion
+	# 'with open() as' automatically closes the file after the block is executed
+	# allows immediate deletion
+	with open(OUTPUT_FILE, "rb") as audioFile:
+		question = client.audio.transcriptions.create(model="whisper-1", file=audioFile).text
 
-model = whisper.load_model('base')
-result = model.transcribe('output.wav', fp16=False, language='English')
-print(result['text'])
+	print(question)
+	# Delete audio file
+	Path(OUTPUT_FILE).unlink()
+	print('File deleted')
 
-# If there is a file with the name "output.mp3" in the directory, delete it.
-if Path('output.mp3').is_file():
-	Path('output.mp3').unlink()
-# If there is a file with the name "output.wav" in the directory, delete it.
-if Path('output.wav').is_file():
-	Path('output.wav').unlink()
+recordQuestion()
 
 # Add infromation source
 source = """
-
 """
 
 # Build the prompt
@@ -81,17 +80,21 @@ Information:
 \"\"\"
 {source}
 \"\"\"
-Question: {result}"""
+Question: {question}"""
 
-response = openai.ChatCompletion.create(
+response = client.chat.completions.create(
+	model = GPT_MODEL,
+	temperature = 0.2,
 	messages = [
 		{'role': 'system', 'content': 'You answer questions in the same language as the question.'},
-        {'role': 'user', 'content': query},
-	],
-	model = GPT_MODEL, temperature = 0
-)	
+		{'role': 'user', 'content': query},
+	]
+)
+# This does not work anymore, response is no longer a dictionary
+# answer = response['choices'][0]['message']['content']
 
-answer = response['choices'][0]['message']['content']
+# New way to get the answer, response is now an object of the Response class
+answer = response.choices[0].message.content
 print('Answer: ', answer)
 
 audioOutput = generate(answer)

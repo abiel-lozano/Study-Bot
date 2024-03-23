@@ -1,8 +1,7 @@
 # Study-Bot: Question answering using audio interaction and object detection, 
 # CLI version for testing, and functions for GUI version
 
-import openai
-import whisper
+from openai import OpenAI
 from pydub import AudioSegment
 from pydub.playback import play as pydubPlay
 import io
@@ -33,7 +32,7 @@ stop = False
 GPT_MODEL = 'gpt-3.5-turbo-16k'
 
 # Credentials
-openai.api_key = credentials.openAIKey
+openAIClient = OpenAI(api_key = credentials.openAIKey)
 set_api_key(credentials.elevenLabsKey)
 
 # Behavioral guidelines for conversation
@@ -90,9 +89,10 @@ def recordQuestion():
 	wf.close()
 
 	# STT Conversion
-	model = whisper.load_model('base')
-	result = model.transcribe(OUTPUT_FILE, fp16 = False)
-	question = result['text']
+	# 'with open() as' automatically closes file after
+	# code block is executed, allows immediate deletion
+	with open(OUTPUT_FILE, "rb") as audioFile:
+		question = openAIClient.audio.transcriptions.create(model="whisper-1", file=audioFile).text
 	
 	# Delete audio file
 	Path(OUTPUT_FILE).unlink()
@@ -317,16 +317,17 @@ def lookForObjects(topic: int, camera: int = 0):
 
 def sendMessage(messageList: any):
 	# Send prompt to GPT
-	response = openai.ChatCompletion.create(
-		messages = messageList,
-		model = GPT_MODEL, 
-		temperature = 0.2
+	response = openAIClient.chat.completions.create(
+		model = GPT_MODEL,
+		temperature = 0.2,
+		messages = messageList
 	)
-	# print(response)
-	_answer = response['choices'][0]['message']['content']
+
+	# print(response) # For debugging only
+	gptAnswer = response.choices[0].message.content
 
 	# Add the response to the message list
-	messageList.append({'role': 'assistant', 'content': _answer})
+	messageList.append({'role': 'assistant', 'content': gptAnswer})
 
 def streamAnswer(audioStream: Iterator[bytes]) -> bytes:
 	audioOutput = b''
