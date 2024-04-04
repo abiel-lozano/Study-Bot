@@ -7,6 +7,7 @@ src/credentials.py
 Tools/credentials.py
 Tests/AudioInteraction/credentials.py
 */__pycache__
+Tests/AudioInteraction/__pycache__
 
 # Compilation output
 Bin

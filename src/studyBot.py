@@ -446,11 +446,12 @@ if __name__ == '__main__':
 		print('Question: ' + question + '\n')
 
 
-		# NOTE: Add this to the query if the model's response has any deviations from previous instructions
+		# NOTE: Add either of these the query if the model's response has any
+		# deviations from previous instructions
 		"""
 		Remember to consider the object list and the information provided when answering 
 		the user's question. Do not mention the user or the information in your answer 
-		to make it more sound natural.
+		to make it sound more natural.
 
 		If the question is unrelated to the information, ignore all previous instructions
 		and try to answer the question without mentioning the information or the objects

@@ -2,13 +2,14 @@
 # given the source material, different custom instructions, 
 # models, and temperature settings.
 
-import openai
+from openai import OpenAI
 import credentials
 
 print('Prompt Tester', end = '\n\n')
 GPT_MODEL = 'gpt-3.5-turbo-16k'
 
-openai.api_key = credentials.openAIKey
+# Initialize the OpenAI client
+client = OpenAI(api_key = credentials.openAIKey)
 
 # Source material, preferably from a realiable textbook
 source = """
@@ -32,13 +33,13 @@ Answer the question in the same language of the question.
 """
 
 # Send the prompt to the API
-response = openai.ChatCompletion.create(
-    messages = [
-        {'role': 'system', 'content': 'Answer questions in the language of the question.'},
-		{'role': 'user', 'content': query},
-	],
+response = client.chat.completions.create(
     model = GPT_MODEL,
-    temperature = 0, # High temperature will make the response more 'creative', low temperature will make the AI more 'factual' and reliant on the given source
+    temperature = 0.2,
+    messages = [
+        {'role': 'system', 'content': 'You answer questions in the same language as the question.'},
+        {'role': 'user', 'content': query},
+    ]
 )
 
 print('Answer:', response['choices'][0]['message']['content'])

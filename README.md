@@ -13,11 +13,6 @@
 
 Some good next steps could be to embed this system into a more advanced user interface for distribution as a desktop application, create a computer vision model that can detect the physical educational material without depending on color or ArUco markers, as well as some performance improvements and new interactive features.
 
-## Contributors
-
-- Aarón Francisco Urbina de la Cruz ( [@Prodygyt](https://github.com/Prodygyt) )
-- Abiel Adrián Lozano Herrejón ( [@abiel-lozano](https://github.com/abiel-lozano) )
-
 ## Installation and Usage
 
 It is recomended to use [Python 3.9.9](https://www.python.org/downloads/release/python-399/) so that the `whisper` library can be used without issues. To avoid having to remove your current **Python** installation, you may want to use a virtual enviroment to use this specific version of **Python**. To install the required dependencies, run the following command:
