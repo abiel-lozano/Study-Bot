@@ -23,7 +23,7 @@ def playAudioWithID(history, itemID):
 		print('Something went wrong, history item not found.')
 
 # 1 - Generate audio from text
-text = 'TEXT TO BE CONVERTED TO AUDIO'
+text = ''
 generate(text = text, model = 'eleven_multilingual_v2')
 
 # 2 - Check history to get history_item_id
@@ -33,5 +33,5 @@ history = History.from_api()
 
 # 3 - Play specific history item by history_item_id to check your work
 select = history[0].history_item_id # Selects the last generated audio
-# select = "" # history_item_id string
+# select = '' # history_item_id string
 playAudioWithID(history, select)

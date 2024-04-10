@@ -32,13 +32,13 @@ ENG = {
 
 ESP = {
 	# Audio Name ------- ID -------------------- Suggested Audio Descriptions
-	'welcome': 			'wij7p8zqa3uKAJMevWFT', # Bienvenido a Study-Bot! Para comenzar, elige un tema del menú usando el número 1 para navegar las opciones. Después, selecciona el tema presionando el número 2.
-	'language': 		'yAcNwzwkL3XzKjpxqTRf', # Español
-	'topicHumanBody': 	'OIZ9eoFel81KKe7eMjEN', # Cuerpo Humano
-	'topicBiochem': 	'KLMTeyIhaa2hTeFahZAU', # Bioquímica
-	'confirmHumanBody': 'A0AHMdfV5qFgohvvwIdp', # Cuerpo Humano seleccionado. Prepárate para presentar los objetos a la cámara. Luego, presiona el número 3 para comenzar a grabar la pregunta. La grabación comenzará después del tono. Usa el número 4 para detener la grabación cuando hayas terminado.
-	'confirmBiochem': 	'NybAwxFeEYpFKEKymRvu', # Bioquímica seleccionada. Prepárate para presentar los objetos a la cámara. Luego, presiona el número 3 para comenzar a grabar la pregunta. La grabación comenzará después del tono. Usa el número 4 para detener la grabación cuando hayas terminado.
-	'questionRecorded': 'bYlleFyvske67zV4Wr2Z', # Pregunta grabada, por favor espera.
+	'welcome': 			'upVrbpxRCRiSjsI0Tw11', # Bienvenido a Study-Bot! Para comenzar, elige un tema del menú usando el número 1 para navegar las opciones. Después, selecciona el tema presionando el número 2.
+	'language': 		'dx9OIBdj9NJIAcZleDSM', # Español
+	'topicHumanBody': 	'DzFBKFlDbgFeuHr56OvO', # Cuerpo Humano
+	'topicBiochem': 	'hjh2ZfBrukQGM3SVcroq', # Bioquímica
+	'confirmHumanBody': 'K9F5XhztDY2UawvdQFH9', # Cuerpo Humano seleccionado. Prepárate para presentar los objetos a la cámara. Luego, presiona el número 3 para comenzar a grabar la pregunta. La grabación comenzará después del tono. Usa el número 4 para detener la grabación cuando hayas terminado.
+	'confirmBiochem': 	'N1KChBbFileU8lQMcM9J', # Bioquímica seleccionada. Prepárate para presentar los objetos a la cámara. Luego, presiona el número 3 para comenzar a grabar la pregunta. La grabación comenzará después del tono. Usa el número 4 para detener la grabación cuando hayas terminado.
+	'questionRecorded': 'yc1Zi8Zx5pXMAaZfNh7e', # Pregunta grabada, por favor espera.
 }
 
 # Select audio language here
