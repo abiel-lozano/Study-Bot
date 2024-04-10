@@ -1,4 +1,4 @@
-openai==1.14.2
+openai==1.16.2
 pyaudio==0.2.13
 elevenlabs==0.2.18
 opencv-python==4.7.0.72

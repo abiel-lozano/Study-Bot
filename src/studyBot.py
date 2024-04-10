@@ -29,7 +29,7 @@ question = ''
 answer = ''
 stop = False
 
-GPT_MODEL = 'gpt-3.5-turbo-16k'
+GPT_MODEL = 'gpt-3.5-turbo'
 
 # Credentials
 openAIClient = OpenAI(api_key = credentials.openAIKey)
@@ -342,7 +342,7 @@ def streamAnswer(audioStream: Iterator[bytes]) -> bytes:
 	pydubPlay(audioSegment)
 
 def convertTTS(text: str):
-	audioOutput = generate(text = text, model = 'eleven_multilingual_v1', stream = True)
+	audioOutput = generate(text = text, model = 'eleven_multilingual_v2', stream = True)
 	streamAnswer(audioOutput)
 	# print('Audio playback disabled.\n')
 

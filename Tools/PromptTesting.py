@@ -6,7 +6,7 @@ from openai import OpenAI
 import credentials
 
 print('Prompt Tester', end = '\n\n')
-GPT_MODEL = 'gpt-3.5-turbo-16k'
+GPT_MODEL = 'gpt-3.5-turbo'
 
 # Initialize the OpenAI client
 client = OpenAI(api_key = credentials.openAIKey)

@@ -14,7 +14,7 @@ from elevenlabs import generate, play, set_api_key
 client = OpenAI(api_key = credentials.openAIKey)
 
 # set_api_key('') # Elevenlabs API key
-GPT_MODEL = "gpt-3.5-turbo-16k"
+GPT_MODEL = "gpt-3.5-turbo"
 
 # Recorder configuration
 CHUNK = 1024 # Chunk size
@@ -97,5 +97,5 @@ response = client.chat.completions.create(
 answer = response.choices[0].message.content
 print('Answer: ', answer)
 
-audioOutput = generate(answer)
+audioOutput = generate(text = answer, model = 'eleven_multilingual_v2')
 play(audioOutput)

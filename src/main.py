@@ -21,23 +21,24 @@ firstQuestion = True
 
 ENG = {
 	# Audio Name ------- ID -------------------- Suggested Audio Descriptions
-	'welcome': 			'HNwmc11X0p23y77VLvOY', # Welcome to Study-Bot! To begin, select a topic from the dropdown menu and click the select button.
-	'language': 		'chwuaLHe1nnAY3VBJRoI', # English
-	'topicHumanBody': 	'ppXHdy46xuZtg3ysNoxu', # Human Body.
-	'topicBiochem': 	'IjsDkrqkOCQ64XyqL5ZV', # Biochemistry.
-	'confirmHumanBody': 'OCE5HysrlHaX1AoGDd1j', # Human Body selected. Before pressing the ask buton, be ready to present the objects to the camera and to ask you question right after pressing the button. Before asking the next question, please wait for the previous response to be read out loud.
-	'confirmBiochem': 	'CPjy6303qpWpSUEl07xz', # Biochemistry selected. Before pressing the ask buton, be ready to present the objects to the camera and to ask you question right after pressing the button. Before asking the next question, please wait for the previous response to be read out loud.
-	'questionRecorded': '7aNkMntxEq7M9IXZ6Vkv', # Question recorded, please wait.
+	'welcome': 			'6X1EMz6BdxLjm7uvGozZ', # Welcome to Study-Bot! To begin, choose a topic from the dropdown menu using number 1 to go through the options. Then, select the topic by pressing number 2.
+	'language': 		'VKSMDZtiWeA1aBUOYL9H', # English
+	'topicHumanBody': 	'vI6YafcjSXDE1jAcOmyD', # Human Body
+	'topicBiochem': 	'Mb5eiuPEzl6uQvyUIpdT', # Biochemistry
+	'confirmHumanBody': 'OCE5HysrlHaX1AoGDd1j', # Human Body selected. Be ready to present the objects to the camera. Then, use number 3 to start recording the question. The recording will begin after the tone. Use number 4 to stop recording when you are done.
+	'confirmBiochem': 	'9g9lMMaDz6Hdb3j9ym5D', # Biochemistry selected. Be ready to present the objects to the camera. Then, use number 3 to start recording the question. The recording will begin after the tone. Use number 4 to stop recording.
+	'questionRecorded': 'cfzOrwicQ3HbeaGbUs1V', # Question recorded, please wait.
 }
 
 ESP = {
-	'welcome': 			'wij7p8zqa3uKAJMevWFT', # Bienvenido a Study-Bot! Para comenzar, seleccione un tema del menú desplegable y haga clic en el botón de selección.
+	# Audio Name ------- ID -------------------- Suggested Audio Descriptions
+	'welcome': 			'wij7p8zqa3uKAJMevWFT', # Bienvenido a Study-Bot! Para comenzar, elige un tema del menú usando el número 1 para navegar las opciones. Después, selecciona el tema presionando el número 2.
 	'language': 		'yAcNwzwkL3XzKjpxqTRf', # Español
-	'topicHumanBody': 	'OIZ9eoFel81KKe7eMjEN', # Cuerpo humano.
-	'topicBiochem': 	'KLMTeyIhaa2hTeFahZAU', # Bioquímica.
-	'confirmHumanBody': 'A0AHMdfV5qFgohvvwIdp', # Cuerpo humano seleccionado. Antes de presionar el botón de preguntar, esté listo para presentar los objetos a la cámara y para hacer su pregunta justo después de presionar el botón. Antes de hacer la siguiente pregunta, espere a que la respuesta anterior se lea en voz alta.
-	'confirmBiochem': 	'NybAwxFeEYpFKEKymRvu', # Bioquímica seleccionada. Antes de presionar el botón de preguntar, esté listo para presentar los objetos a la cámara y para hacer su pregunta justo después de presionar el botón. Antes de hacer la siguiente pregunta, espere a que la respuesta anterior se lea en voz alta.
-	'questionRecorded': 'bYlleFyvske67zV4Wr2Z', # Pregunta grabada, por favor espere.
+	'topicHumanBody': 	'OIZ9eoFel81KKe7eMjEN', # Cuerpo Humano
+	'topicBiochem': 	'KLMTeyIhaa2hTeFahZAU', # Bioquímica
+	'confirmHumanBody': 'A0AHMdfV5qFgohvvwIdp', # Cuerpo Humano seleccionado. Prepárate para presentar los objetos a la cámara. Luego, presiona el número 3 para comenzar a grabar la pregunta. La grabación comenzará después del tono. Usa el número 4 para detener la grabación cuando hayas terminado.
+	'confirmBiochem': 	'NybAwxFeEYpFKEKymRvu', # Bioquímica seleccionada. Prepárate para presentar los objetos a la cámara. Luego, presiona el número 3 para comenzar a grabar la pregunta. La grabación comenzará después del tono. Usa el número 4 para detener la grabación cuando hayas terminado.
+	'questionRecorded': 'bYlleFyvske67zV4Wr2Z', # Pregunta grabada, por favor espera.
 }
 
 # Select audio language here

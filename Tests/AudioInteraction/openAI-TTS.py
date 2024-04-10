@@ -1,24 +1,19 @@
-from openai import OpenAI
-client = OpenAI()
+# Generate audio from text using OpenAI's speech endpoint
+# Will not be used for now, spanish sounds terrible
 
-audioFile = 'response.wav'
+from openai import OpenAI
+import credentials
+import warnings
+
+# Ignore deprecation warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+
+client = OpenAI(api_key = credentials.openAIKey)
 
 response = client.audio.speech.create(
-  model="tts-1",
-  voice="alloy",
-  input="Today is a wonderful day to build something people love!"
+  model="tts-1-hd",
+  voice="echo",
+  input="text"
 )
 
-response.stream_to_file(audioFile)
-# response.stream_to_file("output.wav")
-# response.with_streaming_response.method()
-
-# Play MP3 file
-
-import pygame
-
-pygame.mixer.init()
-pygame.mixer.music.load(audioFile)
-pygame.mixer.music.play()
-pygame.time.wait(5000) # Play for 5 seconds
-pygame.mixer.music.stop() # Stop playing
+response.stream_to_file("output.wav")
