@@ -342,9 +342,9 @@ def streamAnswer(audioStream: Iterator[bytes]) -> bytes:
 	pydubPlay(audioSegment)
 
 def convertTTS(text: str):
-	# audioOutput = generate(text = text, model = 'eleven_multilingual_v2', stream = True)
-	# streamAnswer(audioOutput)
-	print('Audio playback disabled.\n')
+	audioOutput = generate(text = text, model = 'eleven_multilingual_v2', stream = True)
+	streamAnswer(audioOutput)
+	# print('Audio playback disabled.\n')
 
 # Only run if not imported as a module
 if __name__ == '__main__':
