@@ -61,6 +61,8 @@ RATE = 44100 # Sample rate
 OUTPUT_FILE = 'question.wav'
 
 def recordQuestion():
+	startTime = time.time()
+
 	global question
 	global stop
 
@@ -71,7 +73,7 @@ def recordQuestion():
 	frames = []
 
 	# Record audio stream in chunks
-	while not stop:
+	while not stop or time.time() - startTime < 1: # While stop is false 
 		data = stream.read(CHUNK)
 		frames.append(data)
 
@@ -292,8 +294,6 @@ def markerID(camera: int = 0):
 		cv2.imshow('Study-Bot View', frame)
 
 		elapsedTime = time.time() - startTime
-
-		# Check for 'Esc' key press
 		key = cv2.waitKey(10) & 0xFF
 		if key == 27:
 			break
@@ -342,28 +342,34 @@ def streamAnswer(audioStream: Iterator[bytes]) -> bytes:
 	pydubPlay(audioSegment)
 
 def convertTTS(text: str):
-	audioOutput = generate(text = text, model = 'eleven_multilingual_v2', stream = True)
-	streamAnswer(audioOutput)
-	# print('Audio playback disabled.\n')
+	# audioOutput = generate(text = text, model = 'eleven_multilingual_v2', stream = True)
+	# streamAnswer(audioOutput)
+	print('Audio playback disabled.\n')
 
 # Only run if not imported as a module
 if __name__ == '__main__':
 	# Listen for keyboard input to stop recording
 	keyboard.add_hotkey('s', stopRecording)
+	selectedTopic = False
 
-	print('Select a topic NUMBER from the list:\n')
-	print('[1] - Human Body')
-	print('[2] - Krebs Cycle\n')
-	topic = int(input('Topic: '))
-	source = ''
+	while selectedTopic == False:
+		print('Select a topic NUMBER from the list:\n')
+		print('[1] - Human Body')
+		print('[2] - Krebs Cycle\n')
+		topic = int(input('Topic: '))
+		source = ''
 
-	# Load the source material based on the selected topic
-	if topic == 1:
-		print('Topic: Human Body\n')
-		source = sourceMaterial.humanBody
-	elif topic == 2:
-		print('Topic: Krebs Cycle\n')
-		source = sourceMaterial.krebsCycle
+		# Load the source material based on the selected topic
+		if topic == 1:
+			print('Topic: Human Body\n')
+			source = sourceMaterial.humanBody
+			selectedTopic = True
+		elif topic == 2:
+			print('Topic: Krebs Cycle\n')
+			source = sourceMaterial.krebsCycle
+			selectedTopic = True
+		else:
+			print('Invalid topic number.\n')
 
 	# Start question processing threads
 	objID = threading.Thread(target = lookForObjects, args = (topic,))

@@ -25,7 +25,7 @@ ENG = {
 	'language': 		'VKSMDZtiWeA1aBUOYL9H', # English
 	'topicHumanBody': 	'vI6YafcjSXDE1jAcOmyD', # Human Body
 	'topicBiochem': 	'Mb5eiuPEzl6uQvyUIpdT', # Biochemistry
-	'confirmHumanBody': 'OCE5HysrlHaX1AoGDd1j', # Human Body selected. Be ready to present the objects to the camera. Then, use number 3 to start recording the question. The recording will begin after the tone. Use number 4 to stop recording when you are done.
+	'confirmHumanBody': 'g7YIvYxq9oszkAqEqVqG', # Human Body selected. Be ready to present the objects to the camera. Then, use number 3 to start recording the question. The recording will begin after the tone. Use number 4 to stop recording.
 	'confirmBiochem': 	'9g9lMMaDz6Hdb3j9ym5D', # Biochemistry selected. Be ready to present the objects to the camera. Then, use number 3 to start recording the question. The recording will begin after the tone. Use number 4 to stop recording.
 	'questionRecorded': 'cfzOrwicQ3HbeaGbUs1V', # Question recorded, please wait.
 }
@@ -41,8 +41,10 @@ ESP = {
 	'questionRecorded': 'yc1Zi8Zx5pXMAaZfNh7e', # Pregunta grabada, por favor espera.
 }
 
-# Select audio language here
-audioSelect = ENG
+# TODO: Review ESP[language], ESP[confirmHumanBody], ESP[confirmBiochem], ENG[confirmBiochem].
+
+# Select default audio language here
+audioSelect = ESP
 
 # NOTE: This is a patch for elevenlabs' play function, to avoid showing an
 # empty black window when playing audio in the compiled version. The lack of
@@ -81,15 +83,14 @@ def playAudioWithID(itemID):
 				threadAudio.start()
 				break
 
-def toggleAudioDesc(event = None):
+def toggleAudioDesc():
 	global audioInstructions
-	# Invert boolean value
-	audioInstructions.set(not audioInstructions.get())
+	audioInstructions.set(not audioInstructions.get()) # Invert boolean value
 
 	if audioInstructions.get():
-		winsound.Beep(700, 300)
+		winsound.Beep(700, 400)
 	else:
-		winsound.Beep(500, 300)
+		winsound.Beep(500, 400)
 
 # Switch between English and Spanish audio, depending on the selected language
 def selectAudioLanguage():
@@ -147,7 +148,7 @@ def checkSelection():
 
 	# Check if the 'Ask Question' button isn't already bound
 	if window.bind('3') == '':
-		window.bind('3', lambda e: backgroundInit())
+		window.bind('3', lambda _: backgroundInit())
 		askButton.config(state = 'normal')
 
 	# Resets message history, firstQuestion, and query if the topic is changed
@@ -175,7 +176,7 @@ def backgroundInit():
 	window.unbind('2')
 	window.unbind('3')
 	# Bind stop recording key
-	window.bind('4', lambda e: stopRecording())
+	window.bind('4', lambda _: stopRecording())
 
 def startQuestionThreads():
 	global firstQuestion
@@ -242,9 +243,9 @@ Question: {studyBot.question}
 	askButton.config(state = 'normal')
 
 	# Rebind keys
-	window.bind('1', lambda e: selectNextOption())
-	window.bind('2', lambda e: checkSelection())
-	window.bind('3', lambda e: backgroundInit())
+	window.bind('1', lambda _: selectNextOption())
+	window.bind('2', lambda _: checkSelection())
+	window.bind('3', lambda _: backgroundInit())
 
 	# Unbind stop recording key
 	window.unbind('4')
@@ -258,12 +259,14 @@ def stopRecording():
 	window.unbind('4')
 
 def close():
+	# Wake up system sounds
+	winsound.Beep(37, 600) # Unaudible frequency in most speakers
 	# Closing signal
-	winsound.Beep(700, 200) 
+	winsound.Beep(700, 250) 
 	studyBot.time.sleep(0.01) # Avoid overlapping sounds and popping
-	winsound.Beep(600, 200)
+	winsound.Beep(600, 250)
 	studyBot.time.sleep(0.01)
-	winsound.Beep(500, 200)
+	winsound.Beep(500, 250)
 	sys.exit()
 
 # Given a camera index, open the camera for 3 seconds and display the feed
@@ -346,12 +349,12 @@ langLabel = tkinter.Label(
 langLabel.pack(pady=8)
 
 langVar = tkinter.StringVar(window)
-langVar.set('<C> English') # default value
+langVar.set('<C> Español') # default value
 langDropdown = tkinter.OptionMenu(
 	langFrame, 
 	langVar,
-	'<C> English',
-	'<C> Spanish'
+	'<C> Español',
+	'<C> English'
 )
 
 langDropdown.config(width = 15)
@@ -378,7 +381,7 @@ cameraDropdown.pack(side = 'left', padx = 10)
 cameraButton = tkinter.Button(
 	camFrame, 
 	text = 'Test Camera', 
-	command = lambda: testCamera(int(cameraVar.get()[7:])-1), # Get camera index from string
+	command = lambda: testCamera(int(cameraVar.get()[7:]) - 1), # Get camera index from string
 	bg = '#b16286', 
 	font = ('Leelawadee', 12)
 )
@@ -488,11 +491,11 @@ for i in range(topicDropdown['menu'].index('end') + 1): # Size of dropdown menu
 	options.append(optionLabel)
 
 # Keyboard bindings for all functions with keys 1, 2, 3, 4 and Esc
-window.bind('1', lambda e: selectNextOption())
-window.bind('2', lambda e: checkSelection())
-window.bind('<Escape>', lambda e: close())
-window.bind('<space>', lambda e: toggleAudioDesc())
-window.bind('c', lambda e: selectAudioLanguage())
+window.bind('1', lambda _: selectNextOption())
+window.bind('2', lambda _: checkSelection())
+window.bind('<Escape>', lambda _: close())
+window.bind('<space>', lambda _: toggleAudioDesc())
+window.bind('c', lambda _: selectAudioLanguage())
 
 # Stop and ask buttons disabled by default
 stopButton.config(state = 'disabled')
@@ -501,7 +504,7 @@ askButton.config(state = 'disabled')
 # NOTE: System sounds are not always immediately enabled, which causes 
 # the first sounds to be inaudible. This beep is used to 'wake up' the 
 # system sounds.
-winsound.Beep(37, 1100) # Unaudible frequency in most speakers and by most people
+winsound.Beep(37, 1000) # Unaudible frequency in most speakers
 
 # Boot-up signal
 window.after(0, winsound.Beep, 500, 350)
