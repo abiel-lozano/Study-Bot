@@ -51,6 +51,8 @@ to make it sound more natural.
 Always try to give brief answers to the user's questions.
 
 If the user question is empty, or unintelligible, give a summary of the topic.
+
+Do not add appendages to the answer, such as "Summary:", "Answer:", etc.
 """
 
 # Recorder configuration
@@ -329,6 +331,24 @@ def sendMessage(messageList: any):
 	# Add the response to the message list
 	messageList.append({'role': 'assistant', 'content': gptAnswer})
 
+def sendMessageStreamAnswer(messageList: any):
+	gptAnswer = ''
+
+	stream = openAIClient.chat.completions.create(
+    	model = GPT_MODEL,
+    	messages = messageList,
+		temperature = 0.2,
+    	stream=True,
+	)
+
+	for chunk in stream:
+		print(chunk.choices[0].delta.content or "", end="", flush=True)
+		
+		if chunk.choices[0].delta.content is not None:
+			gptAnswer += chunk.choices[0].delta.content
+
+	messageList.append({'role': 'assistant', 'content': gptAnswer})
+
 def streamAnswer(audioStream: Iterator[bytes]) -> bytes:
 	audioOutput = b''
 	
@@ -406,13 +426,9 @@ if __name__ == '__main__':
 	]
 
 	print('Sending prompt to GPT...\n')
-	sendMessage(messageHistory)
+	sendMessageStreamAnswer(messageHistory)
 	# Get the answer from the last message in the message history
 	answer = next((msg for msg in reversed(messageHistory) if msg['role'] == 'assistant'), None)['content']
-	print(answer + '\n')
-	
-	if answer != '':
-		print('Answer: ' + answer + '\n\n')
 
 	# Convert answer to audio
 	print('Converting answer to audio...\n')
