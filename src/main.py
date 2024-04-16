@@ -36,50 +36,28 @@ ESP = {
 	'language': 		'dx9OIBdj9NJIAcZleDSM', # Español
 	'topicHumanBody': 	'DzFBKFlDbgFeuHr56OvO', # Cuerpo Humano
 	'topicBiochem': 	'hjh2ZfBrukQGM3SVcroq', # Bioquímica
-	'confirmHumanBody': 'K9F5XhztDY2UawvdQFH9', # Cuerpo Humano seleccionado. Prepárate para presentar los objetos a la cámara. Luego, presiona el número 3 para comenzar a grabar la pregunta. La grabación comenzará después del tono. Usa el número 4 para detener la grabación cuando hayas terminado.
+	'confirmHumanBody': 'yc1Zi8Zx5pXMAaZfNh7e', # Cuerpo Humano seleccionado. Prepárate para presentar los objetos a la cámara. Luego, presiona el número 3 para comenzar a grabar la pregunta. La grabación comenzará después del tono. Usa el número 4 para detener la grabación cuando hayas terminado.
 	'confirmBiochem': 	'N1KChBbFileU8lQMcM9J', # Bioquímica seleccionada. Prepárate para presentar los objetos a la cámara. Luego, presiona el número 3 para comenzar a grabar la pregunta. La grabación comenzará después del tono. Usa el número 4 para detener la grabación cuando hayas terminado.
-	'questionRecorded': 'yc1Zi8Zx5pXMAaZfNh7e', # Pregunta grabada, por favor espera.
+	'questionRecorded': 'OYb9QwW8xyylYVFnax7w', # Pregunta grabada, por favor espera.
 }
 
 # TODO: Review ESP[language], ESP[confirmHumanBody], ESP[confirmBiochem], ENG[confirmBiochem].
 
 # Select default audio language here
-audioSelect = ESP
-
-# NOTE: This is a patch for elevenlabs' play function, to avoid showing an
-# empty black window when playing audio in the compiled version. The lack of
-# this flag is not an issue when using the Python interpreter. The specific 
-# playback method for notebooks was removed, as it is not necessary
-# for this application.
-def playPatch(audio: bytes) -> None:
-	# Access subprocess module through elevenlabs from studyBot 
-	# to avoid double import
-	if not studyBot.is_installed("ffplay"):
-		raise ValueError("ffplay from ffmpeg not found, necessary to play audio.")
-	
-	args = ["ffplay", "-autoexit", "-", "-nodisp"]
-	proc = studyBot.subprocess.Popen(
-		args = args,
-		stdout = studyBot.subprocess.PIPE,
-		stdin = studyBot.subprocess.PIPE,
-		stderr = studyBot.subprocess.PIPE,
-		# Flag prevents black window from showing
-		creationflags = studyBot.subprocess.CREATE_NO_WINDOW,
-	)
-	out, err = proc.communicate(input = audio)
-	proc.poll()
+audioSelect = ENG
 
 # Play specific history item ID
-def playAudioWithID(itemID):
+def playAudioWithID(itemID: str):
 	global audioHistory
 	global audioInstructions
 
 	# Check if user disabled audio instructions
 	if audioInstructions.get():
 		# Find item with matching ID
-		for item in audioHistory:
+		for item in audioHistory.history:
 			if item.history_item_id == itemID:
-				threadAudio = studyBot.threading.Thread(target = playPatch, args = (item.audio,))
+				audio = studyBot.elevenLabsClient.history.get_audio(itemID)
+				threadAudio = studyBot.threading.Thread(target = studyBot.play, args = (audio, False, False))
 				threadAudio.start()
 				break
 
@@ -205,7 +183,6 @@ def startQuestionThreads():
 
 		Objects held by user: {studyBot.objects}
 		Question: {studyBot.question}
-
 		Information:
 		\"\"\"
 		{source}
@@ -270,7 +247,7 @@ def close():
 	sys.exit()
 
 # Given a camera index, open the camera for 3 seconds and display the feed
-def testCamera(index):
+def testCamera(index: int):
 	cap = studyBot.cv2.VideoCapture(index, studyBot.cv2.CAP_DSHOW)
 	start = studyBot.time.time()
 	elapsedTime = 0
@@ -480,8 +457,8 @@ infoLabel = tkinter.Label(
 )
 infoLabel.pack()
 
-# Access from_api() method from History class through studyBot module
-audioHistory = studyBot.History.from_api()
+# Access get_all() method from elevenLabsClient in studyBot module
+audioHistory = studyBot.elevenLabsClient.history.get_all()
 
 options = []
 

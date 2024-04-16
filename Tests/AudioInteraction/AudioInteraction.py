@@ -6,14 +6,16 @@
 
 import pyaudio
 import wave
-import credentials
-from openai import OpenAI
 from pathlib import Path
-from elevenlabs import generate, play, set_api_key
+from elevenlabs.client import ElevenLabs
+from elevenlabs import play
+from openai import OpenAI
+import credentials
 
-client = OpenAI(api_key = credentials.openAIKey)
+# Initialize clients, set API keys
+openAIClient = OpenAI(api_key = credentials.openAIKey)
+elevenLabsClient = ElevenLabs(api_key = credentials.elevenLabsKey)
 
-# set_api_key('') # Elevenlabs API key
 GPT_MODEL = "gpt-3.5-turbo"
 
 # Recorder configuration
@@ -59,7 +61,7 @@ def recordQuestion():
 	# 'with open() as' automatically closes the file after the block is executed
 	# allows immediate deletion
 	with open(OUTPUT_FILE, "rb") as audioFile:
-		question = client.audio.transcriptions.create(model="whisper-1", file=audioFile).text
+		question = openAIClient.audio.transcriptions.create(model="whisper-1", file=audioFile).text
 
 	print(question)
 	# Delete audio file
@@ -82,7 +84,7 @@ Information:
 \"\"\"
 Question: {question}"""
 
-response = client.chat.completions.create(
+response = openAIClient.chat.completions.create(
 	model = GPT_MODEL,
 	temperature = 0.2,
 	messages = [
@@ -97,5 +99,5 @@ response = client.chat.completions.create(
 answer = response.choices[0].message.content
 print('Answer: ', answer)
 
-audioOutput = generate(text = answer, model = 'eleven_multilingual_v2')
+audioOutput = elevenLabsClient.generate(text = answer, model = 'eleven_multilingual_v2')
 play(audioOutput)

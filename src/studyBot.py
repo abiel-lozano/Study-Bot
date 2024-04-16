@@ -1,22 +1,18 @@
 # Study-Bot: Question answering using audio interaction and object detection, 
 # CLI version for testing, and functions for GUI version
 
-from openai import OpenAI
-from pydub import AudioSegment
-from pydub.playback import play as pydubPlay
-import io
-from typing import Iterator
 import pyaudio
 import wave
+import time
 from pathlib import Path
-# History, is_installed, and subprocess are used only by main script, do not remove
-from elevenlabs import set_api_key, generate, History, is_installed, subprocess
+from openai import OpenAI
 import cv2
 import numpy as np
-import time
+from elevenlabs import play
+from elevenlabs.client import ElevenLabs
 import threading
 import keyboard
-import credentials # Ignored by git, contains API keys
+import credentials # Contains API keys, create your own credentials.py file
 import sourceMaterial
 
 global objects
@@ -33,26 +29,26 @@ GPT_MODEL = 'gpt-3.5-turbo'
 
 # Credentials
 openAIClient = OpenAI(api_key = credentials.openAIKey)
-set_api_key(credentials.elevenLabsKey)
+elevenLabsClient = ElevenLabs(api_key = credentials.elevenLabsKey)
 
 # Behavioral guidelines for conversation
 instructions = """
-Try to use the information below to help the user study by answering 
-the user's question. The user may or may not be holding a physical representation 
-of what their question is about. Consider the object list, which includes all 
-the objects that the user is holding, so that the answer can be refined to be 
-more specific to the user's question. Do not mention the user or the information 
-in your answer to make it more sound natural.
+Use the information below to help the user study by answering their 
+questions. The user could be holding a physical representation of 
+what their question is about. Consider the object list, which 
+includes all the objects that the user is holding, so that the answer 
+can be refined to be more specific to the user's question. Do not 
+mention 'the user' or 'the information' in your answer, so that it 
+sounds natural, as if a teacher were answering a student's question.
 
-If the question is unrelated to the information, ignore all previous instructions
-and try to answer the question without mentioning the information or the objects 
-to make it sound more natural.
+If the question is unrelated to the information, ignore all previous 
+instructions and try to answer the question without mentioning the 
+information or the objects to make it sound more natural.
 
 Always try to give brief answers to the user's questions.
 
-If the user question is empty, or unintelligible, give a summary of the topic.
-
-Do not add appendages to the answer, such as "Summary:", "Answer:", etc.
+If the user question is empty, or unintelligible, give a summary of 
+the topic.
 """
 
 # Recorder configuration
@@ -343,27 +339,15 @@ def sendMessageStreamAnswer(messageList: any):
 
 	for chunk in stream:
 		print(chunk.choices[0].delta.content or "", end="", flush=True)
-		
+
 		if chunk.choices[0].delta.content is not None:
 			gptAnswer += chunk.choices[0].delta.content
 
 	messageList.append({'role': 'assistant', 'content': gptAnswer})
 
-def streamAnswer(audioStream: Iterator[bytes]) -> bytes:
-	audioOutput = b''
-	
-	# For each chunk of audio in stream, add it to the output
-	for chunk in audioStream:
-		if chunk is not None:
-			audioOutput += chunk
-
-	# Play audio output using PyDub
-	audioSegment = AudioSegment.from_file(io.BytesIO(audioOutput), format="mp3")
-	pydubPlay(audioSegment)
-
 def convertTTS(text: str):
-	audioOutput = generate(text = text, model = 'eleven_multilingual_v2', stream = True)
-	streamAnswer(audioOutput)
+	# audioOutput = elevenLabsClient.generate(text = text, model = 'eleven_multilingual_v2', stream = True)
+	threading.Thread(target = play, args = (elevenLabsClient.generate(text = text, model = 'eleven_multilingual_v2', stream = True), False, False)).start()
 	# print('Audio playback disabled.\n')
 
 # Only run if not imported as a module
