@@ -50,15 +50,6 @@ blood out of the heart and into the arteries. The heart is responsible for suppl
 oxygenated blood to the body and deoxygenated blood to the lungs for oxygenation.
 """
 
-testQuestionsHumanBody = [
-	"What is the main function of the stomach?",
-	"Where is the liver located in the human body?",
-	"What is the primary function of the colon?",
-	"What are the three main parts of the brain?",
-	"What is the role of the kidneys in the human body?",
-	"What are the four chambers of the heart called?"
-]
-
 krebsCycle = """
 The Krebs cycle, also known as the citric acid cycle or tricarboxylic acid cycle, is a 
 vital metabolic pathway that takes place in the mitochondria of eukaryotic cells. It 
@@ -116,12 +107,3 @@ transport chain to produce ATP. Additionally, the cycle provides intermediates t
 used in various biosynthetic pathways and play important roles in maintaining cellular 
 metabolic balance.
 """
-
-testQuestionsKrebsCycle = [
-	"What is the starting compound of the Krebs cycle?",
-	"What is the role of aconitase in the Krebs cycle?",
-	"How is a-ketoglutarate produced in the Krebs cycle?",
-	"What is the function of succinyl-CoA in the Krebs cycle?",
-	"What is the role of succinate dehydrogenase in the Krebs cycle?",
-	"What is the final product of the Krebs cycle?"
-]

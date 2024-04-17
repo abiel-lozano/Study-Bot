@@ -4,10 +4,13 @@
 # Misc
 image_recognition.py
 src/credentials.py
-Tools/credentials.py
-Tests/AudioInteraction/credentials.py
-*/__pycache__
 Tests/AudioInteraction/__pycache__
+Tests/AudioInteraction/credentials.py
+Tests/TextInteraction/credentials.py
+Tests/Performance/__pycache__
+Tests/Performance/credentials.py
+Tools/credentials.py
+*/__pycache__
 
 # Compilation output
 Bin
