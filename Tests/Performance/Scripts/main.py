@@ -220,7 +220,7 @@ Question: {studyBot.question}
 	threadConvertTTS.join()
 
 	# Stop timer ---------------------------------------------------------------------------------------------------------
-	print(f'Response time: {studyBot.time.time() - studyBot.testStartTime} seconds')
+	print(f'\n Response time: {studyBot.time.time() - testStartTime:.3f} seconds\n')
 
 	# Reenable buttons
 	topicDropdown.config(state = 'normal')

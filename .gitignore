@@ -7,8 +7,8 @@ src/credentials.py
 Tests/AudioInteraction/__pycache__
 Tests/AudioInteraction/credentials.py
 Tests/TextInteraction/credentials.py
-Tests/Performance/__pycache__
-Tests/Performance/credentials.py
+Tests/Performance/Scripts/__pycache__
+Tests/Performance/Scripts/credentials.py
 Tools/credentials.py
 */__pycache__
 

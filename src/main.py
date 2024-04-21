@@ -41,7 +41,7 @@ ESP = {
 	'questionRecorded': 'OYb9QwW8xyylYVFnax7w', # Pregunta grabada, por favor espera.
 }
 
-# TODO: Review ESP[language], ESP[confirmHumanBody], ESP[confirmBiochem], ENG[confirmBiochem].
+# TODO: Review ESP[language] (pronunciation), ESP[confirmHumanBody] (pronunciation), ESP[confirmBiochem] (change to 'Krebs Cycle'), ENG[confirmBiochem] (change to 'Krebs Cycle')
 
 # Select default audio language here
 audioSelect = ENG

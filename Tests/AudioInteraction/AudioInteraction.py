@@ -9,11 +9,17 @@ import wave
 from pathlib import Path
 from elevenlabs.client import ElevenLabs
 from elevenlabs import play
-from openai import OpenAI
+from openai import OpenAI, AsyncOpenAI
 import credentials
+import asyncio
+import time
+from typing import Iterator
+
+startTime = None
 
 # Initialize clients, set API keys
-openAIClient = OpenAI(api_key = credentials.openAIKey)
+# openAIClient = OpenAI(api_key = credentials.openAIKey)
+openAIClient = AsyncOpenAI(api_key = credentials.openAIKey)
 elevenLabsClient = ElevenLabs(api_key = credentials.elevenLabsKey)
 
 GPT_MODEL = "gpt-3.5-turbo"
@@ -57,18 +63,33 @@ def recordQuestion():
 	wf.close()
 	print('File saved as "question.wav"')
 
-	# STT Conversion
-	# 'with open() as' automatically closes the file after the block is executed
-	# allows immediate deletion
-	with open(OUTPUT_FILE, "rb") as audioFile:
-		question = openAIClient.audio.transcriptions.create(model="whisper-1", file=audioFile).text
+def streamAudio(audio_stream: Iterator[bytes]) -> bytes:
+    audio = b""
+    for chunk in audio_stream:
+        if chunk is not None:
+            audio += chunk
 
-	print(question)
-	# Delete audio file
-	Path(OUTPUT_FILE).unlink()
-	print('File deleted')
+    # Create a PyAudio object
+    p = pyaudio.PyAudio()
 
-recordQuestion()
+    # Open stream
+    stream = p.open(format = pyaudio.paInt16,  # 16-bit PCM
+                    channels = 1,  # mono
+                    rate = 22050,  # sample rate
+                    output = True)
+
+    # Play stream
+    for i in range(0, len(audio), 1024):
+        stream.write(audio[i:i+1024])
+
+    # Stop stream
+    stream.stop_stream()
+    stream.close()
+
+    # Close PyAudio
+    p.terminate()
+
+    return audio
 
 # Add infromation source
 source = """
@@ -84,20 +105,49 @@ Information:
 \"\"\"
 Question: {question}"""
 
-response = openAIClient.chat.completions.create(
-	model = GPT_MODEL,
-	temperature = 0.2,
-	messages = [
-		{'role': 'system', 'content': 'You answer questions in the same language as the question.'},
-		{'role': 'user', 'content': query},
-	]
-)
-# This does not work anymore, response is no longer a dictionary
-# answer = response['choices'][0]['message']['content']
+response = str()
+
+async def sendMessage() -> None:
+	global response
+	global startTime
+
+	startTime = time.time()
+	recordQuestion()
+	
+	with open(OUTPUT_FILE, "rb") as audioFile:
+		question = await openAIClient.audio.transcriptions.create(model = "whisper-1", file = audioFile)
+	
+	question = question.text
+
+	print(question)
+	# Delete audio file
+	Path(OUTPUT_FILE).unlink()
+	print('File deleted')
+	
+	stream = await openAIClient.chat.completions.create(
+		model=GPT_MODEL,
+		temperature=0.2,
+		messages=[
+			{'role': 'system', 'content': 'You answer questions in the same language as the question.'},
+			{'role': 'user', 'content': query},
+		],
+		stream = True
+	)
+	async for chunk in stream:
+		if chunk.choices[0].delta.content is not None:
+			response += chunk.choices[0].delta.content or ''
+
+loop = asyncio.get_event_loop()
+loop.run_until_complete(sendMessage())
+
 
 # New way to get the answer, response is now an object of the Response class
-answer = response.choices[0].message.content
-print('Answer: ', answer)
+# answer = response.choices[0].message.content
+# print('Answer: ', answer)
+print(response)
 
-audioOutput = elevenLabsClient.generate(text = answer, model = 'eleven_multilingual_v2')
-play(audioOutput)
+print(f'\n Response time: {time.time() - startTime:.3f} seconds')
+
+print('Audio playback disabled')
+audioOutput = elevenLabsClient.generate(text = response, model = 'eleven_multilingual_v2', output_format = 'pcm_22050')
+streamAudio(audioOutput)

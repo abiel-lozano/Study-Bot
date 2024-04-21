@@ -21,7 +21,6 @@ global answer
 global topic
 global stop
 
-testStartTime = 0.0
 objects = ''
 question = ''
 answer = ''
