@@ -16,7 +16,5 @@ Tools/credentials.py
 Bin
 *.exe
 *.pyc
-studyBotCLI.spec
-studyBotGUI.spec
 dist
 build

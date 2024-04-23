@@ -5,7 +5,7 @@ block_cipher = None
 
 
 a = Analysis(
-    ['..\\src\\studyBot.py'],
+    ['..\\src\\main.py'],
     pathex=[],
     binaries=[],
     datas=[],
@@ -28,14 +28,14 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='Study-Bot-CLI',
+    name='Study-Bot',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=True,
+    console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
