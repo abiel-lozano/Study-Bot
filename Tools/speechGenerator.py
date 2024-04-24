@@ -9,14 +9,16 @@ import credentials
 client = ElevenLabs(api_key=credentials.elevenLabsKey)
 
 # 1 - Generate audio from text
-text = ''
-client.generate(text = text, model = 'eleven_multilingual_v2')
+text = 'How are you?'
+# audio = client.generate(text = text, model = 'eleven_multilingual_v2', stream = True)
+# play(audio, notebook=False, use_ffmpeg=False)
+
 
 # 2 - Check history to get history_item_id
 history = client.history.get_all().history
-print('History item:', history[0].history_item_id)
+print('History item:', history[0])
 # print(history) # Messy raw output, uncomment only when needed
 
 # 3 - Play specific history item by history_item_id to check your work
 play(client.history.get_audio(history[0].history_item_id), notebook=False, use_ffmpeg=False)
-play(client.history.get_audio(''), notebook=False, use_ffmpeg=False)
+# play(client.history.get_audio(''), notebook=False, use_ffmpeg=False)
