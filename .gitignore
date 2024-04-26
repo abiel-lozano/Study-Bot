@@ -6,9 +6,10 @@ image_recognition.py
 src/credentials.py
 Tests/AudioInteraction/__pycache__
 Tests/AudioInteraction/credentials.py
-Tests/TextInteraction/credentials.py
 Tests/Performance/Scripts/__pycache__
 Tests/Performance/Scripts/credentials.py
+Tests/TextInteraction/credentials.py
+
 Tools/credentials.py
 */__pycache__
 
