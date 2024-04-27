@@ -5,20 +5,22 @@
 # The answer is then converted to audio and played back to the user
 # Requires API keys in credentials.py
 
-# Based on the ElevenLabs example code provided in the ElevenLabs API documentation
-# for voice streaming using ElevenLabs and OpenAI APIs:
+# Input streaming based on the ElevenLabs example code provided in the 
+# ElevenLabs API documentation for voice streaming using ElevenLabs 
+# and OpenAI APIs, available at:
 # https://elevenlabs.io/docs/api-reference/websockets#example-voice-streaming-using-elevenlabs-and-openai
+
+# But this one actually works and does so without depending on mpv or ffmpeg
 
 import pyaudio
 import wave
 from pathlib import Path
-from elevenlabs.client import ElevenLabs, AsyncElevenLabs
-from elevenlabs import play
-from openai import OpenAI, AsyncOpenAI
+from elevenlabs.client import AsyncElevenLabs
+from openai import AsyncOpenAI
 import credentials
 import asyncio
 import time
-from typing import Iterator, AsyncGenerator
+from typing import AsyncGenerator
 
 import websockets
 import json
@@ -27,14 +29,12 @@ import base64
 startTime = None
 
 # Initialize clients, set API keys
-# openAIClient = OpenAI(api_key = credentials.openAIKey)
 openAIClient = AsyncOpenAI(api_key = credentials.openAIKey)
-# elevenLabsClient = ElevenLabs(api_key = credentials.elevenLabsKey)
 elevenLabsClient = AsyncElevenLabs(api_key = credentials.elevenLabsKey)
 
 GPT_MODEL = "gpt-3.5-turbo"
 
-
+global question
 question = ''
 
 # Add infromation source
@@ -80,7 +80,7 @@ def recordQuestion():
 	stream.close()
 	audio.terminate()
 
-	print('Recording stopped')
+	print('Recording stopped, start time set')
 
 	global startTime
 	startTime = time.time()
@@ -94,102 +94,83 @@ def recordQuestion():
 	wf.close()
 	print('File saved as "question.wav"')
 
-async def text_chunker(chunks):
-	"""Split text into chunks, ensuring to not break sentences."""
-	splitters = (".", ",", "?", "!", ";", ":", "—", "-", "(", ")", "[", "]", "}", " ")
-	buffer = ""
+async def textChunker(chunks):
+	# Split text into chunks, ensuring to not break sentences.
+	splitters = ('.', ',', '?', '!', ';', ':', '—', '-', '(', ')', '[', ']', '}', ' ')
+	buffer = ''
 
 	async for text in chunks:
-		if text is None:
-			continue
 		if buffer.endswith(splitters):
-			yield buffer + " "
+			yield buffer + ' '
 			buffer = text
 		elif text.startswith(splitters):
-			yield buffer + text[0] + " "
+			yield buffer + text[0] + ' '
 			buffer = text[1:]
 		else:
 			buffer += text
 
 	if buffer:
-		yield buffer + " "
+		yield buffer + ' '
 
-
-async def streamAudio(audio_stream: Iterator[bytes]) -> bytes:
+async def playAudio(audioData: bytes):
 	global startTime
-
-	audio = b""
-	async for chunk in audio_stream:
-		if chunk is not None:
-			audio += chunk
-
-	# Create a PyAudio object
-	p = pyaudio.PyAudio()
-
-	# Open stream
-	stream = p.open(format = pyaudio.paInt16,  # 16-bit PCM
-					channels = 1,  # mono
-					rate = 22050,  # sample rate
-					output = True)
 	
-	print(f'\n Response time: {time.time() - startTime:.3f} seconds')
-
-	# Play stream
-	for i in range(0, len(audio), 1024):
-		stream.write(audio[i:i+1024])
-
-	# Stop stream
+	p = pyaudio.PyAudio()
+	stream = p.open(format = pyaudio.paInt16, channels = 1, rate = 24000, output = True, frames_per_buffer = 4096)
+	# Play audio data using PyAudio.
+	if startTime is not None:
+		print('Response Time: ', time.time() - startTime)
+		startTime = None
+	stream.write(audioData)
 	stream.stop_stream()
 	stream.close()
-
-	# Close PyAudio
 	p.terminate()
 
-	return audio
+async def stream(audioStream):
+	# Stream audio data and play it.
+	async for chunk in audioStream:
+		if chunk:
+			await playAudio(chunk)
 
-async def text_to_speech_input_streaming(voice_id, text_iterator):
-	"""Send text to ElevenLabs API and stream the returned audio."""
-	uri = f"wss://api.elevenlabs.io/v1/text-to-speech/{voice_id}/stream-input?model_id=eleven_multilingual_v2"
+async def ttsInputStreaming(voiceId, textIterator):
+	# Send text to ElevenLabs API and stream the returned audio.
+	uri = f'wss://api.elevenlabs.io/v1/text-to-speech/{voiceId}/stream-input?model_id=eleven_multilingual_v2&output_format=pcm_24000'
 
 	async with websockets.connect(uri) as websocket:
 		await websocket.send(json.dumps({
-			"text": " ",
-			"voice_settings": {"stability": 0.5, "similarity_boost": 0.8},
-			"xi_api_key": credentials.elevenLabsKey,
-			"output_format": "pcm_22050"
+			'text': ' ',
+			'voice_settings': {'stability': 0.5, 'similarity_boost': 0.8},
+			'xi_api_key': credentials.elevenLabsKey
 		}))
 
 		async def listen():
-			"""Listen to the websocket for audio data and stream it."""
+			# Listen to the websocket for audio data and stream it.
 			while True:
 				try:
-					print('Listening...')
 					message = await websocket.recv()
-					if message is not None:
-						print('Message received')
 					data = json.loads(message)
-					if data.get("audio"):
-						print('Audio received')
-						yield base64.b64decode(data["audio"])
+					if data.get('audio'):
+						
+						yield base64.b64decode(data['audio'])
 					elif data.get('isFinal'):
-						print('Final audio received')
 						break
 				except websockets.exceptions.ConnectionClosed:
-					print("Connection closed")
+					print('Connection closed')
 					break
 
-		listen_task = asyncio.create_task(streamAudio(listen()))
+		listen_task = asyncio.create_task(stream(listen()))
 
-		async for text in text_chunker(text_iterator):
-			await websocket.send(json.dumps({"text": text, "try_trigger_generation": True}))
+		async for text in textChunker(textIterator):
+			await websocket.send(json.dumps({'text': text, 'try_trigger_generation': True}))
 
-		await websocket.send(json.dumps({"text": ""}))
-
+		await websocket.send(json.dumps({'text': ''}))
 		await listen_task
 
 
 async def sendMessage() -> AsyncGenerator[str, None]:
 	global response
+	global question
+
 	textStream = await openAIClient.chat.completions.create(
 		model=GPT_MODEL,
 		temperature=0.2,
@@ -199,18 +180,18 @@ async def sendMessage() -> AsyncGenerator[str, None]:
 		],
 		stream = True
 	)
+	
 	async def textIterator():
-		completeResponse = ''
+		global response
 		async for chunk in textStream:
-			if chunk.choices[0].delta is not None:
-				delta = chunk.choices[0].delta
-				if delta.content is not None:
-					completeResponse += delta.content
+			delta = chunk.choices[0].delta
+			if delta.content is not None:
+				response += delta.content
 				yield delta.content
-		print('Text stream ended')
-		print(completeResponse)
+		print('Response: ', response)
 
-	await text_to_speech_input_streaming("EXAVITQu4vr4xnSDxMaL", textIterator())
+
+	await ttsInputStreaming('EXAVITQu4vr4xnSDxMaL', textIterator())
 			
 
 async def convertTTS() -> None:
@@ -219,21 +200,14 @@ async def convertTTS() -> None:
 	
 	recordQuestion()
 	
-	with open(OUTPUT_FILE, "rb") as audioFile:
-		whisperResponse = await openAIClient.audio.transcriptions.create(model = "whisper-1", file = audioFile)
+	with open(OUTPUT_FILE, 'rb') as audioFile:
+		whisperResponse = await openAIClient.audio.transcriptions.create(model = 'whisper-1', file = audioFile)
 	
 	question = whisperResponse.text
-
 	print(question)
-	# Delete audio file
 	Path(OUTPUT_FILE).unlink()
 	print('File deleted')
-	# print('Audio playback disabled')
- 
-	# audioOutput = await elevenLabsClient.generate(text = sendMessage(), model = 'eleven_multilingual_v2', output_format = 'pcm_22050', stream = True)
-	# print(response)
-	# await streamAudio(audioOutput)
- 
+	
 	await sendMessage()
 
 loop = asyncio.get_event_loop()
