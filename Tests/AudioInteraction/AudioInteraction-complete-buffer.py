@@ -12,8 +12,6 @@
 
 # Works without depending on mpv or ffmpeg
 
-# Attempt at buffering all audio data before playing it back
-
 import pyaudio
 import wave
 from pathlib import Path
@@ -48,7 +46,7 @@ source = """
 
 # Build the prompt
 query = f"""
-What are the benefits of riding a bike?
+Why are silicon wafers round if chips are square? Describe the process of making silicon wafers and the process of making chips.
 """
 
 response = str()
@@ -119,20 +117,14 @@ async def textChunker(chunks):
 
 def playAudioFromQueue():
 	p = pyaudio.PyAudio()
-	stream = p.open(format = pyaudio.paInt16, channels = 1, rate = 16000, output = True, frames_per_buffer = 8192*4)
-
-	# Store all audio data in a list
-	audioDataList = []
+	stream = p.open(format = pyaudio.paInt16, channels = 1, rate = 24000, output = True, frames_per_buffer = 8192*4)
+	
 	while True:
 		audioData = audioQueue.get()
 		if audioData is None:
 			break
-		audioDataList.append(audioData)
-
-	# Play all audio data
-	for audioData in audioDataList:
 		stream.write(audioData)
-
+	
 	stream.stop_stream()
 	stream.close()
 	p.terminate()
@@ -147,19 +139,19 @@ async def playAudio(audioData: bytes):
 	audioQueue.put(audioData)
 
 async def stream(audioStream):
-    # Store all audio data first
-    async for chunk in audioStream:
-        if chunk:
-            audioQueue.put(chunk)
+	# Stream audio data and play it.
+	async for chunk in audioStream:
+		if chunk:
+			await playAudio(chunk)
 
-async def ttsInputStreaming(voiceId, textIterator):
+async def ttsInputStreaming(textIterator):
 	# Send text to ElevenLabs API and stream the returned audio.
-	uri = f'wss://api.elevenlabs.io/v1/text-to-speech/{voiceId}/stream-input?model_id=eleven_multilingual_v2&output_format=pcm_16000'
+	# URI: Convert TTS, use voice 'Sarah', with model 'eleven_multilingual_v2', and output in 'pcm_16000' format.
+	uri = f'wss://api.elevenlabs.io/v1/text-to-speech/EXAVITQu4vr4xnSDxMaL/stream-input?model_id=eleven_multilingual_v2&output_format=pcm_24000'
 
 	async with websockets.connect(uri) as websocket:
 		await websocket.send(json.dumps({
 			'text': ' ',
-			'voice_settings': {'stability': 0.5, 'similarity_boost': 0.8},
 			'xi_api_key': credentials.elevenLabsKey
 		}))
 
@@ -169,15 +161,15 @@ async def ttsInputStreaming(voiceId, textIterator):
 				try:
 					message = await websocket.recv()
 					data = json.loads(message)
-					if data.get('audio'):
-						
+					# Check if the message contains audio data or is the final message.
+					if data.get('audio'):	
 						yield base64.b64decode(data['audio'])
 					elif data.get('isFinal'):
 						break
 				except websockets.exceptions.ConnectionClosed:
 					print('Connection closed')
 					break
-
+		
 		listen_task = asyncio.create_task(stream(listen()))
 
 		async for text in textChunker(textIterator):
@@ -212,7 +204,7 @@ async def sendMessage() -> AsyncGenerator[str, None]:
 		print('Response: ', response)
 
 
-	await ttsInputStreaming('EXAVITQu4vr4xnSDxMaL', textIterator())
+	await ttsInputStreaming(textIterator())
 	
 	# Add sentinel value to queue to stop audio playback
 	audioQueue.put(None)
@@ -230,10 +222,9 @@ async def convertTTS() -> None:
 	print(question)
 	Path(OUTPUT_FILE).unlink()
 	print('File deleted')
- 
-	print('Skipping recording...')
 
 	threading.Thread(target = playAudioFromQueue).start()
+	
 	await sendMessage()
 
 loop = asyncio.get_event_loop()

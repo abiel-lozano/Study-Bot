@@ -46,7 +46,7 @@ source = """
 
 # Build the prompt
 query = f"""
-What are the benefits of riding a bike?
+Why are silicon wafers round if chips are square? Describe the process of making silicon wafers and the process of making chips.
 """
 
 response = str()
@@ -117,7 +117,7 @@ async def textChunker(chunks):
 
 def playAudioFromQueue():
 	p = pyaudio.PyAudio()
-	stream = p.open(format = pyaudio.paInt16, channels = 1, rate = 16000, output = True, frames_per_buffer = 8192*4)
+	stream = p.open(format = pyaudio.paInt16, channels = 1, rate = 24000, output = True, frames_per_buffer = 32768)
 	
 	while True:
 		audioData = audioQueue.get()
@@ -147,7 +147,7 @@ async def stream(audioStream):
 async def ttsInputStreaming(textIterator):
 	# Send text to ElevenLabs API and stream the returned audio.
 	# URI: Convert TTS, use voice 'Sarah', with model 'eleven_multilingual_v2', and output in 'pcm_16000' format.
-	uri = f'wss://api.elevenlabs.io/v1/text-to-speech/EXAVITQu4vr4xnSDxMaL/stream-input?model_id=eleven_multilingual_v2&output_format=pcm_16000'
+	uri = f'wss://api.elevenlabs.io/v1/text-to-speech/EXAVITQu4vr4xnSDxMaL/stream-input?model_id=eleven_multilingual_v2&output_format=pcm_24000'
 
 	async with websockets.connect(uri) as websocket:
 		await websocket.send(json.dumps({
@@ -184,9 +184,9 @@ async def sendMessage() -> AsyncGenerator[str, None]:
 	global question
 
 	textStream = await openAIClient.chat.completions.create(
-		model=GPT_MODEL,
-		temperature=0.2,
-		messages=[
+		model = GPT_MODEL,
+		temperature = 0.2,
+		messages = [
 			{'role': 'system', 'content': 'You answer in English or Spanish depending on the language of the question.'},
 			{'role': 'user', 'content': query},
 		],
@@ -222,8 +222,6 @@ async def convertTTS() -> None:
 	print(question)
 	Path(OUTPUT_FILE).unlink()
 	print('File deleted')
- 
-	print('Skipping recording...')
 
 	threading.Thread(target = playAudioFromQueue).start()
 	
