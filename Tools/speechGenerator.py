@@ -9,9 +9,9 @@ import credentials
 client = ElevenLabs(api_key=credentials.elevenLabsKey)
 
 # 1 - Generate audio from text
-text = 'How are you?'
-# audio = client.generate(text = text, model = 'eleven_multilingual_v2', stream = True)
-# play(audio, notebook=False, use_ffmpeg=False)
+text = 'Silicon wafers are round because they are sliced from a cylindrical ingot. The ingot is made by melting silicon and then casting it into a cylindrical shape.'
+audio = client.generate(text = text, model = 'eleven_multilingual_v1', stream = True)
+play(audio, notebook=False, use_ffmpeg=False)
 
 
 # 2 - Check history to get history_item_id

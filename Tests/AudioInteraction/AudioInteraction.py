@@ -1,6 +1,7 @@
 # Test audio interaction in isolation without visual context or GUI
-# Records a question, converts it to text, and uses it as a prompt to 
-# generate an answer using GPT-3.5-turbo
+# Records a question, converts it to text. Sends question to ChatGPT
+# and converts the response to audio and plays it back to the user 
+# in real-time while GPT is generating the answer.
 
 # The answer is then converted to audio and played back to the user
 # Requires API keys in credentials.py
@@ -146,13 +147,14 @@ async def stream(audioStream):
 
 async def ttsInputStreaming(textIterator):
 	# Send text to ElevenLabs API and stream the returned audio.
-	# URI: Convert TTS, use voice 'Sarah', with model 'eleven_multilingual_v2', and output in 'pcm_16000' format.
-	uri = f'wss://api.elevenlabs.io/v1/text-to-speech/EXAVITQu4vr4xnSDxMaL/stream-input?model_id=eleven_multilingual_v2&output_format=pcm_24000'
+	# URI: Convert TTS, use voice 'Sarah', with model 'eleven_multilingual_v1', and output in 'pcm_24000' format.
+	uri = f'wss://api.elevenlabs.io/v1/text-to-speech/EXAVITQu4vr4xnSDxMaL/stream-input?model_id=eleven_multilingual_v1&output_format=pcm_24000'
 
 	async with websockets.connect(uri) as websocket:
 		await websocket.send(json.dumps({
 			'text': ' ',
-			'xi_api_key': credentials.elevenLabsKey
+			'xi_api_key': credentials.elevenLabsKey,
+			'voice_settings': {'stability': 0.5, 'similarity_boost': 0}
 		}))
 
 		async def listen():
@@ -201,8 +203,6 @@ async def sendMessage() -> AsyncGenerator[str, None]:
 				response += delta.content
 				print(delta.content)
 				yield delta.content
-		print('Response: ', response)
-
 
 	await ttsInputStreaming(textIterator())
 	
