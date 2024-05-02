@@ -32,23 +32,24 @@ openAIClient = OpenAI(api_key = credentials.openAIKey)
 elevenLabsClient = ElevenLabs(api_key = credentials.elevenLabsKey)
 
 # Behavioral guidelines for conversation
-instructions = """
+customInstructions = """
 Use the information below to help the user study by answering their 
-questions. The user could be holding a physical representation of 
-what their question is about. Consider the object list, which 
-includes all the objects that the user is holding, so that the answer 
-can be refined to be more specific to the user's question. Do not 
-mention 'the user' or 'the information' in your answer, so that it 
-sounds natural, as if a teacher were answering a student's question.
-
-If the question is unrelated to the information, ignore all previous 
-instructions and try to answer the question without mentioning the 
-information or the objects to make it sound more natural.
-
-Always try to give brief answers to the user's questions.
-
-If the user question is empty, or unintelligible, give a summary of 
-the topic.
+questions with thorough explanations. The user could be holding a 
+physical representation of what their question is about. Consider 
+the object list, which includes all the objects that the user is 
+holding, so that the answer can be refined to be more specific to 
+the user's question. Never mention 'the user' or 'the information' 
+in your answer, regardless of the circumstances, so that it sounds 
+natural, as if a teacher were answering a student's question. If 
+the question is unrelated to the information, try to answer the 
+question without mentioning the information or the objects to make 
+it sound more natural. If the user question is empty, or 
+unintelligible, give a summary of the topic. Refrain from adding 
+			
+any additional prefixes or appendages such as 'Summary:' or 'Answer:'. 
+The response should consist solely of the content relevant to the 
+query without any additional formatting. You answer questions in the 
+same language as the question.
 """
 
 # Recorder configuration
@@ -392,11 +393,9 @@ if __name__ == '__main__':
 	print('Question: ' + question + '\n')
 
 	# Build prompt
-	query = f"""{instructions}
-
+	query = f"""
 	Objects held by user: {objects}.
 	Question: {question}
-
 	Information: 
 	\"\"\"
 	{source}
@@ -405,7 +404,7 @@ if __name__ == '__main__':
 
 	# Send prompt to GPT
 	messageHistory = [
-		{'role': 'system', 'content': 'You answer questions in the same language as the question.'},
+		{'role': 'system', 'content': customInstructions},
 		{'role': 'user', 'content': query},
 	]
 
@@ -450,19 +449,6 @@ if __name__ == '__main__':
 		audioRec.join()
 		print('Question recorded.\n')
 		print('Question: ' + question + '\n')
-
-
-		# NOTE: Add either of these the query if the model's response has any
-		# deviations from previous instructions
-		"""
-		Remember to consider the object list and the information provided when answering 
-		the user's question. Do not mention the user or the information in your answer 
-		to make it sound more natural.
-
-		If the question is unrelated to the information, ignore all previous instructions
-		and try to answer the question without mentioning the information or the objects
-		to make it sound more natural.
-		"""
 
 		# Build new prompt and add to chat history
 		query = f"""Objects held by user: {objects}.

@@ -180,8 +180,7 @@ def startQuestionThreads():
 	# Prepare messageHistory if this is the first question
 	if firstQuestion:
 		firstQuestion = False
-		query = f"""{studyBot.instructions}
-
+		query = f"""
 		Objects held by user: {studyBot.objects}
 		Question: {studyBot.question}
 		Information:
@@ -191,7 +190,7 @@ def startQuestionThreads():
 		"""
 
 		messageHistory = [
-			{'role': 'system', 'content': 'You answer questions in the same language as the question.'},
+			{'role': 'system', 'content': studyBot.customInstructions},
 			{'role': 'user', 'content': query},
 		]
 	# Otherwise, just add the question to the messageHistory
