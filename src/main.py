@@ -12,12 +12,14 @@ global source
 global audioHistory
 global audioInstructions
 
+
 answer = ''
 studyBot.question = ''
 studyBot.objects = ''
 studyBot.topic = 0
 source = ''
 firstQuestion = True
+lastHistoryItem = ''
 
 ENG = {
 	# Audio Name ------- ID -------------------- Suggested Audio Descriptions
@@ -47,19 +49,14 @@ ESP = {
 audioSelect = ENG
 
 # Play specific history item ID
-def playAudioWithID(itemID: str):
+def playAudioWithID(itemID: str, isReplay: bool = False):
 	global audioHistory
 	global audioInstructions
 
 	# Check if user disabled audio instructions
-	if audioInstructions.get():
-		# Find item with matching ID
-		for item in audioHistory.history:
-			if item.history_item_id == itemID:
-				audio = studyBot.elevenLabsClient.history.get_audio(itemID)
-				threadAudio = studyBot.threading.Thread(target = studyBot.play, args = (audio, False, False))
-				threadAudio.start()
-				break
+	if audioInstructions.get() or isReplay:
+		threadAudio = studyBot.threading.Thread(target = studyBot.play, args = (studyBot.elevenLabsClient.history.get_audio(itemID), False, False))
+		threadAudio.start()
 
 def toggleAudioDesc():
 	global audioInstructions
@@ -146,6 +143,7 @@ def backgroundInit():
 	topicDropdown.config(state = 'disabled')
 	selectButton.config(state = 'disabled')
 	askButton.config(state = 'disabled')
+	replayButton.config(state = 'disabled')
 	# Enable stop button
 	stopButton.config(state = 'normal')
 
@@ -153,6 +151,7 @@ def backgroundInit():
 	window.unbind('1')
 	window.unbind('2')
 	window.unbind('3')
+	window.unbind('r')
 	# Bind stop recording key
 	window.bind('4', lambda _: stopRecording())
 
@@ -161,9 +160,11 @@ def startQuestionThreads():
 	global messageHistory
 	global query
 	global cameraVar
+	global lastHistoryItem
+	global audioHistory
 
 	# Start threads for object identification and question recording
-	threadObjID = studyBot.threading.Thread(target = studyBot.lookForObjects, args = (studyBot.topic, int(cameraVar.get()[7:])-1)) # Get camera selection from dropdown menu
+	threadObjID = studyBot.threading.Thread(target = studyBot.lookForObjects, args = (studyBot.topic, int(cameraVar.get()[7:]) - 1)) # Get camera selection from dropdown menu
 	threadQuestionRec = studyBot.threading.Thread(target = studyBot.recordQuestion)
 	threadObjID.start()
 	threadQuestionRec.start()
@@ -214,15 +215,21 @@ Question: {studyBot.question}
 	threadConvertTTS.start()
 	threadConvertTTS.join()
 
-	# Reenable buttons
+	# Save last history item ID
+	audioHistory = studyBot.elevenLabsClient.history.get_all() # Update audio history
+	lastHistoryItem = audioHistory.history[0].history_item_id
+
+	# Enable buttons
 	topicDropdown.config(state = 'normal')
 	selectButton.config(state = 'normal')
 	askButton.config(state = 'normal')
+	replayButton.config(state = 'normal')
 
-	# Rebind keys
+	# Bind keys
 	window.bind('1', lambda _: selectNextOption())
 	window.bind('2', lambda _: checkSelection())
 	window.bind('3', lambda _: backgroundInit())
+	window.bind('r', lambda _: playAudioWithID(lastHistoryItem, True))
 
 	# Unbind stop recording key
 	window.unbind('4')
@@ -238,12 +245,14 @@ def stopRecording():
 def close():
 	# Wake up system sounds
 	winsound.Beep(37, 600) # Unaudible frequency in most speakers
+
 	# Closing signal
 	winsound.Beep(700, 250) 
 	studyBot.time.sleep(0.01) # Avoid overlapping sounds and popping
 	winsound.Beep(600, 250)
 	studyBot.time.sleep(0.01)
 	winsound.Beep(500, 250)
+	
 	sys.exit()
 
 # Given a camera index, open the camera for 3 seconds and display the feed
@@ -279,17 +288,17 @@ while True:
 # Create main window
 window = tkinter.Tk()
 window.title('Study-Bot')
-window.geometry('450x500')
+window.geometry('525x500')
 
 # Set background color
-window.configure(bg = '#3C3836')
+window.configure(bg = '#282828')
 
 # Create title label
 titleLabel = tkinter.Label(
 	window, 
 	text = 'Study-Bot', 
 	font = ('Leelawadee', 24, 'bold'), 
-	bg = '#3C3836', 
+	bg = '#282828', 
 	fg = '#FBF1C7'
 )
 titleLabel.pack(pady = 15)
@@ -302,24 +311,24 @@ audioCheckBox = tkinter.Checkbutton(
 	window, 
 	text = '<Spacebar> Audio feedback and instructions',
 	font = ('Leelawadee', 12),
-	bg = '#3C3836',
+	bg = '#282828',
 	fg = '#FBF1C7',
-	selectcolor = '#3C3836',
-	activebackground = '#3C3836',
+	selectcolor = '#282828',
+	activebackground = '#282828',
 	activeforeground = '#FBF1C7',
 	variable = audioInstructions
 )
 audioCheckBox.pack(pady = 0)
 
 # Create audio language frame
-langFrame = tkinter.Frame(window, bg = '#3C3836')
+langFrame = tkinter.Frame(window, bg = '#282828')
 langFrame.pack(pady = 8)
 
 # Create language label
 langLabel = tkinter.Label(
 	langFrame,
 	text = 'Select audio language:', 
-	bg = '#3C3836', 
+	bg = '#282828', 
 	font = ('Leelawadee', 12), 
 	fg = '#FBF1C7'
 )
@@ -341,7 +350,7 @@ langDropdown.pack(
 )
 
 # Create camera frame
-camFrame = tkinter.Frame(window, bg = '#3C3836')
+camFrame = tkinter.Frame(window, bg = '#282828')
 camFrame.pack(pady = 7)
 
 cameraVar = tkinter.StringVar(camFrame)
@@ -358,14 +367,14 @@ cameraDropdown.pack(side = 'left', padx = 10)
 cameraButton = tkinter.Button(
 	camFrame, 
 	text = 'Test Camera', 
-	command = lambda: testCamera(int(cameraVar.get()[7:]) - 1), # Get camera index from string
+	command = lambda: testCamera(int(cameraVar.get()[7:]) - 1), # Get camera index from dropdown menu text
 	bg = '#b16286', 
 	font = ('Leelawadee', 12)
 )
 cameraButton.pack(side = 'left', padx = 5)
 
 # Create topic frame
-topicFrame = tkinter.Frame(window, bg = '#3C3836')
+topicFrame = tkinter.Frame(window, bg = '#282828')
 topicFrame.pack(pady = 15)
 
 topicVar = tkinter.StringVar(window)
@@ -394,16 +403,14 @@ selectButton.pack(
 	padx = 10
 )
 
-# Create buttons frame
-buttonsFrame = tkinter.Frame(
+conversationControls = tkinter.Frame(
 	window, 
-	bg = '#3C3836'
+	bg = '#282828'
 )
-buttonsFrame.pack(pady = 10)
+conversationControls.pack(pady = 10)
 
-# Create 'Ask another question' button
 askButton = tkinter.Button(
-	buttonsFrame, 
+	conversationControls, 
 	text = '<3> Ask Question', 
 	command = backgroundInit, 
 	bg = '#8EC07C', 
@@ -414,9 +421,8 @@ askButton.pack(
 	padx = 10
 )
 
-# Create stop recording button
 stopButton = tkinter.Button(
-	buttonsFrame,
+	conversationControls,
 	text = '<4> Stop Recording',
 	command = stopRecording,
 	bg = '#FE8019',
@@ -428,14 +434,25 @@ stopButton.pack(
 	padx = 10
 )
 
-# Create buttons frame
+replayButton = tkinter.Button(
+	conversationControls,
+	text = '<R> Replay Answer',
+	command = lambda: playAudioWithID(lastHistoryItem, True),
+	bg = '#458588',
+	font = ('Leelawadee', 12)
+)
+
+replayButton.pack(
+	side = 'left',
+	padx = 10
+)
+
 exitFrame = tkinter.Frame(
 	window, 
-	bg = '#3C3836'
+	bg = '#282828'
 )
 exitFrame.pack(pady = 8)
 
-# Create 'Exit' button
 exitButton = tkinter.Button(
 	exitFrame, 
 	text = '<esc> Exit', 
@@ -445,13 +462,13 @@ exitButton = tkinter.Button(
 )
 exitButton.pack()
 
-# Create infoDisplay text label
 infoDisplay = tkinter.StringVar()
 infoDisplay.set('Welcome to Study-Bot! Please select a topic before asking a question.')
 infoLabel = tkinter.Label(
 	window, 
 	textvariable=infoDisplay, 
-	bg = '#458588',
+	bg = '#282828',
+	fg = '#FBF1C7',
 	font = ('Leelawadee', 12), 
 	wraplength = 400
 )
@@ -474,9 +491,10 @@ window.bind('<Escape>', lambda _: close())
 window.bind('<space>', lambda _: toggleAudioDesc())
 window.bind('c', lambda _: selectAudioLanguage())
 
-# Stop and ask buttons disabled by default
+# Stop, ask, and replay buttons disabled by default
 stopButton.config(state = 'disabled')
 askButton.config(state = 'disabled')
+replayButton.config(state = 'disabled')
 
 # NOTE: System sounds are not always immediately enabled, which causes 
 # the first sounds to be inaudible. This beep is used to 'wake up' the 
