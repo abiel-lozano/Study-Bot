@@ -24,6 +24,7 @@ objects = ''
 question = ''
 answer = ''
 stop = False
+startTime = 0.0
 
 GPT_MODEL = 'gpt-3.5-turbo'
 
@@ -60,19 +61,19 @@ RATE = 44100 # Sample rate
 OUTPUT_FILE = 'question.wav'
 
 def recordQuestion():
-	startTime = time.time()
-
 	global question
 	global stop
+	global startTime
 
+	startTime = time.time()
 	stop = False
-	audio = pyaudio.PyAudio() # Initialize PyAudio
-	# Open audio stream for recording
+
+	audio = pyaudio.PyAudio()
 	stream = audio.open(format = FORMAT, channels = CHANNELS, rate = RATE, input = True, frames_per_buffer = CHUNK)
 	frames = []
 
 	# Record audio stream in chunks
-	while not stop or time.time() - startTime < 1: # While stop is false 
+	while not stop:
 		data = stream.read(CHUNK)
 		frames.append(data)
 
@@ -90,17 +91,9 @@ def recordQuestion():
 	wf.close()
 
 	# STT Conversion
-	# 'with open() as' automatically closes file after
-	# code block is executed, allows immediate deletion
 	with open(OUTPUT_FILE, "rb") as audioFile:
 		question = openAIClient.audio.transcriptions.create(model="whisper-1", file=audioFile).text
-	
-	# Delete audio file
 	Path(OUTPUT_FILE).unlink()
-
-def stopRecording():
-	global stop
-	stop = True
 
 def colorID(camera: int = 0):
 	obj = 'User is not holding any objects'
@@ -328,6 +321,12 @@ def sendMessage(messageList: any):
 	# Add the response to the message list
 	messageList.append({'role': 'assistant', 'content': gptAnswer})
 
+def convertTTS(text: str):
+	# audioOutput = elevenLabsClient.generate(text = text, model = 'eleven_multilingual_v2', stream = True)
+	# threading.Thread(target = play, args = (elevenLabsClient.generate(text = text, model = 'eleven_multilingual_v2', stream = True), False, False)).start()
+	print('Audio playback disabled.\n')
+
+# Functions for CLI version only
 def sendMessageStreamAnswer(messageList: any):
 	gptAnswer = ''
 
@@ -346,15 +345,14 @@ def sendMessageStreamAnswer(messageList: any):
 
 	messageList.append({'role': 'assistant', 'content': gptAnswer})
 
-def convertTTS(text: str):
-	# audioOutput = elevenLabsClient.generate(text = text, model = 'eleven_multilingual_v2', stream = True)
-	threading.Thread(target = play, args = (elevenLabsClient.generate(text = text, model = 'eleven_multilingual_v2', stream = True), False, False)).start()
-	# print('Audio playback disabled.\n')
+def stopRec():
+	global stop
+	stop = True
 
 # Only run if not imported as a module
 if __name__ == '__main__':
 	# Listen for keyboard input to stop recording
-	keyboard.add_hotkey('s', stopRecording)
+	keyboard.add_hotkey('s', stopRec)
 	selectedTopic = False
 
 	while selectedTopic == False:

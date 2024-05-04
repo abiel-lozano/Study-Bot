@@ -155,6 +155,16 @@ def backgroundInit():
 	# Bind stop recording key
 	window.bind('4', lambda _: stopRecording())
 
+def timeLimiter():
+	# While the user hasn't stopped the recording, or less than 1 second has passed,
+	# and more than 30 have not passed
+	while (not studyBot.stop or studyBot.time.time() - studyBot.startTime < 1) and studyBot.time.time() - studyBot.startTime < 30:
+		continue
+	
+	# If the user has not called stopRecording()
+	if not studyBot.stop:
+		stopRecording()
+
 def startQuestionThreads():
 	global firstQuestion
 	global messageHistory
@@ -166,8 +176,10 @@ def startQuestionThreads():
 	# Start threads for object identification and question recording
 	threadObjID = studyBot.threading.Thread(target = studyBot.lookForObjects, args = (studyBot.topic, int(cameraVar.get()[7:]) - 1)) # Get camera selection from dropdown menu
 	threadQuestionRec = studyBot.threading.Thread(target = studyBot.recordQuestion)
+	threadTimeLimiter = studyBot.threading.Thread(target = timeLimiter)
 	threadObjID.start()
 	threadQuestionRec.start()
+	threadTimeLimiter.start()
 	winsound.Beep(700, 600)
 	infoDisplay.set(f'Listening for question and looking for objects...')
 	threadObjID.join()
@@ -230,16 +242,13 @@ Question: {studyBot.question}
 	window.bind('3', lambda _: backgroundInit())
 	window.bind('r', lambda _: playAudioWithID(lastHistoryItem, True))
 
-	# Unbind stop recording key
-	window.unbind('4')
-
 def stopRecording():
-	studyBot.stopRecording() # Access stopRecording() method from studyBot module
+	studyBot.stop = True
 	winsound.Beep(700, 300) # Stop signal
-	playAudioWithID(audioSelect['questionRecorded']) # Play audio confirmation
 	# Disable stop button and unbind stop key
 	stopButton.config(state = 'disabled')
 	window.unbind('4')
+	playAudioWithID(audioSelect['questionRecorded']) # Play audio confirmation
 
 def close():
 	# Wake up system sounds
@@ -304,7 +313,7 @@ titleLabel.pack(pady = 15)
 
 # Audio instructions checkbox
 audioInstructions = tkinter.BooleanVar()
-audioInstructions.set(True)
+audioInstructions.set(False)
 
 audioCheckBox = tkinter.Checkbutton(
 	window, 
