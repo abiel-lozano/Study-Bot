@@ -15,22 +15,17 @@ import keyboard
 import credentials # Contains API keys, create your own credentials.py file
 import sourceMaterial
 
-global objects
-global question
-global answer
-global topic
-global stop
-objects = ''
-question = ''
-answer = ''
-stop = False
+objects = str()
+question = str()
+answer = str()
+stop = bool()
 startTime = 0.0
-
-GPT_MODEL = 'gpt-3.5-turbo'
 
 # Credentials
 openAIClient = OpenAI(api_key = credentials.openAIKey)
 elevenLabsClient = ElevenLabs(api_key = credentials.elevenLabsKey)
+
+# TODO: Fix custom instructions, these don't work anymore, again
 
 # Behavioral guidelines for conversation
 customInstructions = """
@@ -46,7 +41,6 @@ the question is unrelated to the information, try to answer the
 question without mentioning the information or the objects to make 
 it sound more natural. If the user question is empty, or 
 unintelligible, give a summary of the topic. Refrain from adding 
-			
 any additional prefixes or appendages such as 'Summary:' or 'Answer:'. 
 The response should consist solely of the content relevant to the 
 query without any additional formatting. You answer questions in the 
@@ -91,12 +85,13 @@ def recordQuestion():
 	wf.close()
 
 	# STT Conversion
-	with open(OUTPUT_FILE, "rb") as audioFile:
-		question = openAIClient.audio.transcriptions.create(model="whisper-1", file=audioFile).text
+	with open(OUTPUT_FILE, 'rb') as audioFile:
+		question = openAIClient.audio.transcriptions.create(model = 'whisper-1', file = audioFile).text
 	Path(OUTPUT_FILE).unlink()
 
 def colorID(camera: int = 0):
-	obj = 'User is not holding any objects'
+	global objects
+	objects = 'User is not holding any objects'
 
 	# Capture video
 	cam = cv2.VideoCapture(camera, cv2.CAP_DSHOW) # Use 0 for default camera
@@ -171,61 +166,61 @@ def colorID(camera: int = 0):
 			area = cv2.contourArea(contour)
 			if area > 700:
 				# Append the name of the model to the list of objects
-				if 'colon' not in obj:
-					if obj == 'User is not holding any objects':
-						obj = 'colon'
+				if 'colon' not in objects:
+					if objects == 'User is not holding any objects':
+						objects = 'colon'
 					else:
-						obj = obj + ', colon'
+						objects = objects + ', colon'
 
 		contours, hierarchy = cv2.findContours(liverMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 		for pic, contour in enumerate(contours):
 			area = cv2.contourArea(contour)
 			if area > 500:
-				if 'liver' not in obj:
-					if obj == 'User is not holding any objects':
-						obj = 'liver'
+				if 'liver' not in objects:
+					if objects == 'User is not holding any objects':
+						objects = 'liver'
 					else:
-						obj = obj + ', liver'
+						objects = objects + ', liver'
 
 		contours, hierarchy = cv2.findContours(stomachMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 		for pic, contour in enumerate(contours):
 			area = cv2.contourArea(contour)
 			if area > 1400:
-				if 'stomach' not in obj:
-					if obj == 'User is not holding any objects':
-						obj = 'stomach'
+				if 'stomach' not in objects:
+					if objects == 'User is not holding any objects':
+						objects = 'stomach'
 					else:
-						obj = obj + ', stomach'
+						objects = objects + ', stomach'
 
 		contours, hierarchy = cv2.findContours(brainMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 		for pic, contour in enumerate(contours):
 			area = cv2.contourArea(contour)
 			if area > 2500:
-				if 'brain' not in obj:
-					if obj == 'User is not holding any objects':
-						obj = 'brain'
+				if 'brain' not in objects:
+					if objects == 'User is not holding any objects':
+						objects = 'brain'
 					else:
-						obj = obj + ', brain'
+						objects = objects + ', brain'
 		
 		contours, hierarchy = cv2.findContours(heartMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 		for pic, contour in enumerate(contours):
 			area = cv2.contourArea(contour)
 			if area > 650:
-				if 'heart' not in obj:
-					if obj == 'User is not holding any objects':
-						obj = 'heart'
+				if 'heart' not in objects:
+					if objects == 'User is not holding any objects':
+						objects = 'heart'
 					else:
-						obj = obj + ', heart'
+						objects = objects + ', heart'
 
 		contours, hierarchy = cv2.findContours(kidneyMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 		for pic, contour in enumerate(contours):
 			area = cv2.contourArea(contour)
 			if area > 50:
-				if 'kidney' not in obj:
-					if obj == 'User is not holding any objects':
-						obj = 'kidney'
+				if 'kidney' not in objects:
+					if objects == 'User is not holding any objects':
+						objects = 'kidney'
 					else:
-						obj = obj + ', kidney'
+						objects = objects + ', kidney'
 
 		elapsedTime = time.time() - startTime
 
@@ -237,10 +232,9 @@ def colorID(camera: int = 0):
 	cam.release()
 	cv2.destroyAllWindows()
 
-	return obj
-
 def markerID(camera: int = 0):
-	obj = 'User is not holding any objects'
+	global objects
+	objects = 'User is not holding any objects'
 
 	# Choose the predefined dictionary to use
 	arucoDict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
@@ -266,7 +260,7 @@ def markerID(camera: int = 0):
 		gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
 		# Detect markers
-		corners, ids, _ = cv2.aruco.detectMarkers(gray, arucoDict)
+		_, ids, _ = cv2.aruco.detectMarkers(gray, arucoDict)
 
 		if ids is not None:
 			# For each marker found in current frame
@@ -275,10 +269,10 @@ def markerID(camera: int = 0):
 					# Try to get the name of the compound from the dictionary
 					compoundName = compoundDict[ids[i][0]]
 					# Append compound to list while avoiding repeats
-					if obj == 'User is not holding any objects':
-						obj = compoundName
-					elif compoundName not in obj:
-						obj += ', ' + compoundName
+					if objects == 'User is not holding any objects':
+						objects = compoundName
+					elif compoundName not in objects:
+						objects += ', ' + compoundName
 				except KeyError:
 					continue
 
@@ -293,24 +287,19 @@ def markerID(camera: int = 0):
 	cap.release()
 	cv2.destroyAllWindows()
 
-	return obj
-
 # Takes the topic number and camera number as arguments, if no camera number is provided, the default camera is used
 def lookForObjects(topic: int, camera: int = 0):
-	global objects
-	objects = ''
-
 	if topic == 1:
 		# Call the function for color identification
-		objects = colorID(camera)
+		colorID(camera)
 	elif topic == 2:
 		# Call the function for marker identification
-		objects = markerID(camera)
+		markerID(camera)
 
 def sendMessage(messageList: any):
 	# Send prompt to GPT
 	response = openAIClient.chat.completions.create(
-		model = GPT_MODEL,
+		model = 'gpt-3.5-turbo',
 		temperature = 0.2,
 		messages = messageList
 	)
@@ -321,9 +310,8 @@ def sendMessage(messageList: any):
 	# Add the response to the message list
 	messageList.append({'role': 'assistant', 'content': gptAnswer})
 
-def convertTTS(text: str):
-	# audioOutput = elevenLabsClient.generate(text = text, model = 'eleven_multilingual_v2', stream = True)
-	# threading.Thread(target = play, args = (elevenLabsClient.generate(text = text, model = 'eleven_multilingual_v2', stream = True), False, False)).start()
+def convertTTS(answer: str):
+	# threading.Thread(target = play, args = (elevenLabsClient.generate(text = answer, model = 'eleven_multilingual_v2', stream = True), False, False)).start()
 	print('Audio playback disabled.\n')
 
 # Functions for CLI version only
@@ -331,14 +319,14 @@ def sendMessageStreamAnswer(messageList: any):
 	gptAnswer = ''
 
 	stream = openAIClient.chat.completions.create(
-    	model = GPT_MODEL,
+    	model = 'gpt-3.5-turbo',
     	messages = messageList,
 		temperature = 0.2,
     	stream=True,
 	)
 
 	for chunk in stream:
-		print(chunk.choices[0].delta.content or "", end="", flush=True)
+		print(chunk.choices[0].delta.content or '', end='', flush=True)
 
 		if chunk.choices[0].delta.content is not None:
 			gptAnswer += chunk.choices[0].delta.content
@@ -349,7 +337,7 @@ def stopRec():
 	global stop
 	stop = True
 
-# Only run if not imported as a module
+# Run on CLI version only
 if __name__ == '__main__':
 	# Listen for keyboard input to stop recording
 	keyboard.add_hotkey('s', stopRec)

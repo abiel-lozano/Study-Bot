@@ -3,17 +3,7 @@ import tkinter
 import sys
 import winsound
 
-# NOTE - There is chance this is not necessary
-global answer
-global messageHistory
-global query
-global firstQuestion
-global source
-global audioHistory
-global audioInstructions
-
-
-answer = ''
+studyBot.answer = ''
 studyBot.question = ''
 studyBot.objects = ''
 studyBot.topic = 0
@@ -22,7 +12,7 @@ firstQuestion = True
 lastHistoryItem = ''
 
 ENG = {
-	# Audio Name ------- ID -------------------- Suggested Audio Descriptions
+	# Audio Name ------- ID --------------------- Suggested Audio Descriptions
 	'welcome': 			'6X1EMz6BdxLjm7uvGozZ', # Welcome to Study-Bot! To begin, choose a topic from the dropdown menu using number 1 to go through the options. Then, select the topic by pressing number 2.
 	'language': 		'VKSMDZtiWeA1aBUOYL9H', # English
 	'topicHumanBody': 	'vI6YafcjSXDE1jAcOmyD', # Human Body
@@ -33,7 +23,7 @@ ENG = {
 }
 
 ESP = {
-	# Audio Name ------- ID -------------------- Suggested Audio Descriptions
+	# Audio Name ------- ID --------------------- Suggested Audio Descriptions
 	'welcome': 			'upVrbpxRCRiSjsI0Tw11', # Bienvenido a Study-Bot! Para comenzar, elige un tema del menú usando el número 1 para navegar las opciones. Después, selecciona el tema presionando el número 2.
 	'language': 		'dx9OIBdj9NJIAcZleDSM', # Español
 	'topicHumanBody': 	'DzFBKFlDbgFeuHr56OvO', # Cuerpo Humano
@@ -50,10 +40,7 @@ audioSelect = ENG
 
 # Play specific history item ID
 def playAudioWithID(itemID: str, isReplay: bool = False):
-	global audioHistory
-	global audioInstructions
-
-	# Check if user disabled audio instructions
+	# PLay audio if audio instructions are enabled or if it's a replay of the last answer
 	if audioInstructions.get() or isReplay:
 		threadAudio = studyBot.threading.Thread(target = studyBot.play, args = (studyBot.elevenLabsClient.history.get_audio(itemID), False, False))
 		threadAudio.start()
@@ -70,7 +57,6 @@ def toggleAudioDesc():
 # Switch between English and Spanish audio, depending on the selected language
 def selectAudioLanguage():
 	global audioSelect
-	global audioInstructions
 
 	if langVar.get() == '<C> English':
 		audioSelect = ESP
@@ -105,7 +91,7 @@ def checkSelection():
 	winsound.Beep(600, 800) # frequency, duration
 	
 	topic = topicVar.get()
-	# Remove the first 4 characters of topic string for cleaner display
+	# Remove the first 4 characters of topic string '<1> ' to get the topic name
 	infoDisplay.set(f'Selected topic: {topic[4:]}')
 	
 	# Set the topic for the studyBot module
@@ -131,12 +117,11 @@ def checkSelection():
 	firstQuestion = True
 	query = ''
 	
-# NOTE: Not using this function, and calling startQuestionThreads directly from the button
-# causes the UI to freeze while the threads are running. This allows the threads to run
-# in the background, while the UI is still responsive.
+# Allow the question processing threads to start and join in the background
+# using threadOrchestration() while the UI remains responsive
 def backgroundInit():
 	# Gets the show running by calling all the study-Bot functions
-	threadStart = studyBot.threading.Thread(target = startQuestionThreads)
+	threadStart = studyBot.threading.Thread(target = threadOrchestration)
 	threadStart.start()
 
 	# Disable buttons while question is being processed
@@ -155,51 +140,36 @@ def backgroundInit():
 	# Bind stop recording key
 	window.bind('4', lambda _: stopRecording())
 
-def timeLimiter():
-	# While the user hasn't stopped the recording, or less than 1 second has passed,
-	# and more than 30 have not passed
-	while (not studyBot.stop or studyBot.time.time() - studyBot.startTime < 1) and studyBot.time.time() - studyBot.startTime < 30:
-		continue
-	
-	# If the user has not called stopRecording()
-	if not studyBot.stop:
-		stopRecording()
-
-def startQuestionThreads():
+def threadOrchestration():
 	global firstQuestion
 	global messageHistory
 	global query
 	global cameraVar
-	global lastHistoryItem
 	global audioHistory
 
-	# Start threads for object identification and question recording
+	# Perform object detection and question recording concurrently, wait for results
 	threadObjID = studyBot.threading.Thread(target = studyBot.lookForObjects, args = (studyBot.topic, int(cameraVar.get()[7:]) - 1)) # Get camera selection from dropdown menu
 	threadQuestionRec = studyBot.threading.Thread(target = studyBot.recordQuestion)
 	threadTimeLimiter = studyBot.threading.Thread(target = timeLimiter)
+	
 	threadObjID.start()
 	threadQuestionRec.start()
 	threadTimeLimiter.start()
+
 	winsound.Beep(700, 600)
 	infoDisplay.set(f'Listening for question and looking for objects...')
+
 	threadObjID.join()
 	threadQuestionRec.join()
 
 	# Display recorded question and identified object
 	infoDisplay.set(f'Question taken: {studyBot.question} \nObject identified: {studyBot.objects} \nMessaging GPT, please wait...')
 
-	# Assemble prompt for GPT
+	# Build prompt for GPT  
 	# Prepare messageHistory if this is the first question
 	if firstQuestion:
 		firstQuestion = False
-		query = f"""
-		Objects held by user: {studyBot.objects}
-		Question: {studyBot.question}
-		Information:
-		\"\"\"
-		{source}
-		\"\"\"
-		"""
+		query = f'Objects held by user: {studyBot.objects} Question: {studyBot.question} Information:{source}'
 
 		messageHistory = [
 			{'role': 'system', 'content': studyBot.customInstructions},
@@ -207,9 +177,7 @@ def startQuestionThreads():
 		]
 	# Otherwise, just add the question to the messageHistory
 	else:
-		query = f"""Objects held by user: {studyBot.objects}
-Question: {studyBot.question}
-"""		
+		query = f'Objects held by user: {studyBot.objects} Question: {studyBot.question}'
 		messageHistory.append({'role': 'user', 'content': query})
 
 	# Message GPT
@@ -242,6 +210,15 @@ Question: {studyBot.question}
 	window.bind('3', lambda _: backgroundInit())
 	window.bind('r', lambda _: playAudioWithID(lastHistoryItem, True))
 
+def timeLimiter():
+	# While the user hasn't stopped the recording, or less than 1 second has passed, and more than 30 have not passed
+	while (not studyBot.stop or studyBot.time.time() - studyBot.startTime < 1) and studyBot.time.time() - studyBot.startTime < 30:
+		continue
+	
+	# If the user has not called stopRecording()
+	if not studyBot.stop:
+		stopRecording()
+
 def stopRecording():
 	studyBot.stop = True
 	winsound.Beep(700, 300) # Stop signal
@@ -249,19 +226,6 @@ def stopRecording():
 	stopButton.config(state = 'disabled')
 	window.unbind('4')
 	playAudioWithID(audioSelect['questionRecorded']) # Play audio confirmation
-
-def close():
-	# Wake up system sounds
-	winsound.Beep(37, 600) # Unaudible frequency in most speakers
-
-	# Closing signal
-	winsound.Beep(700, 250) 
-	studyBot.time.sleep(0.01) # Avoid overlapping sounds and popping
-	winsound.Beep(600, 250)
-	studyBot.time.sleep(0.01)
-	winsound.Beep(500, 250)
-	
-	sys.exit()
 
 # Given a camera index, open the camera for 3 seconds and display the feed
 def testCamera(index: int):
@@ -282,7 +246,20 @@ def testCamera(index: int):
 	cap.release()
 	studyBot.cv2.destroyAllWindows()
 
-# Using cv2 from studyBot, determine how many cameras are available
+def close():
+	# Wake up system sounds
+	winsound.Beep(37, 600) # Unaudible frequency in most speakers
+
+	# Closing signal
+	winsound.Beep(700, 250) 
+	studyBot.time.sleep(0.01) # Avoid overlapping sounds and popping
+	winsound.Beep(600, 250)
+	studyBot.time.sleep(0.01)
+	winsound.Beep(500, 250)
+	
+	sys.exit()
+
+# Using cv2 from studyBot, test and count all cameras until failure
 i = 0
 while True:
 	testCap = studyBot.cv2.VideoCapture(i, studyBot.cv2.CAP_DSHOW)
@@ -478,12 +455,10 @@ infoLabel = tkinter.Label(
 	bg = '#282828',
 	fg = '#FBF1C7',
 	font = ('Leelawadee', 12), 
-	wraplength = 400
+	wraplength = 400,
+	justify='left'
 )
 infoLabel.pack()
-
-# Access get_all() method from elevenLabsClient in studyBot module
-audioHistory = studyBot.elevenLabsClient.history.get_all()
 
 options = []
 
@@ -491,6 +466,8 @@ options = []
 for i in range(topicDropdown['menu'].index('end') + 1): # Size of dropdown menu
 	optionLabel = topicDropdown['menu'].entrycget(i, 'label')
 	options.append(optionLabel)
+
+# Setup before main loop
 
 # Keyboard bindings for all functions with keys 1, 2, 3, 4 and Esc
 window.bind('1', lambda _: selectNextOption())
@@ -503,6 +480,9 @@ window.bind('c', lambda _: selectAudioLanguage())
 stopButton.config(state = 'disabled')
 askButton.config(state = 'disabled')
 replayButton.config(state = 'disabled')
+
+# Access get_all() method from elevenLabsClient in studyBot module
+audioHistory = studyBot.elevenLabsClient.history.get_all()
 
 # NOTE: System sounds are not always immediately enabled, which causes 
 # the first sounds to be inaudible. This beep is used to 'wake up' the 
