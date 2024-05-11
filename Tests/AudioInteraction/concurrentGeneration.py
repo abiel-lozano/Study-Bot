@@ -217,7 +217,7 @@ async def convertTTS() -> None:
 	recordQuestion()
 	
 	with open(OUTPUT_FILE, 'rb') as audioFile:
-		whisperResponse = await openAIClient.audio.transcriptions.create(model = 'whisper-1', file = audioFile)
+		whisperResponse = await openAIClient.audio.transcriptions.create(model = 'whisper-1', file = audioFile, prompt = 'Krebs, Citrate, Isocitrate, a-Ketoglutarate, Succinyl-CoA, Succinate, Fumarate, Malate, Oxaloacetate')
 	
 	question = whisperResponse.text
 	print(question)
