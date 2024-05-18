@@ -52,69 +52,57 @@ while True:
     # For colon
     # Dilate the mask: Remove holes in the mask by adding pixels to the boundaries of objects in the mask
     colonMask = cv2.dilate(colonMask, kernel)
-    # Apply the mask to the frame using a bitwise AND operation
-    resColon = cv2.bitwise_and(imageFrame, imageFrame, mask=colonMask)
-
     # For liver
     liverMask = cv2.dilate(liverMask, kernel)
-    resliver = cv2.bitwise_and(imageFrame, imageFrame, mask=liverMask)
-
     # For stomach
     stomachMask = cv2.dilate(stomachMask, kernel)
-    resStomach = cv2.bitwise_and(imageFrame, imageFrame, mask=stomachMask)
-
     # For brain
     brainMask = cv2.dilate(brainMask, kernel)
-    resBrain = cv2.bitwise_and(imageFrame, imageFrame, mask=brainMask)
-
     # For heart
     heartMask = cv2.dilate(heartMask, np.ones((12, 12), "uint8"))
-    resHeart = cv2.bitwise_and(imageFrame, imageFrame, mask=heartMask)
-    
+
     # For kidney use a more aggressive kernel for dilation
     kidneyMask = cv2.dilate(kidneyMask, np.ones((12, 12), "uint8"))
-    resKidney = cv2.bitwise_and(imageFrame, imageFrame, mask=kidneyMask)
-
     # Create a contour around the zone that matches the color range
-    contours, hierarchy = cv2.findContours(colonMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) 
+    contours, _ = cv2.findContours(colonMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) 
     # For each contour, check if the area is greater than 500 pixels
-    for pic, contour in enumerate(contours):
+    for _, contour in enumerate(contours):
         area = cv2.contourArea(contour)
         if area > 700:
             # Create a bounding rectangle with a title around the detected object
             x, y, w, h = cv2.boundingRect(contour)
             imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (0, 120, 255), 2)
 
-    contours, hierarchy = cv2.findContours(liverMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    for pic, contour in enumerate(contours):
+    contours, _ = cv2.findContours(liverMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    for _, contour in enumerate(contours):
         area = cv2.contourArea(contour)
         if area > 500:
             x, y, w, h = cv2.boundingRect(contour)
             imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (86, 194, 0), 2)
 
-    contours, hierarchy = cv2.findContours(stomachMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    for pic, contour in enumerate(contours):
+    contours, _ = cv2.findContours(stomachMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    for _, contour in enumerate(contours):
         area = cv2.contourArea(contour)
         if area > 1400:
             x, y, w, h = cv2.boundingRect(contour)
             imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (237, 117, 47), 2)
 
-    contours, hierarchy = cv2.findContours(brainMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    for pic, contour in enumerate(contours):
+    contours, _ = cv2.findContours(brainMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    for _, contour in enumerate(contours):
         area = cv2.contourArea(contour)
         if area > 2500:
             x, y, w, h = cv2.boundingRect(contour)
             imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (204, 0, 255), 2)
 
-    contours, hierarchy = cv2.findContours(kidneyMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    for pic, contour in enumerate(contours):
+    contours, _ = cv2.findContours(kidneyMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    for _, contour in enumerate(contours):
         area = cv2.contourArea(contour)
         if area > 50:
             x, y, w, h = cv2.boundingRect(contour)
             imageFrame = cv2.rectangle(imageFrame, (x, y), (x + w, y + h), (0, 255, 255), 2)
 
-    contours, hierarchy = cv2.findContours(heartMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    for pic, contour in enumerate(contours):
+    contours, _ = cv2.findContours(heartMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    for _, contour in enumerate(contours):
         area = cv2.contourArea(contour)
         if area > 650:
             x, y, w, h = cv2.boundingRect(contour)
