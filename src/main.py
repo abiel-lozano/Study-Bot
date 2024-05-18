@@ -36,7 +36,7 @@ ESP = {
 # TODO: Review ESP[language] (pronunciation), ESP[confirmHumanBody] (pronunciation), ESP[confirmBiochem] (change to 'Krebs Cycle'), ENG[confirmBiochem] (change to 'Krebs Cycle')
 
 # Select default audio language here
-audioSelect = ENG
+audioSelect = ESP
 
 # Play specific history item ID
 def playAudioWithID(itemID: str, isReplay: bool = False):
@@ -290,7 +290,7 @@ titleLabel.pack(pady = 15)
 
 # Audio instructions checkbox
 audioInstructions = tkinter.BooleanVar()
-audioInstructions.set(False)
+audioInstructions.set(True)
 
 audioCheckBox = tkinter.Checkbutton(
 	window, 
@@ -475,6 +475,7 @@ window.bind('2', lambda _: checkSelection())
 window.bind('<Escape>', lambda _: close())
 window.bind('<space>', lambda _: toggleAudioDesc())
 window.bind('c', lambda _: selectAudioLanguage())
+window.bind('<W>', lambda _: playAudioWithID(audioSelect['welcome']))
 
 # Stop, ask, and replay buttons disabled by default
 stopButton.config(state = 'disabled')

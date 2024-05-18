@@ -136,33 +136,18 @@ def colorID(camera: int = 0):
 		# For colon
 		# Dilate mask: Remove holes in the mask by adding pixels to the boundaires of the objects in the mask
 		colonMask = cv2.dilate(colonMask, kernel)
-		# Apply mask to frame by using bitwise AND operation
-		resColon = cv2.bitwise_and(imageFrame, imageFrame, mask = colonMask)
-
-		# For liver
 		liverMask = cv2.dilate(liverMask, kernel)
-		resliver = cv2.bitwise_and(imageFrame, imageFrame, mask=liverMask)
-
-		# For stomach
 		stomachMask = cv2.dilate(stomachMask, kernel)
-		resStomach = cv2.bitwise_and(imageFrame, imageFrame, mask=stomachMask)
-
-		# For brain
 		brainMask = cv2.dilate(brainMask, kernel)
-		resBrain = cv2.bitwise_and(imageFrame, imageFrame, mask=brainMask)
-
-		# For heart
 		heartMask = cv2.dilate(heartMask, kernel)
-		resHeart = cv2.bitwise_and(imageFrame, imageFrame, mask=heartMask)
-
-		# For kidney use a more aggressive kernel for dilation
+		# Use a larger kernel for heart and kidney masks
 		kidneyMask = cv2.dilate(kidneyMask, np.ones((12, 12), 'uint8'))
-		resKidney = cv2.bitwise_and(imageFrame, imageFrame, mask=kidneyMask)
+		heartMask = cv2.dilate(heartMask, np.ones((12, 12), 'uint8'))
 
 		# Create a contour around the zone that matches the color range
-		contours, hierarchy = cv2.findContours(colonMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-		# For each countour, check if the area is greater than the threshold
-		for pic, contour in enumerate(contours):
+		contours, _ = cv2.findContours(colonMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+		# Fo_ach countour, check if the area is greater than the threshold
+		for _, contour in enumerate(contours):
 			area = cv2.contourArea(contour)
 			if area > 700:
 				# Append the name of the model to the list of objects
@@ -172,8 +157,8 @@ def colorID(camera: int = 0):
 					else:
 						objects = objects + ', colon'
 
-		contours, hierarchy = cv2.findContours(liverMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-		for pic, contour in enumerate(contours):
+		contours, _ = cv2.findContours(liverMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+		for _, contour in enumerate(contours):
 			area = cv2.contourArea(contour)
 			if area > 500:
 				if 'liver' not in objects:
@@ -182,8 +167,8 @@ def colorID(camera: int = 0):
 					else:
 						objects = objects + ', liver'
 
-		contours, hierarchy = cv2.findContours(stomachMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-		for pic, contour in enumerate(contours):
+		contours, _ = cv2.findContours(stomachMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+		for _, contour in enumerate(contours):
 			area = cv2.contourArea(contour)
 			if area > 1400:
 				if 'stomach' not in objects:
@@ -192,8 +177,8 @@ def colorID(camera: int = 0):
 					else:
 						objects = objects + ', stomach'
 
-		contours, hierarchy = cv2.findContours(brainMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-		for pic, contour in enumerate(contours):
+		contours, _ = cv2.findContours(brainMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+		for _, contour in enumerate(contours):
 			area = cv2.contourArea(contour)
 			if area > 2500:
 				if 'brain' not in objects:
@@ -202,8 +187,8 @@ def colorID(camera: int = 0):
 					else:
 						objects = objects + ', brain'
 		
-		contours, hierarchy = cv2.findContours(heartMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-		for pic, contour in enumerate(contours):
+		contours, _ = cv2.findContours(heartMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+		for _, contour in enumerate(contours):
 			area = cv2.contourArea(contour)
 			if area > 650:
 				if 'heart' not in objects:
@@ -212,8 +197,8 @@ def colorID(camera: int = 0):
 					else:
 						objects = objects + ', heart'
 
-		contours, hierarchy = cv2.findContours(kidneyMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-		for pic, contour in enumerate(contours):
+		contours, _ = cv2.findContours(kidneyMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+		for _, contour in enumerate(contours):
 			area = cv2.contourArea(contour)
 			if area > 50:
 				if 'kidney' not in objects:
