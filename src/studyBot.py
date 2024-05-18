@@ -111,11 +111,10 @@ def colorID(camera: int = 0):
 	brainUpper = np.array(	[161, 	255, 		255			], np.uint8)
 	kidneyLower = np.array(	[26, 	255 * 0.60, 255 * 0.69	], np.uint8)
 	kidneyUpper = np.array(	[26, 	255, 		255			], np.uint8)
-	heartLower = np.array(	[179, 	255 * 0.50, 255 * 0.35	], np.uint8)
-	heartUpper = np.array(	[179, 	255 * 0.97, 255 * 0.69	], np.uint8)
+	heartLower = np.array(	[177, 	255 * 0.50, 255 * 0.35	], np.uint8)
+	heartUpper = np.array(	[177, 	255 * 0.97, 255 * 0.69	], np.uint8)
 
 	while elapsedTime < 1:
-
 		_, imageFrame = cam.read()
 
 		# Convert frame from BGR color space to HSV
@@ -130,82 +129,60 @@ def colorID(camera: int = 0):
 		heartMask = cv2.inRange(hsvFrame, heartLower, heartUpper)
 
 		# Create a 5x5 square-shaped filter called kernel
-		# Filter is filled with ones and will be used for morphological transformations such as dilation for better detection
+		# Filter is filled with ones and will be used for dilation
 		kernel = np.ones((5, 5), 'uint8')
 
 		# For colon
 		# Dilate mask: Remove holes in the mask by adding pixels to the boundaires of the objects in the mask
 		colonMask = cv2.dilate(colonMask, kernel)
-		liverMask = cv2.dilate(liverMask, kernel)
 		stomachMask = cv2.dilate(stomachMask, kernel)
 		brainMask = cv2.dilate(brainMask, kernel)
 		heartMask = cv2.dilate(heartMask, kernel)
-		# Use a larger kernel for heart and kidney masks
+		# Use a larger kernel for heart, liver, and kidney masks
+		liverMask = cv2.dilate(liverMask, np.ones((12, 12), 'uint8'))
 		kidneyMask = cv2.dilate(kidneyMask, np.ones((12, 12), 'uint8'))
 		heartMask = cv2.dilate(heartMask, np.ones((12, 12), 'uint8'))
 
 		# Create a contour around the zone that matches the color range
 		contours, _ = cv2.findContours(colonMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-		# Fo_ach countour, check if the area is greater than the threshold
-		for _, contour in enumerate(contours):
+
+		# For each contour, check if the area is greater than the threshold
+		for contour in contours:
 			area = cv2.contourArea(contour)
-			if area > 700:
+			if area > 700 and 'colon' not in objects:
 				# Append the name of the model to the list of objects
-				if 'colon' not in objects:
-					if objects == 'User is not holding any objects':
-						objects = 'colon'
-					else:
-						objects = objects + ', colon'
+				objects = f'{objects}, colon' if objects != 'User is not holding any objects' else 'colon'
 
 		contours, _ = cv2.findContours(liverMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-		for _, contour in enumerate(contours):
+		for contour in contours:
 			area = cv2.contourArea(contour)
-			if area > 500:
-				if 'liver' not in objects:
-					if objects == 'User is not holding any objects':
-						objects = 'liver'
-					else:
-						objects = objects + ', liver'
+			if area > 1300 and 'liver' not in objects:
+				objects = f'{objects}, liver' if objects != 'User is not holding any objects' else 'liver'
 
 		contours, _ = cv2.findContours(stomachMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-		for _, contour in enumerate(contours):
+		for contour in contours:
 			area = cv2.contourArea(contour)
-			if area > 1400:
-				if 'stomach' not in objects:
-					if objects == 'User is not holding any objects':
-						objects = 'stomach'
-					else:
-						objects = objects + ', stomach'
+			if area > 1400 and 'stomach' not in objects:
+				objects = f'{objects}, stomach' if objects != 'User is not holding any objects' else 'stomach'
+
 
 		contours, _ = cv2.findContours(brainMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-		for _, contour in enumerate(contours):
+		for contour in contours:
 			area = cv2.contourArea(contour)
-			if area > 2500:
-				if 'brain' not in objects:
-					if objects == 'User is not holding any objects':
-						objects = 'brain'
-					else:
-						objects = objects + ', brain'
+			if area > 3000 and 'brain' not in objects:
+				objects = f'{objects}, brain' if objects != 'User is not holding any objects' else 'brain'
 		
 		contours, _ = cv2.findContours(heartMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-		for _, contour in enumerate(contours):
+		for contour in contours:
 			area = cv2.contourArea(contour)
-			if area > 650:
-				if 'heart' not in objects:
-					if objects == 'User is not holding any objects':
-						objects = 'heart'
-					else:
-						objects = objects + ', heart'
+			if area > 1400 and 'heart' not in objects:
+				objects = f'{objects}, heart' if objects != 'User is not holding any objects' else 'heart'
 
 		contours, _ = cv2.findContours(kidneyMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-		for _, contour in enumerate(contours):
+		for contour in contours:
 			area = cv2.contourArea(contour)
-			if area > 50:
-				if 'kidney' not in objects:
-					if objects == 'User is not holding any objects':
-						objects = 'kidney'
-					else:
-						objects = objects + ', kidney'
+			if area > 50 and 'kidney' not in objects:
+				objects = f'{objects}, kidney' if objects != 'User is not holding any objects' else 'kidney'
 
 		elapsedTime = time.time() - startTime
 
@@ -304,10 +281,10 @@ def sendMessageStreamAnswer(messageList: any):
 	gptAnswer = ''
 
 	stream = openAIClient.chat.completions.create(
-    	model = 'gpt-3.5-turbo',
-    	messages = messageList,
+		model = 'gpt-3.5-turbo',
+		messages = messageList,
 		temperature = 0.2,
-    	stream=True,
+		stream=True,
 	)
 
 	for chunk in stream:
