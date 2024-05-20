@@ -34,12 +34,15 @@ ESP = {
 }
 
 # Select default audio language here
-audioSelect = ESP
+audioSelect = ENG
 
 # Play specific history item ID
 def playAudioWithID(itemID: str, isReplay: bool = False):
 	# PLay audio if audio instructions are enabled or if it's a replay of the last answer
-	if audioInstructions.get() or isReplay:
+	if isReplay:
+		audioHistory = studyBot.elevenLabsClient.history.get_all() # Update audio history
+		studyBot.threading.Thread(target = studyBot.play, args = (studyBot.elevenLabsClient.history.get_audio(audioHistory.history[0].history_item_id), False, False)).start()
+	elif audioInstructions.get():
 		threadAudio = studyBot.threading.Thread(target = studyBot.play, args = (studyBot.elevenLabsClient.history.get_audio(itemID), False, False))
 		threadAudio.start()
 
@@ -192,9 +195,7 @@ def threadOrchestration():
 	threadConvertTTS.start()
 	threadConvertTTS.join()
 
-	# Save last history item ID
-	audioHistory = studyBot.elevenLabsClient.history.get_all() # Update audio history
-	lastHistoryItem = audioHistory.history[0].history_item_id
+	
 
 	# Enable buttons
 	topicDropdown.config(state = 'normal')
@@ -419,7 +420,7 @@ stopButton.pack(
 
 replayButton = tkinter.Button(
 	conversationControls,
-	text = '<R/A> Replay Answer',
+	text = '<R> Replay Answer',
 	command = lambda: playAudioWithID(lastHistoryItem, True),
 	bg = '#458588',
 	font = ('Leelawadee', 12)
@@ -473,7 +474,7 @@ window.bind('2', lambda _: checkSelection())
 window.bind('<Escape>', lambda _: close())
 window.bind('<space>', lambda _: toggleAudioDesc())
 window.bind('c', lambda _: selectAudioLanguage())
-window.bind('<W>', lambda _: playAudioWithID(audioSelect['welcome']))
+window.bind('w', lambda _: playAudioWithID(audioSelect['welcome']))
 
 # Stop, ask, and replay buttons disabled by default
 stopButton.config(state = 'disabled')

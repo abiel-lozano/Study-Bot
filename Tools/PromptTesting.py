@@ -5,9 +5,10 @@
 from openai import OpenAI
 import credentials
 
-print('\n', '|', '-'*50, '|', '\n', '|', ' Prompt Tester '.center(50, '-'), '|', '\n', '|', '-'*50, '|', '\n', sep = '', end = '\n\n')
 
 GPT_MODEL = 'gpt-4o'
+
+print('\n', '|', '-' * 80, '|', '\n', '|', f' ChatGPT - Model: {GPT_MODEL}'.center(80, '-'), '|', '\n', '|', '-' * 80, '|', '\n', sep = '', end = '\n\n')
 
 # Initialize the OpenAI client
 client = OpenAI(api_key = credentials.openAIKey)
@@ -49,16 +50,21 @@ response = client.chat.completions.create(
 			natural, as if a teacher were answering a student's question. If 
 			the question is unrelated to the information, try to answer the 
 			question without mentioning the information or the objects to make 
-			it sound more natural. If the user question is empty, or 
-			unintelligible, give a summary of the topic. Refrain from adding 
+			it sound more natural. If the user question is empty, or unintelligible, 
+			give a summary of the topic.
 			
-			any additional prefixes or appendages such as 'Summary:' or 'Answer:'. 
-			The response should consist solely of the content relevant to the 
-			query without any additional formatting. You answer questions in the 
-			same language as the question.
+			If you answer has numbers, spell them out ('twenty-five', not '25').
+			
+			If your answer includes a range, spell out both numbers ('from ten 
+			to twenty-five', not 'from 10 to 25').
+
+			If your answer includes a list, do not enumerate it.
+
+			You answer questions in the same language as the question.
 			"""
 		}, {'role': 'user', 'content': query},
 	]
 )
 
+response.choices[0].message.content = response.choices[0].message.content.replace('\"\"\"', '').replace('**', '').replace('*', '').replace('_', '')
 print('\n\nChatGPT says:\n\n', response.choices[0].message.content, sep = '', end = '\n\n')

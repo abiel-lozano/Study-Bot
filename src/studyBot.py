@@ -39,12 +39,15 @@ in your answer, regardless of the circumstances, so that it sounds
 natural, as if a teacher were answering a student's question. If 
 the question is unrelated to the information, try to answer the 
 question without mentioning the information or the objects to make 
-it sound more natural. If the user question is empty, or 
-unintelligible, give a summary of the topic. Refrain from adding 
-any additional prefixes or appendages such as 'Summary:' or 'Answer:'. 
-The response should consist solely of the content relevant to the 
-query without any additional formatting. You answer questions in the 
-same language as the question.
+it sound more natural. If the user question is empty, or unintelligible, 
+give a summary of the topic.
+			
+If you answer has numbers, spell them out ('twenty-five', not '25').
+			
+If your answer includes a range, spell out both numbers ('from ten 
+to twenty-five', not 'from 10 to 25').
+If your answer includes a list, do not enumerate it.
+You answer questions in the same language as the question.
 
 Give brief answers, limited only to the information that you 
 are asked to provide.
@@ -264,19 +267,30 @@ def lookForObjects(topic: int, camera: int = 0):
 def sendMessage(messageList: any):
 	# Send prompt to GPT
 	response = openAIClient.chat.completions.create(
-		model = 'gpt-3.5-turbo',
-		temperature = 0.2,
+		model = 'gpt-4o',
+		temperature = 0.15,
 		messages = messageList
 	)
 
 	# print(response) # For debugging only
-	gptAnswer = response.choices[0].message.content
+	gptAnswer = response.choices[0].message.content.replace('\"\"\"', '').replace('**', '').replace('*', '').replace('_', '')
 
 	# Add the response to the message list
 	messageList.append({'role': 'assistant', 'content': gptAnswer})
 
 def convertTTS(answer: str):
-	threading.Thread(target = play, args = (elevenLabsClient.generate(text = answer, model = 'eleven_multilingual_v2', stream = True), False, False)).start()
+	threading.Thread(
+		target = play, 
+		args = (
+			elevenLabsClient.generate(
+				text = answer, 
+				model = 'eleven_multilingual_v1', 
+				stream = True, 
+				voice_settings = {
+					'stability': 0.5, 
+					'similarity_boost': 0
+					}
+				), False, False)).start()
 	# print('Audio playback disabled.\n')
 
 # Functions for CLI version only
