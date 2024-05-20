@@ -42,10 +42,10 @@ question without mentioning the information or the objects to make
 it sound more natural. If the user question is empty, or unintelligible, 
 give a summary of the topic.
 			
-If you answer has numbers, spell them out ('twenty-five', not '25').
+If your answer has numbers, spell them out ('twenty-five', not '25').
 			
 If your answer includes a range, spell out both numbers ('from ten 
-to twenty-five', not 'from 10 to 25').
+to twenty-five', not '10-25').
 If your answer includes a list, do not enumerate it.
 You answer questions in the same language as the question.
 
