@@ -45,6 +45,9 @@ any additional prefixes or appendages such as 'Summary:' or 'Answer:'.
 The response should consist solely of the content relevant to the 
 query without any additional formatting. You answer questions in the 
 same language as the question.
+
+Give brief answers, limited only to the information that you 
+are asked to provide.
 """
 
 # Recorder configuration
@@ -273,8 +276,8 @@ def sendMessage(messageList: any):
 	messageList.append({'role': 'assistant', 'content': gptAnswer})
 
 def convertTTS(answer: str):
-	# threading.Thread(target = play, args = (elevenLabsClient.generate(text = answer, model = 'eleven_multilingual_v2', stream = True), False, False)).start()
-	print('Audio playback disabled.\n')
+	threading.Thread(target = play, args = (elevenLabsClient.generate(text = answer, model = 'eleven_multilingual_v2', stream = True), False, False)).start()
+	# print('Audio playback disabled.\n')
 
 # Functions for CLI version only
 def sendMessageStreamAnswer(messageList: any):

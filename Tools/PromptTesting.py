@@ -7,7 +7,7 @@ import credentials
 
 print('\n', '|', '-'*50, '|', '\n', '|', ' Prompt Tester '.center(50, '-'), '|', '\n', '|', '-'*50, '|', '\n', sep = '', end = '\n\n')
 
-GPT_MODEL = 'gpt-3.5-turbo'
+GPT_MODEL = 'gpt-4o'
 
 # Initialize the OpenAI client
 client = OpenAI(api_key = credentials.openAIKey)

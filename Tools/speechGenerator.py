@@ -9,16 +9,22 @@ import credentials
 client = ElevenLabs(api_key=credentials.elevenLabsKey)
 
 # 1 - Generate audio from text
-text = 'Silicon wafers are round because they are sliced from a cylindrical ingot. The ingot is made by melting silicon and then casting it into a cylindrical shape.'
-audio = client.generate(text = text, model = 'eleven_multilingual_v1', stream = True)
+text = input('Text: ')
+audio = client.generate(
+	text = text, 
+	model = 'eleven_multilingual_v1', 
+	voice_settings = {
+		'stability': 0.5, 
+		'similarity_boost': 0
+		}
+	)
 play(audio, notebook=False, use_ffmpeg=False)
 
 
-# 2 - Check history to get history_item_id
+# 2 - Get history_item_id of the last generated audio
 history = client.history.get_all().history
-print('History item:', history[0])
+print('\n\nHistory item:', history[0].history_item_id + '\n\n')
 # print(history) # Messy raw output, uncomment only when needed
 
 # 3 - Play specific history item by history_item_id to check your work
-play(client.history.get_audio(history[0].history_item_id), notebook=False, use_ffmpeg=False)
-# play(client.history.get_audio(''), notebook=False, use_ffmpeg=False)
+# play(client.history.get_audio(history[0].history_item_id), notebook=False, use_ffmpeg=False)

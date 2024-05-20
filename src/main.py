@@ -13,27 +13,25 @@ lastHistoryItem = ''
 
 ENG = {
 	# Audio Name ------- ID --------------------- Suggested Audio Descriptions
-	'welcome': 			'6X1EMz6BdxLjm7uvGozZ', # Welcome to Study-Bot! To begin, choose a topic from the dropdown menu using number 1 to go through the options. Then, select the topic by pressing number 2.
-	'language': 		'VKSMDZtiWeA1aBUOYL9H', # English
-	'topicHumanBody': 	'vI6YafcjSXDE1jAcOmyD', # Human Body
-	'topicBiochem': 	'Mb5eiuPEzl6uQvyUIpdT', # Biochemistry
-	'confirmHumanBody': 'g7YIvYxq9oszkAqEqVqG', # Human Body selected. Be ready to present the objects to the camera. Then, use number 3 to start recording the question. The recording will begin after the tone. Use number 4 to stop recording.
-	'confirmBiochem': 	'9g9lMMaDz6Hdb3j9ym5D', # Biochemistry selected. Be ready to present the objects to the camera. Then, use number 3 to start recording the question. The recording will begin after the tone. Use number 4 to stop recording.
-	'questionRecorded': 'cfzOrwicQ3HbeaGbUs1V', # Question recorded, please wait.
+	'welcome': 			'Fcr09G5osIVgPdB54Gwe', # Welcome to Study-Bot! To begin, choose a topic from the dropdown menu using number 1 to go through the options. Then, select the topic by pressing number 2.
+	'language': 		'FcRqjD9nTRQUbQchNBG8', # English
+	'topicHumanBody': 	'Xpzofl8BcoZi3LpebPUQ', # Human Body
+	'topicBiochem': 	'7dKNxFd2HIR30dKFwdmY', # Biochemistry
+	'confirmHumanBody': 'gOLazidFXjWtAVHX2J6L', # Human Body selected. Be ready to present the objects to the camera. Then, use number 3 to start recording the question. The recording will begin after the tone. Use number 4 to stop recording.
+	'confirmBiochem': 	'9WqViI4hHc4FGqQguMPq', # Biochemistry selected. Be ready to present the objects to the camera. Then, use number 3 to start recording the question. The recording will begin after the tone. Use number 4 to stop recording.
+	'questionRecorded': 'XCs47V952gWAhZrZoNtO', # Question recorded, please wait.
 }
 
 ESP = {
 	# Audio Name ------- ID --------------------- Suggested Audio Descriptions
-	'welcome': 			'upVrbpxRCRiSjsI0Tw11', # Bienvenido a Study-Bot! Para comenzar, elige un tema del menú usando el número 1 para navegar las opciones. Después, selecciona el tema presionando el número 2.
-	'language': 		'dx9OIBdj9NJIAcZleDSM', # Español
-	'topicHumanBody': 	'DzFBKFlDbgFeuHr56OvO', # Cuerpo Humano
-	'topicBiochem': 	'hjh2ZfBrukQGM3SVcroq', # Bioquímica
-	'confirmHumanBody': 'yc1Zi8Zx5pXMAaZfNh7e', # Cuerpo Humano seleccionado. Prepárate para presentar los objetos a la cámara. Luego, presiona el número 3 para comenzar a grabar la pregunta. La grabación comenzará después del tono. Usa el número 4 para detener la grabación cuando hayas terminado.
-	'confirmBiochem': 	'N1KChBbFileU8lQMcM9J', # Bioquímica seleccionada. Prepárate para presentar los objetos a la cámara. Luego, presiona el número 3 para comenzar a grabar la pregunta. La grabación comenzará después del tono. Usa el número 4 para detener la grabación cuando hayas terminado.
-	'questionRecorded': 'OYb9QwW8xyylYVFnax7w', # Pregunta grabada, por favor espera.
+	'welcome': 			'GZALP3KM1fBIH4uU2of7', # Hola! Para comenzar, elige un tema del menú usando el número uno para navegar las opciones. Después, selecciona el tema presionando el número dos.
+	'language': 		'IIH34ANdEoFnUh9mn7Dn', # Español
+	'topicHumanBody': 	'hHEoz72Yl43NrxelKrkE', # Cuerpo Humano
+	'topicBiochem': 	'fYqUQJcQHkPm1EJ3F2SM', # Bioquímica
+	'confirmHumanBody': '8YIW9hjNIvcAivStBGRB', # Cuerpo Humano seleccionado. Prepárate para presentar los objetos a la cámara. Luego, presiona el número tres para comenzar a grabar la pregunta. La grabación comenzará después del tono. Usa el número cuatro para detener la grabación cuando hayas terminado.
+	'confirmBiochem': 	'diSUSBcjZoyuKwTBtfpL', # Bioquímica seleccionada. Prepárate para presentar los objetos a la cámara. Luego, presiona el número tres para comenzar a grabar la pregunta. La grabación comenzará después del tono. Usa el número cuatro para detener la grabación cuando hayas terminado.
+	'questionRecorded': 'UkKdDEpH3g8DeRHA9w3V', # Pregunta grabada. Por favor espera.
 }
-
-# TODO: Review ESP[language] (pronunciation), ESP[confirmHumanBody] (pronunciation), ESP[confirmBiochem] (change to 'Krebs Cycle'), ENG[confirmBiochem] (change to 'Krebs Cycle')
 
 # Select default audio language here
 audioSelect = ESP
@@ -421,7 +419,7 @@ stopButton.pack(
 
 replayButton = tkinter.Button(
 	conversationControls,
-	text = '<R> Replay Answer',
+	text = '<R/A> Replay Answer',
 	command = lambda: playAudioWithID(lastHistoryItem, True),
 	bg = '#458588',
 	font = ('Leelawadee', 12)

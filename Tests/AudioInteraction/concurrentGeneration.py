@@ -28,6 +28,7 @@ import json
 import base64
 import threading
 import queue
+import keyboard
 
 startTime = None
 
@@ -76,9 +77,11 @@ def recordQuestion():
 	frames = []
 	
 	print('Recording...')
-	for i in range(0, int(RATE / CHUNK * 5)):
+	while True:
 		data = stream.read(CHUNK)
 		frames.append(data)
+		if keyboard.is_pressed('q'):
+			break
 
 	# Stop and close audio stream
 	stream.stop_stream()
@@ -135,7 +138,7 @@ async def playAudio(audioData: bytes):
 	global startTime
 	
 	if startTime is not None:
-		print('Response Time: ', time.time() - startTime)
+		print('\n\nResponse Time: ', time.time() - startTime, '\n\n')
 		startTime = None
 
 	audioQueue.put(audioData)
@@ -149,7 +152,7 @@ async def stream(audioStream):
 async def ttsInputStreaming(textIterator):
 	# Send text to ElevenLabs API and stream the returned audio.
 	# URI: Convert TTS, use voice 'Sarah', with model 'eleven_multilingual_v1', and output in 'pcm_24000' format.
-	uri = f'wss://api.elevenlabs.io/v1/text-to-speech/EXAVITQu4vr4xnSDxMaL/stream-input?model_id=eleven_multilingual_v1&output_format=pcm_24000'
+	uri = 'wss://api.elevenlabs.io/v1/text-to-speech/EXAVITQu4vr4xnSDxMaL/stream-input?model_id=eleven_multilingual_v1&output_format=pcm_24000'
 
 	async with websockets.connect(uri) as websocket:
 		await websocket.send(json.dumps({
@@ -191,7 +194,7 @@ async def sendMessage() -> AsyncGenerator[str, None]:
 		temperature = 0.2,
 		messages = [
 			{'role': 'system', 'content': 'You answer in English or Spanish depending on the language of the question.'},
-			{'role': 'user', 'content': query},
+			{'role': 'user', 'content': question + 'Feel free to give a lengthy answer.'},
 		],
 		stream = True
 	)
@@ -202,8 +205,9 @@ async def sendMessage() -> AsyncGenerator[str, None]:
 			delta = chunk.choices[0].delta
 			if delta.content is not None:
 				response += delta.content
-				print(delta.content)
+				print(delta.content, end = '')
 				yield delta.content
+		print('\n\n---\n')
 
 	await ttsInputStreaming(textIterator())
 	
