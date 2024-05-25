@@ -14,6 +14,7 @@ import threading
 import keyboard
 import credentials # Contains API keys, create your own credentials.py file
 import sourceMaterial
+from detecto import core, visualize
 
 objects = str()
 question = str()
@@ -252,6 +253,33 @@ def markerID(camera: int = 0):
 	cap.release()
 	cv2.destroyAllWindows()
 
+def detectionID(camera: int = 0):
+	cap = cv2.VideoCapture(camera, cv2.CAP_DSHOW) # Use 0 for default camera
+	
+	ret, frame = cap.read()
+	
+	cap.release()
+	
+	frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+	
+	# Poner todos los archivos png y xml en una sola carpeta
+	dataset = core.Dataset("/Users/myriamfm/Downloads/imagesDetecto")
+	
+	# Entrenamiento del modelo
+	dataset = core.Dataset("/Users/myriamfm/Downloads/imagesDetecto")
+	model = core.Model.load("/Users/myriamfm/Downloads/imagesDetecto/pruebasSLB.pth", ['stomach', 'liver', 'brain'])
+	
+	# Especificar el path o el directorio de la imagen a probar
+	predictions = model.predict(frame_rgb)
+	
+	# Formato de predicciones: (labels, boxes, scores)
+	labels, boxes, scores = predictions
+	
+	print(labels)
+	print(boxes)
+	print(scores)
+	visualize.show_labeled_image(frame_rgb, boxes, labels)
+
 # Takes the topic number and camera number as arguments, if no camera number is provided, the default camera is used
 def lookForObjects(topic: int, camera: int = 0):
 	if topic == 1:
@@ -260,6 +288,9 @@ def lookForObjects(topic: int, camera: int = 0):
 	elif topic == 2:
 		# Call the function for marker identification
 		markerID(camera)
+	elif topic == 3:
+		# Call the function for detection identification
+		detectionID(camera)
 
 def sendMessage(messageList: any):
 	# Send prompt to GPT

@@ -83,6 +83,8 @@ def selectNextOption():
 		playAudioWithID(audioSelect['topicHumanBody'])
 	elif nextOption == '<1> Biochem':
 		playAudioWithID(audioSelect['topicBiochem'])
+	elif nextOption == '<1> Human Body Detection':
+		playAudioWithID(audioSelect['topicHumanBody'])
 	# Add new topics here
 
 # Select source material to be sent to GPT and select object ID function
@@ -109,6 +111,10 @@ def checkSelection():
 		studyBot.topic = 2
 		source = studyBot.sourceMaterial.krebsCycle
 		playAudioWithID(audioSelect['confirmBiochem'])
+	elif topic == '<1> Human Body Detection':
+		studyBot.topic = 3
+		source = studyBot.sourceMaterial.humanBody
+		playAudioWithID(audioSelect['confirmHumanBody'])
 	# Add new topics here
 
 	# Check if the 'Ask Question' button isn't already bound
@@ -367,7 +373,8 @@ topicDropdown = tkinter.OptionMenu(
 	topicFrame, 
 	topicVar,
 	'<1> Human Body',
-	'<1> Biochem'
+	'<1> Biochem',
+	'<1> Human Body Detection'
 )
 topicDropdown.config(width = 15)
 topicDropdown.pack(
