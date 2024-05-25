@@ -37,14 +37,17 @@ ESP = {
 audioSelect = ENG
 
 # Play specific history item ID
-def playAudioWithID(itemID: str, isReplay: bool = False):
-	# PLay audio if audio instructions are enabled or if it's a replay of the last answer
-	if isReplay:
-		audioHistory = studyBot.elevenLabsClient.history.get_all() # Update audio history
-		studyBot.threading.Thread(target = studyBot.play, args = (studyBot.elevenLabsClient.history.get_audio(audioHistory.history[0].history_item_id), False, False)).start()
-	elif audioInstructions.get():
+def playAudioWithID(itemID: str):
+	# PLay audio if audio instructions are enabled
+	if audioInstructions.get():
 		threadAudio = studyBot.threading.Thread(target = studyBot.play, args = (studyBot.elevenLabsClient.history.get_audio(itemID), False, False))
 		threadAudio.start()
+
+def replay():
+	# Refresh audio history, play the last audio item
+	global audioHistory
+	audioHistory = studyBot.elevenLabsClient.history.get_all()
+	studyBot.threading.Thread(target = studyBot.play, args = (audioHistory.history[0].history_item_id, False, False)).start()
 
 def toggleAudioDesc():
 	global audioInstructions
@@ -146,7 +149,6 @@ def threadOrchestration():
 	global messageHistory
 	global query
 	global cameraVar
-	global audioHistory
 
 	# Perform object detection and question recording concurrently, wait for results
 	threadObjID = studyBot.threading.Thread(target = studyBot.lookForObjects, args = (studyBot.topic, int(cameraVar.get()[7:]) - 1)) # Get camera selection from dropdown menu
@@ -195,8 +197,6 @@ def threadOrchestration():
 	threadConvertTTS.start()
 	threadConvertTTS.join()
 
-	
-
 	# Enable buttons
 	topicDropdown.config(state = 'normal')
 	selectButton.config(state = 'normal')
@@ -207,7 +207,7 @@ def threadOrchestration():
 	window.bind('1', lambda _: selectNextOption())
 	window.bind('2', lambda _: checkSelection())
 	window.bind('3', lambda _: backgroundInit())
-	window.bind('r', lambda _: playAudioWithID(lastHistoryItem, True))
+	window.bind('r', lambda _: replay())
 
 def timeLimiter():
 	# While the user hasn't stopped the recording, or less than 1 second has passed, and more than 30 have not passed
@@ -421,7 +421,7 @@ stopButton.pack(
 replayButton = tkinter.Button(
 	conversationControls,
 	text = '<R> Replay Answer',
-	command = lambda: playAudioWithID(lastHistoryItem, True),
+	command = lambda: replay(),
 	bg = '#458588',
 	font = ('Leelawadee', 12)
 )

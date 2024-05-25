@@ -29,6 +29,8 @@ elevenLabsClient = ElevenLabs(api_key = credentials.elevenLabsKey)
 
 # Behavioral guidelines for conversation
 customInstructions = """
+You are a tutor helping a student. You answer the student's questions
+in the same language as their question.
 Use the information below to help the user study by answering their 
 questions with thorough explanations. The user could be holding a 
 physical representation of what their question is about. Consider 
@@ -47,10 +49,6 @@ If your answer has numbers, spell them out ('twenty-five', not '25').
 If your answer includes a range, spell out both numbers ('from ten 
 to twenty-five', not '10-25').
 If your answer includes a list, do not enumerate it.
-You answer questions in the same language as the question.
-
-Give brief answers, limited only to the information that you 
-are asked to provide.
 """
 
 # Recorder configuration
@@ -146,7 +144,7 @@ def colorID(camera: int = 0):
 		heartMask = cv2.dilate(heartMask, kernel)
 		# Use a larger kernel for heart, liver, and kidney masks
 		liverMask = cv2.dilate(liverMask, np.ones((12, 12), 'uint8'))
-		kidneyMask = cv2.dilate(kidneyMask, np.ones((12, 12), 'uint8'))
+		kidneyMask = cv2.dilate(kidneyMask, np.ones((13, 13), 'uint8'))
 		heartMask = cv2.dilate(heartMask, np.ones((12, 12), 'uint8'))
 
 		# Create a contour around the zone that matches the color range
@@ -170,7 +168,6 @@ def colorID(camera: int = 0):
 			area = cv2.contourArea(contour)
 			if area > 1400 and 'stomach' not in objects:
 				objects = f'{objects}, stomach' if objects != 'User is not holding any objects' else 'stomach'
-
 
 		contours, _ = cv2.findContours(brainMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 		for contour in contours:

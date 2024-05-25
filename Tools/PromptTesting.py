@@ -40,6 +40,9 @@ response = client.chat.completions.create(
 			'role': 'system', 
 			'content': 
 			"""
+			You are a tutor helping a student. You answer the student's questions
+			in the same language as their question.
+
 			Use the information below to help the user study by answering their 
 			questions with thorough explanations. The user could be holding a 
 			physical representation of what their question is about. Consider 
@@ -53,14 +56,12 @@ response = client.chat.completions.create(
 			it sound more natural. If the user question is empty, or unintelligible, 
 			give a summary of the topic.
 			
-			If you answer has numbers, spell them out ('twenty-five', not '25').
+			If your answer has numbers, spell them out ('twenty-five', not '25').
 			
 			If your answer includes a range, spell out both numbers ('from ten 
-			to twenty-five', not 'from 10 to 25').
+			to twenty-five', not '10-25').
 
 			If your answer includes a list, do not enumerate it.
-
-			You answer questions in the same language as the question.
 			"""
 		}, {'role': 'user', 'content': query},
 	]
