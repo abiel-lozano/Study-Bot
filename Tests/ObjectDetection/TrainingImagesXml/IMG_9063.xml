@@ -1,0 +1,26 @@
+<annotation>
+	<folder>imagesDetecto</folder>
+	<filename>IMG_9063.png</filename>
+	<path>/Users/myriamfm/Downloads/imagesDetecto/IMG_9063.png</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>4032</width>
+		<height>3024</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>stomach</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>1064</xmin>
+			<ymin>524</ymin>
+			<xmax>3122</xmax>
+			<ymax>2720</ymax>
+		</bndbox>
+	</object>
+</annotation>

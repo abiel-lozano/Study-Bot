@@ -1,0 +1,26 @@
+<annotation>
+	<folder>imagesDetecto</folder>
+	<filename>IMG_9041.png</filename>
+	<path>/Users/myriamfm/Downloads/imagesDetecto/IMG_9041.png</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>4032</width>
+		<height>3024</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>liver</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>743</xmin>
+			<ymin>945</ymin>
+			<xmax>3634</xmax>
+			<ymax>2570</ymax>
+		</bndbox>
+	</object>
+</annotation>

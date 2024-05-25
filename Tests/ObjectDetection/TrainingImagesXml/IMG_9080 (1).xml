@@ -1,0 +1,50 @@
+<annotation>
+	<folder>imagesDetecto2</folder>
+	<filename>IMG_9080 (1).png</filename>
+	<path>/Users/myriamfm/Downloads/imagesDetecto2/IMG_9080 (1).png</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>4032</width>
+		<height>3024</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>liver</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>189</xmin>
+			<ymin>1141</ymin>
+			<xmax>1084</xmax>
+			<ymax>2258</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>stomach</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>1351</xmin>
+			<ymin>887</ymin>
+			<xmax>2572</xmax>
+			<ymax>2362</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>brain</name>
+		<pose>Unspecified</pose>
+		<truncated>1</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>2797</xmin>
+			<ymin>987</ymin>
+			<xmax>4032</xmax>
+			<ymax>2508</ymax>
+		</bndbox>
+	</object>
+</annotation>
