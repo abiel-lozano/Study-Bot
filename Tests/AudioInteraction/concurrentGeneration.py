@@ -194,7 +194,7 @@ async def sendMessage() -> AsyncGenerator[str, None]:
     temperature = 0.2,
     messages = [
       {'role': 'system', 'content': 'You answer in English or Spanish depending on the language of the question.'},
-      {'role': 'user', 'content': question + 'Feel free to give a lengthy answer.'},
+      {'role': 'user', 'content': question},
     ],
     stream = True
   )
@@ -232,5 +232,4 @@ async def convertTTS() -> None:
   
   await sendMessage()
 
-loop = asyncio.get_event_loop()
-loop.run_until_complete(convertTTS())
+asyncio.get_event_loop().run_until_complete(convertTTS())

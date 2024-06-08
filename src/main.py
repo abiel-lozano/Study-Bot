@@ -156,8 +156,8 @@ def threadOrchestration():
 	threadTimeLimiter = studyBot.threading.Thread(target = timeLimiter)
 	
 	threadObjID.start()
-	threadQuestionRec.start()
 	threadTimeLimiter.start()
+	threadQuestionRec.start()
 
 	winsound.Beep(700, 600)
 	infoDisplay.set(f'Listening for question and looking for objects...')
@@ -184,18 +184,24 @@ def threadOrchestration():
 		messageHistory.append({'role': 'user', 'content': query})
 
 	# Message GPT
-	threadSendMessage = studyBot.threading.Thread(target = studyBot.sendMessage, args = (messageHistory,))
-	threadSendMessage.start()
-	threadSendMessage.join()
+	# threadSendMessage = studyBot.threading.Thread(target = studyBot.sendMessage, args = (messageHistory,))
+	# threadSendMessage.start()
+	# threadSendMessage.join()
 
 	# Get answer of last message from messageHistory
+
+	# # Convert TTS
+	# threadConvertTTS = studyBot.threading.Thread(target = studyBot.convertTTS, args = (answer,))
+	# threadConvertTTS.start()
+	# threadConvertTTS.join()
+
+	studyBot.threading.Thread(target = studyBot.playAudioFromQueue).start()
+	threadSendMessage = studyBot.threading.Thread(target = studyBot.asyncio.run, args = (studyBot.sendMessage(),)).start()
+	threadSendMessage.join()
+
+
 	answer = next((msg for msg in reversed(messageHistory) if msg['role'] == 'assistant'), None)['content']
 	infoDisplay.set(f'Answer: {answer}')
-
-	# Convert TTS
-	threadConvertTTS = studyBot.threading.Thread(target = studyBot.convertTTS, args = (answer,))
-	threadConvertTTS.start()
-	threadConvertTTS.join()
 
 	# Enable buttons
 	topicDropdown.config(state = 'normal')

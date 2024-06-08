@@ -5,15 +5,28 @@ import pyaudio
 import wave
 import time
 from pathlib import Path
-from openai import OpenAI
 import cv2
 import numpy as np
+from openai import OpenAI
 from elevenlabs import play
 from elevenlabs.client import ElevenLabs
+
+# Import both Async Clients
+
+from elevenlabs.client import AsyncElevenLabs
+from openai import AsyncOpenAI
+
 import threading
 import keyboard
 import credentials # Contains API keys, create your own credentials.py file
 import sourceMaterial
+
+import asyncio
+import json
+import websockets
+import base64
+import queue
+from typing import AsyncGenerator
 
 objects = str()
 question = str()
@@ -21,9 +34,15 @@ answer = str()
 stop = bool()
 startTime = 0.0
 
+testStartTime = 0.0
+audioQueue = queue.Queue()
+
 # Credentials
 openAIClient = OpenAI(api_key = credentials.openAIKey)
 elevenLabsClient = ElevenLabs(api_key = credentials.elevenLabsKey)
+
+asyncOIAClient = AsyncOpenAI(api_key = credentials.openAIKey)
+async11LClient = AsyncElevenLabs(api_key = credentials.elevenLabsKey)
 
 # TODO: Fix custom instructions, these don't work anymore, again
 
@@ -74,6 +93,9 @@ def recordQuestion():
 	while not stop:
 		data = stream.read(CHUNK)
 		frames.append(data)
+		if keyboard.is_pressed('q'):
+			stop = True
+			print('Recording stopped by user.')
 
 	# Stop and close audio stream
 	stream.stop_stream()
@@ -144,7 +166,7 @@ def colorID(camera: int = 0):
 		heartMask = cv2.dilate(heartMask, kernel)
 		# Use a larger kernel for heart, liver, and kidney masks
 		liverMask = cv2.dilate(liverMask, np.ones((12, 12), 'uint8'))
-		kidneyMask = cv2.dilate(kidneyMask, np.ones((13, 13), 'uint8'))
+		kidneyMask = cv2.dilate(kidneyMask, np.ones((12, 12), 'uint8'))
 		heartMask = cv2.dilate(heartMask, np.ones((12, 12), 'uint8'))
 
 		# Create a contour around the zone that matches the color range
@@ -261,18 +283,92 @@ def lookForObjects(topic: int, camera: int = 0):
 		# Call the function for marker identification
 		markerID(camera)
 
-def sendMessage(messageList: any):
+def playFromQueue():
+	p = pyaudio.PyAudio()
+	# NOTE: Reducing buffer size could make audio start earlier, as the buffer is filled faster
+	stream = p.open(format = pyaudio.paInt16, channels = 1, rate = 24000, output = True, frames_per_buffer = 32768)
+	while True:
+		audioData = audioQueue.get()
+		if audioData is None:
+			break
+		stream.write(audioData)
+
+	stream.stop_stream()
+	stream.close()
+	p.terminate()
+
+async def send2q(audioChunk: bytes):
+	audioQueue.put(audioChunk)
+
+async def stream(audioStream):
+	async for audioChunk in audioStream:
+		if audioChunk:
+			await send2q(audioChunk)
+
+# Input streaming based on example provided in the ElevenLabs API documentation
+# https://elevenlabs.io/docs/api-reference/websockets#example-voice-streaming-using-elevenlabs-and-openai
+
+async def textChunker(chunks):
+	# Split text into chunks, ensuring to not break sentences
+	splitters = ('.', ',', '?', '!', ';', ':', '—', '-', '(', ')', '[', ']', '}', ' ')
+	buffer = ''
+	async for text in chunks:
+		if buffer.endswith(splitters):
+			yield buffer + ' '
+			buffer = text
+		elif text.startswith(splitters):
+			yield buffer + text[0] + ' '
+			buffer = text[1:]
+		else:
+			buffer += text
+	if buffer:
+		yield buffer + ' '
+
+async def ttsInputStreaming(textIterator: any):
+	uri = 'wss://api.elevenlabs.io/v1/text-to-speech/EXAVITQu4vr4xnSDxMaL/stream-input?model_id=eleven_multilingual_v1&output_format=pcm_24000'
+	async with websockets.connect(uri) as websocket:
+		await websocket.send(json.dumps({
+			'text': ' ',
+			'xi_api_key': credentials.elevenLabsKey,
+			'voice_settings': {'stability': 0.5, 'similarity_boost': 0} # Despite the similarity boost only having effect on cloned voices, removing it makes this an invalid request! (:
+		}))
+		async def listen():
+			while True:
+				try:
+					message = await websocket.recv()
+					data = json.loads(message)
+					if data.get('audio'):
+						yield base64.b64decode(data['audio'])
+					elif data.get('isFinal'):
+						break
+				except websockets.exceptions.ConnectionClosed:
+					print('Connection closed')
+					break
+		listenTask = asyncio.create_task(stream(listen()))
+		async for text in textChunker(textIterator):
+			await websocket.send(json.dumps({'text': text, 'try_trigger_generation': True}))
+		await websocket.send(json.dumps({'text': ''}))
+		await listenTask
+	
+async def sendMessage(messageList: any) -> AsyncGenerator[str, None]:
+	gptAnswer = str()
 	# Send prompt to GPT
-	response = openAIClient.chat.completions.create(
-		model = 'gpt-4o',
-		temperature = 0.15,
-		messages = messageList
+	textStream = await openAIClient.chat.completions.create(
+		model = 'gpt-3.5-turbo',
+		temperature = 0.2,
+		messages = messageList,
+		stream = True
 	)
+	async def textIterator():
+		global gptAnswer
+		for textChunk in textStream:
+			delta = textChunk.choices[0].delta
+			if delta.content is not None:
+				gptAnswer += delta.content
+				yield delta.content
+	await ttsInputStreaming(textIterator())
 
-	# print(response) # For debugging only
-	gptAnswer = response.choices[0].message.content.replace('\"\"\"', '').replace('**', '').replace('*', '').replace('_', '')
-
-	# Add the response to the message list
+	# Add the response to the message list once the answer is complete
 	messageList.append({'role': 'assistant', 'content': gptAnswer})
 
 def convertTTS(answer: str):
