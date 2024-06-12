@@ -253,44 +253,39 @@ def markerID(camera: int = 0):
 	cap.release()
 	cv2.destroyAllWindows()
 
-def detectionID(camera: int = 0):
+def modelID(camera: int = 0):
+	global objects
+
 	cap = cv2.VideoCapture(camera, cv2.CAP_DSHOW) # Use 0 for default camera
-	
-	ret, frame = cap.read()
-	
+	_, frame = cap.read()
 	cap.release()
-	
 	frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+	model = core.Model.load('pruebasSLB.pth', ['stomach', 'liver', 'brain'])
+	predictions = model.predict(frame_rgb) # Select image to scan
+	labels, boxes, scores = predictions # Prediction format: labels, boxes, scores
 	
-	# Poner todos los archivos png y xml en una sola carpeta
-	dataset = core.Dataset("/Users/myriamfm/Downloads/imagesDetecto")
-	
-	# Entrenamiento del modelo
-	dataset = core.Dataset("/Users/myriamfm/Downloads/imagesDetecto")
-	model = core.Model.load("/Users/myriamfm/Downloads/imagesDetecto/pruebasSLB.pth", ['stomach', 'liver', 'brain'])
-	
-	# Especificar el path o el directorio de la imagen a probar
-	predictions = model.predict(frame_rgb)
-	
-	# Formato de predicciones: (labels, boxes, scores)
-	labels, boxes, scores = predictions
-	
-	print(labels)
-	print(boxes)
-	print(scores)
-	visualize.show_labeled_image(frame_rgb, boxes, labels)
+	# print(labels)
+	# print(boxes)
+	# print(scores)
+
+	# Visualize the predictions
+	# visualize.show_labeled_image(frame, boxes, labels)
+
+	for i in range(len(labels)):
+		if scores[i] > 0.5:
+			objects += f', {labels[i]}'
 
 # Takes the topic number and camera number as arguments, if no camera number is provided, the default camera is used
 def lookForObjects(topic: int, camera: int = 0):
 	if topic == 1:
-		# Call the function for color identification
+		# Call the function for color-based identification
 		colorID(camera)
 	elif topic == 2:
-		# Call the function for marker identification
+		# Call the function for marker-based identification
 		markerID(camera)
 	elif topic == 3:
-		# Call the function for detection identification
-		detectionID(camera)
+		# Call the function for model-based identification
+		modelID(camera)
 
 def sendMessage(messageList: any):
 	# Send prompt to GPT
