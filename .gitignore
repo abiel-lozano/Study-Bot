@@ -10,6 +10,7 @@ Tests/Performance/Scripts/__pycache__
 Tests/Performance/Scripts/credentials.py
 Tests/TextInteraction/credentials.py
 Tests/ObjectDetection/pruebasSLB.pth
+src/pruebasSLB.pth
 
 Tools/credentials.py
 */__pycache__
