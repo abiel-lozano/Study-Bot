@@ -1,40 +1,45 @@
 # Study-Bot
 
-**Study-Bot** is an open-source project developed by **Edumakers** from **Tecnológico de Monterrey**. It is designed to help visually impaired students review their academic course material. It is an AI-powered study companion that incorporates various technologies, including [Whisper](https://openai.com/research/whisper), [GPT-3.5-turbo-16k](https://platform.openai.com/docs/models/gpt-3-5), [Elevenlabs text-to-speech](https://github.com/elevenlabs/elevenlabs-python), and [OpenCV](https://opencv.org/). For testing purposes, sample course material was generated using [ChatGPT](https://openai.com/blog/chatgpt).
+[![Python Version](https://img.shields.io/badge/python-3.9.9-blue.svg)](https://www.python.org/downloads/release/python-399/)
+![GitHub Issues](https://img.shields.io/github/issues/abiel-lozano/Study-Bot)
+![GitHub Last Commit](https://img.shields.io/github/last-commit/abiel-lozano/Study-Bot)
+![Repo Size](https://img.shields.io/github/repo-size/abiel-lozano/Study-Bot)
+
+
+**Study-Bot** is an open-source project developed by **Edumakers** from **Tecnológico de Monterrey**. It is designed to help visually impaired students review their academic course material. It is an AI-powered study companion that incorporates various technologies, including [Whisper](https://openai.com/research/whisper), [GPT-4o](https://platform.openai.com/docs/models/gpt-4o), [Elevenlabs' AI Speech Synthesis](https://github.com/elevenlabs/elevenlabs-python), and [OpenCV](https://opencv.org/), into a fully accessible interface.
 
 <dl><dd><dl><dd>
 <img src="Documentation/Images/Study-Bot UI.png" alt="Study-Bot GUI" align="right" width="420" height="400"/>
 </dd></dl></dd></dl>
 
-**Study-Bot** can: listen to the user's question, analyze the source material of the topic they want to study, detect the physical educational material that they are holding by its color or ArUco marker, generate an answer, and read it out loud to the user as an accessible executable application. For development and testing purposes, it can be run through the **Python** interpreter as a **CLI** program or with a **GUI**.
+**Study-Bot** can: listen to the user's question, analyze the source material of the topic they want to study, detect the physical educational material that they are holding, generate an answer, and read it out loud to the user. It can be run through the **Python** interpreter as a CLI-only interface for testing new features, or with a **GUI**, and can be compiled into an executable using [PyInstaller](https://www.pyinstaller.org/) for easier distribution without the need to install additional software.
 
-
-
-
-Some good next steps could be to embed this system into a more advanced user interface for distribution as a desktop application, create a computer vision model that can detect the physical educational material without depending on color or ArUco markers, as well as some performance improvements and new interactive features.
+**Study-Bot** could be significantly improved when it comes to its response times, object detection accuracy, and answer quality. To learn more about this project that could be enhanced, refer to the [Next Steps](Documentation/Next%20Steps.md) document.
 
 ## Installation and Usage
 
-It is recomended to use [Python 3.9.9](https://www.python.org/downloads/release/python-399/) so that the `whisper` library can be used without issues. To avoid having to remove your current **Python** installation, you may want to use a virtual enviroment to use this specific version of **Python**. To install the required dependencies, run the following command:
+**Study-Bot** was developed using [Python 3.9.9](https://www.python.org/downloads/release/python-399/), and it is recommended to use this version to run the project to get around any compatibility issues. To avoid having to remove your current installation, you may want to use a virtual enviroment to use this specific version of **Python**.
 
-```bash
+To install the required dependencies, run the following command:
+
+```pwsh
 pip install -r requirements.txt
 ```
-There are some additional steps that need to be taken before being able to run the project, such as the aquisition of your own API keys for the AI services used here. For more information, please refer to the `Documentation` folder for a comprehensive guide on how to use this project.
+There are some additional steps that need to be taken before being able to run the project, such as the acquisition of your own API keys for the AI services used here. For more information, please refer to the `Documentation` folder for a comprehensive guide on how to use and modify this project.
 
 ## What We Used
 
 **Study-Bot** relies on the following existing services and technologies:
 
-<img src="Documentation/Images/Functional Diagram.png" alt="Functional Diagram" width="500" align="right"/>
+<img src="Documentation/Images/Functional Diagram.png" alt="Functional Diagram" width="490" align="right"/>
 
 - **[Whisper:](https://openai.com/research/whisper)** Used for speech-to-text conversion, allowing users to speak their questions to be fed into the GPT model.
 
-- **[gpt-3.5-turbo-16k:](https://platform.openai.com/docs/models/gpt-3-5)** Used for question processing and answer generation. The 16k version of the model was chosen for its 16,385-token context window size, which is needed to process a large amount of source material.
+- **[GPT-4o:](https://platform.openai.com/docs/models/gpt-4o)** Used for question processing and answer generation. This version of GPT was choosen for for having a 128,000-token context window, a relatively fresh training data cut-off from October 2023, and its lower latency and cost.
 
 - **[Elevenlabs text-to-speech:](https://beta.elevenlabs.io/)** Used for text-to-speech conversion, allowing users to hear the answers generated by the GPT model.
 
-- **[OpenCV:](https://opencv.org/)** Used for physical object identification, to aid the GPT-3.5-16k model in answering questions with the added context of what the user is holding.
+- **[OpenCV](https://opencv.org/) and [Custom Computer Vision Model:](https://detecto.readthedocs.io/en/latest/)** **OpenCV** is used for identifying the educational materials based on their color or ArUco markers. A custom computer vision model was trained using **Detecto**, a Python package for building object detection models, for cases in which the other methods are not feasible.
 
 ## Contributing and Codebase Usage
 
