@@ -82,7 +82,7 @@ You are a tutor helping a student...
 
 This function records audio until the user stops it and creates a file named `question.wav` and sends it through the OpenAI API to create a transcription of the audio. The recording is stopped by user input.
 
-While you could select the language Whisper should listen for as a parameter for the `openAIClient.audio.transcriptions.create()` function, ignoring this parameter will cause Whisper to try and detect the language automatically, which is useful to avoid having to select the language every time the bot is used. Note that this feature can lead to language misidentification in noisy environments and/or when using a low-quality microphone.
+You could select the language Whisper should expect from the input audio as a parameter for the `openAIClient.audio.transcriptions.create()` function; ignoring this parameter will make Whisper try to detect the language automatically, which is useful to avoid having to select the language every time the bot is used. Note that this feature can lead to language misidentification in noisy environments and/or when using a low-quality microphone.
 
 ```python
 # Recorder configuration
@@ -133,12 +133,12 @@ def recordQuestion():
 
 Study-Bot has can identify objects using 3 different methods: color ranges, ArUco markers, and a custom computer vision model, depending on which is more feasable to implement for a specific topic and its set of educational materials.
 
-The function `lookForObjects()` is called when the user asks a question, and it will populate the object list with the objects that they are holding. This list is a string containing natural language, as it needs to be read by **GPT**. The function `colorID()` is used to detect the *some* of the pieces of the human body set based on predefined color ranges, the function `markerID()` is used to detect the objects for the Krebs cycle set based on the ArUco markers attached to each one of the pieces of the set, and the function `modelID()` is used to detect the objects using the custom computer vision model trained with all the pieces in the human body set.
+The function `lookForObjects()` is called when the user asks a question, and it will populate the object list with whatever they are holding. This list is a string containing natural language, as it needs to be read by **GPT**. The function `colorID()` is used to detect the *some* of the pieces of the human body set based on predefined color ranges, the function `markerID()` is used to detect the objects for the Krebs cycle set based on the ArUco markers attached to each one of the pieces of the set, and the function `modelID()` is used to detect the objects using the custom computer vision model trained with all the pieces in the human body set.
 
 ```python
 # Takes the topic number and camera number as arguments, if no camera number is provided, the default camera is used
 def lookForObjects(topic: int, camera: int = 0):
-	if topic == 1:
+  if topic == 1:
 		
 		colorID(camera)
 	elif topic == 2:
@@ -151,7 +151,7 @@ def lookForObjects(topic: int, camera: int = 0):
 
 **Color Identification:** `colorID()`
 
-This function uses [OpenCV](https://opencv.org/) to detect objects that match any of the predefined color ranges. It will look for objects for one second, and if it finds any, it will add to the `objects` variable what it has found. If it doesn't find anything, the variable will contain the default message, set at the start of the function.
+This function uses [OpenCV](https://opencv.org/) to detect objects that fit into the predefined color ranges. It will look for objects for one second, and if it finds any match, it will add it to the object list. If it doesn't find anything, the variable will contain the default message, set at the start of the function.
 
 For each of the objects you wish to identify, set a lower and upper bound with the lightest and darkest values for the color of the object in the **HSV color space**. You may use a color picker tool to obtain these values. Consider that the effectiveness of these values will depend on the lighting conditions of the environment, color accuracy of the camera, white balance, and other factors.
 
@@ -159,32 +159,32 @@ For each of the objects you wish to identify, set a lower and upper bound with t
 
 <!-- Use white balance of 3154 for our camera -->
 ```python
-def colorID():
-  obj = 'User is not holding any objects'
+def colorID(camera: int = 0):
+  global objects
+  objects = 'User is not holding any objects'
 
   # Capture video
-  cam = cv2.VideoCapture(0, cv2.CAP_DSHOW) # Use 0 for default camera
+  cam = cv2.VideoCapture(camera, cv2.CAP_DSHOW) # Use 0 for default camera
 
   # Start timer
   startTime = time.time()
   elapsedTime = 0
 
-  # Color ranges       Hue   Saturation   Vibrancy
-  stomachLower = np.array([90,   80,       100       ], np.uint8)
-  stomachUpper = np.array([120,   255,       255       ], np.uint8)
-  colonLower = np.array(  [10,   255 * 0.55, 255 * 0.35], np.uint8)
-  colonUpper = np.array(  [19.5,   255,       255       ], np.uint8)
-  liverLower = np.array(  [38,   225 * 0.22, 255 * 0.38], np.uint8)
-  liverUpper = np.array(  [41,   255,       255       ], np.uint8)
-  brainLower = np.array(  [161,   255 * 0.50, 255 * 0.40], np.uint8)
-  brainUpper = np.array(  [161,   255,       255       ], np.uint8)
-  kidneyLower = np.array(  [26,   255 * 0.60, 255 * 0.69], np.uint8)
-  kidneyUpper = np.array(  [26,   255,       255       ], np.uint8)
-  heartLower = np.array(  [179,   255 * 0.50, 255 * 0.35], np.uint8)
-  heartUpper = np.array(  [179,   255 * 0.97, 255 * 0.69], np.uint8)
+  # Color ranges
+  stomachLower = np.array([90,   80,     100], np.uint8)
+  stomachUpper = np.array([120,  255,    255], np.uint8)
+  colonLower = np.array(  [10,   140.25, 89.25], np.uint8)
+  colonUpper = np.array(  [19.5, 255,    255], np.uint8)
+  liverLower = np.array(  [38,   49.5,   96.9], np.uint8)
+  liverUpper = np.array(  [41,   255,    255], np.uint8)
+  brainLower = np.array(  [161,  127.5,  102], np.uint8)
+  brainUpper = np.array(  [161,  255,    255], np.uint8)
+  kidneyLower = np.array( [26,   153,    175.95], np.uint8)
+  kidneyUpper = np.array( [26,   255,    255], np.uint8)
+  heartLower = np.array(  [177,  127.5,  89.25], np.uint8)
+  heartUpper = np.array(  [177,  247.35, 175.95], np.uint8)
 
   while elapsedTime < 1:
-
     _, imageFrame = cam.read()
 
     # Convert frame from BGR color space to HSV
@@ -203,116 +203,75 @@ When initializing the camera, using the `CAP_DSHOW` flag reduces the time it tak
 
 For each object, create binary masks where color-matched pixels are white and non-matching are black. To minimize false negatives, apply a dilation morphological transformation. This enlarges object boundaries in the binary image by sliding a structuring element (kernel) over the image and replacing each pixel with the maximum pixel value within the kernel's neighborhood.
 
-A 5x5 square-shaped kernel was used for most organs, and a 12x12 for the kidney, since it was harder to detect it's specific color range. This fills gaps in the binary masks, making the objects more solid and continuous, and improving detection. 
-
-Use the bitwise AND operation with binary masks to extract regions of interest from the original image. If both corresponding pixels are non-zero (white in the binary mask), the output image pixel retains its original color; otherwise, it turns black.
+A 5x5 square-shaped kernel was used for most organs, and a 12x12 for the kidney, since it was harder to detect its specific color range, filling any gaps in the mask.
 
 ```python
     # Create a 5x5 square-shaped filter called kernel
-    # Filter is filled with ones and will be used for morphological 
-    # transformations such as dilation for better detection
+    # Filter is filled with ones and will be used for dilation
     kernel = np.ones((5, 5), 'uint8')
 
     # For colon
-    # Dilate mask: Remove holes in the mask by adding pixels to the 
-    # boundaires of the objects in the mask
+    # Dilate mask: Remove holes in the mask by adding pixels to the boundaires of the objects in the mask
     colonMask = cv2.dilate(colonMask, kernel)
-    # Apply mask to frame by using bitwise AND operation
-    resColon = cv2.bitwise_and(imageFrame, imageFrame, mask = colonMask)
-
-    # For liver
-    liverMask = cv2.dilate(liverMask, kernel)
-    resliver = cv2.bitwise_and(imageFrame, imageFrame, mask=liverMask)
-
-    # For stomach
     stomachMask = cv2.dilate(stomachMask, kernel)
-    resStomach = cv2.bitwise_and(imageFrame, imageFrame, mask=stomachMask)
-
-    # For brain
     brainMask = cv2.dilate(brainMask, kernel)
-    resBrain = cv2.bitwise_and(imageFrame, imageFrame, mask=brainMask)
-
-    # For heart
     heartMask = cv2.dilate(heartMask, kernel)
-    resHeart = cv2.bitwise_and(imageFrame, imageFrame, mask=heartMask)
+    # Use larger kernels for heart, liver, and kidney masks
+    liverMask = cv2.dilate(liverMask, np.ones((12, 12), 'uint8'))
+    kidneyMask = cv2.dilate(kidneyMask, np.ones((13, 13), 'uint8'))
+    heartMask = cv2.dilate(heartMask, np.ones((12, 12), 'uint8'))
 
-    # For kidney use a more aggressive kernel for dilation
-    kidneyMask = cv2.dilate(kidneyMask, np.ones((12, 12), 'uint8'))
-    resKidney = cv2.bitwise_and(imageFrame, imageFrame, mask=kidneyMask)
 ```
 
-Create a contour around the zone that matches the color range of the object. The binary masks generated earlier are used as the input to the `cv2.findContours()` function to find contours in the image that correspond to the color range of the object.
+Create a contour around the zone that matches the color range of the object. The binary masks are used as the input to the `cv2.findContours()` function to find contours in the image that correspond to the color range of the object.
 
-The function returns a list of contours, then, iterate over each contour found in the previous step using a loop, determine its `area`, and compare ir to a predefined **size threshold**.
+The function will return a list of contours, iterate over each one of them, determine its `area`, and compare ir to a predefined **size threshold**.
 
 If the `area` is greater than the threshold, it indicates that the detected region is significant enough to be considered a positive detection for the object, so its name is added to the list, while avoiding repeats. This operation is performed for each object of the set.
 
 ```python
     # Create a contour around the zone that matches the color range
-    contours, hierarchy = cv2.findContours(colonMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    # For each countour, check if the area is greater than the threshold
-    for pic, contour in enumerate(contours):
+    contours, _ = cv2.findContours(colonMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+    # For each contour, check if the area is greater than the threshold
+    for contour in contours:
       area = cv2.contourArea(contour)
-      if area > 700:
+      if area > 700 and 'colon' not in objects:
         # Append the name of the model to the list of objects
-        if 'colon' not in obj:
-          if obj == 'User is not holding any objects':
-            obj = 'colon'
-          else:
-            obj = obj + ', colon'
+        objects = f'{objects}, colon' if objects != 'User is not holding any objects' else 'colon'
 
-    contours, hierarchy = cv2.findContours(liverMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    for pic, contour in enumerate(contours):
+    contours, _ = cv2.findContours(liverMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    for contour in contours:
       area = cv2.contourArea(contour)
-      if area > 500:
-        if 'liver' not in obj:
-          if obj == 'User is not holding any objects':
-            obj = 'liver'
-          else:
-            obj = obj + ', liver'
+      if area > 1300 and 'liver' not in objects:
+        objects = f'{objects}, liver' if objects != 'User is not holding any objects' else 'liver'
 
-    contours, hierarchy = cv2.findContours(stomachMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    for pic, contour in enumerate(contours):
+    contours, _ = cv2.findContours(stomachMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    for contour in contours:
       area = cv2.contourArea(contour)
-      if area > 1400:
-        if 'stomach' not in obj:
-          if obj == 'User is not holding any objects':
-            obj = 'stomach'
-          else:
-            obj = obj + ', stomach'
+      if area > 1400 and 'stomach' not in objects:
+        objects = f'{objects}, stomach' if objects != 'User is not holding any objects' else 'stomach'
 
-    contours, hierarchy = cv2.findContours(brainMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    for pic, contour in enumerate(contours):
+    contours, _ = cv2.findContours(brainMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    for contour in contours:
       area = cv2.contourArea(contour)
-      if area > 2500:
-        if 'brain' not in obj:
-          if obj == 'User is not holding any objects':
-            obj = 'brain'
-          else:
-            obj = obj + ', brain'
+      if area > 3000 and 'brain' not in objects:
+        objects = f'{objects}, brain' if objects != 'User is not holding any objects' else 'brain'
     
-    contours, hierarchy = cv2.findContours(heartMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    for pic, contour in enumerate(contours):
+    contours, _ = cv2.findContours(heartMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    for contour in contours:
       area = cv2.contourArea(contour)
-      if area > 650:
-        if 'heart' not in obj:
-          if obj == 'User is not holding any objects':
-            obj = 'heart'
-          else:
-            obj = obj + ', heart'
+      if area > 1400 and 'heart' not in objects:
+        objects = f'{objects}, heart' if objects != 'User is not holding any objects' else 'heart'
 
-    contours, hierarchy = cv2.findContours(kidneyMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    for pic, contour in enumerate(contours):
+    contours, _ = cv2.findContours(kidneyMask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    for contour in contours:
       area = cv2.contourArea(contour)
-      if area > 50:
-        if 'kidney' not in obj:
-          if obj == 'User is not holding any objects':
-            obj = 'kidney'
-          else:
-            obj = obj + ', kidney'
+      if area > 50 and 'kidney' not in objects:
+        objects = f'{objects}, kidney' if objects != 'User is not holding any objects' else 'kidney'
 ```
 
-To calibrate this method of object detection to a specific set of objects, refer to the script located in `Tools/colorDetection.py` to find the color ranges that work best for the set of models and test using different `area` thresholds.
+To calibrate this method of object detection to a specific set of objects, use the script located in `Tools/colorDetection.py` to find the color ranges that work best for the set of models and test using different `area` thresholds.
 
 A properly calibrated set of color ranges and area thresholds will yield a level of detection accuracy resembling the image below, in which there are no false positives between similar colors and the amount of areas detected (or rectangles shown) for each object is close or equal to 1.
 
