@@ -424,6 +424,16 @@ For each captured frame, convert it to grayscale and use the `cv2.aruco.detectMa
 
 In this case the frame is displayed since it is more important to have the camera feed visible to the user, or the person assisting them, to make sure that the objects are correctly aligned with the camera when scanning for markers rather than detecting colors.
 
+**Image Detection:** `modelID()`
+
+This function is in charge of capturing images in real time through the user's camera in order to detect several organs of the human body. It uses an object detection model previously trained with the Detecto library to identify parts such as the stomach, brain, liver, lungs, kidneys, heart, pancreas, small intestine, large intestine, among others.
+
+To develop this model, we used 233 images annotated and stored in XML files in the PASCAL VOC format. After collecting the PNG and XML files, the Detecto library was installed to train a model capable of detecting and classifying images containing specific organs of the human body. When provided with an image, the model would identify and label the body parts present in the picture according to the defined labels.
+
+```bash
+pip install detecto==1.2.2
+```
+
 ---
 ### Answer Generation: `sendMessage()`
 
